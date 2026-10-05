@@ -17,8 +17,6 @@
     "three": "^0.186.1"
   },
   "devDependencies": {
-    "@oxlint/binding-win32-x64-msvc": "^1.86.0",
-    "@rolldown/binding-win32-x64-msvc": "^1.2.12",
     "@types/node": "^24.13.3",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.7",
