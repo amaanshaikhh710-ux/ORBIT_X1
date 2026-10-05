@@ -13,9 +13,18 @@ logger = logging.getLogger("orbital_twin.db")
 RAW_DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
 
 if RAW_DATABASE_URL:
-    # Render and legacy providers use postgres:// which SQLAlchemy 1.4+ rejects
+    # Render and cloud providers may inject postgres://, postgresql://, or postgresql+psycopg://
+    # Map explicitly to postgresql+psycopg2:// to match installed psycopg2-binary
     if RAW_DATABASE_URL.startswith("postgres://"):
-        DATABASE_URL = RAW_DATABASE_URL.replace("postgres://", "postgresql://", 1)
+        DATABASE_URL = RAW_DATABASE_URL.replace("postgres://", "postgresql+psycopg2://", 1)
+    elif RAW_DATABASE_URL.startswith("postgresql+psycopg://"):
+        try:
+            import psycopg  # noqa: F401
+            DATABASE_URL = RAW_DATABASE_URL
+        except ImportError:
+            DATABASE_URL = RAW_DATABASE_URL.replace("postgresql+psycopg://", "postgresql+psycopg2://", 1)
+    elif RAW_DATABASE_URL.startswith("postgresql://") and not RAW_DATABASE_URL.startswith("postgresql+"):
+        DATABASE_URL = RAW_DATABASE_URL.replace("postgresql://", "postgresql+psycopg2://", 1)
     else:
         DATABASE_URL = RAW_DATABASE_URL
     logger.info("Using configured PostgreSQL database connection.")
