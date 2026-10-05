@@ -27,7 +27,19 @@ interface CalloutConfig {
   defaultPos: { left?: string; right?: string; top?: string; bottom?: string };
 }
 
-export const CalloutOverlay: React.FC<CalloutOverlayProps> = ({
+export function getCardAnchorOrigin(configId: string, width: number, height: number): { x: number; y: number } {
+  switch (configId) {
+    case 'solar': return { x: width * 0.12 + 80, y: height * 0.18 + 26 };
+    case 'comm': return { x: width * 0.42 + 80, y: height * 0.12 + 26 };
+    case 'adcs': return { x: width * (1 - 0.34) - 80, y: height * 0.34 + 26 };
+    case 'bus': return { x: width * 0.11 + 80, y: height * 0.50 + 26 };
+    case 'battery': return { x: width * 0.12 + 80, y: height * (1 - 0.22) - 26 };
+    case 'payload': return { x: width * 0.46 + 80, y: height * (1 - 0.22) - 26 };
+    default: return { x: width * 0.5, y: height * 0.5 };
+  }
+}
+
+export const CalloutOverlay: React.FC<CalloutOverlayProps> = React.memo(({
   state,
   selectedComponent,
   onSelectComponent,
@@ -131,36 +143,18 @@ export const CalloutOverlay: React.FC<CalloutOverlayProps> = ({
 
         {configs.map((c) => {
           const anchor = anchors[c.id];
-          if (!anchor || !anchor.visible) return null;
-
           const isSelected = selectedComponent === c.id;
-
-          // Estimate card anchor origin based on defaultPos
-          let cardX = 0;
-          let cardY = 0;
-          if (c.defaultPos.left) {
-            const pct = parseFloat(c.defaultPos.left) / 100;
-            cardX = containerWidth * pct + 80;
-          } else if (c.defaultPos.right) {
-            const pct = parseFloat(c.defaultPos.right) / 100;
-            cardX = containerWidth * (1 - pct) - 80;
-          }
-          if (c.defaultPos.top) {
-            const pct = parseFloat(c.defaultPos.top) / 100;
-            cardY = containerHeight * pct + 26;
-          } else if (c.defaultPos.bottom) {
-            const pct = parseFloat(c.defaultPos.bottom) / 100;
-            cardY = containerHeight * (1 - pct) - 26;
-          }
-
-          // Intermediate bend point for professional aerospace leader line
-          const midX = (cardX + anchor.x) / 2;
+          const origin = getCardAnchorOrigin(c.id, containerWidth, containerHeight);
+          const anchorX = anchor?.x ?? origin.x;
+          const anchorY = anchor?.y ?? origin.y;
+          const midX = (origin.x + anchorX) / 2;
 
           return (
-            <g key={c.id}>
+            <g key={c.id} id={`callout-anchor-${c.id}`}>
               {/* Leader Polyline */}
               <polyline
-                points={`${cardX},${cardY} ${midX},${anchor.y} ${anchor.x},${anchor.y}`}
+                id={`callout-line-${c.id}`}
+                points={`${origin.x},${origin.y} ${midX},${anchorY} ${anchorX},${anchorY}`}
                 fill="none"
                 stroke={isSelected ? '#38bdf8' : 'rgba(56, 189, 248, 0.45)'}
                 strokeWidth={isSelected ? 1.8 : 1.2}
@@ -169,15 +163,17 @@ export const CalloutOverlay: React.FC<CalloutOverlayProps> = ({
               />
               {/* Glowing anchor ring and center dot */}
               <circle
-                cx={anchor.x}
-                cy={anchor.y}
+                id={`callout-dot-${c.id}`}
+                cx={anchorX}
+                cy={anchorY}
                 r={isSelected ? 5 : 3.5}
                 fill="#38bdf8"
                 filter="url(#cyanGlow)"
               />
               <circle
-                cx={anchor.x}
-                cy={anchor.y}
+                id={`callout-ring-${c.id}`}
+                cx={anchorX}
+                cy={anchorY}
                 r={isSelected ? 9 : 7}
                 fill="none"
                 stroke="#38bdf8"
@@ -247,4 +243,4 @@ export const CalloutOverlay: React.FC<CalloutOverlayProps> = ({
       })}
     </div>
   );
-};
+});

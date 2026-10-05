@@ -3,7 +3,7 @@ import { useSimulation } from '../context/SimulationContext';
 import { FileText, Download, RefreshCw } from 'lucide-react';
 
 export const Reports: React.FC = () => {
-  const { generateReport } = useSimulation();
+  const { generateReport, exportTelemetryCsv } = useSimulation();
   const [report, setReport] = useState<any | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -21,13 +21,21 @@ export const Reports: React.FC = () => {
 
   const handleDownloadJson = () => {
     if (!report) return;
-    const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `orbital-twin-report-${report.id}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
+    try {
+      const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `orbital-twin-report-${report.id}.json`;
+      a.style.display = 'none';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 1500);
+    } catch (e: any) {
+      console.error('Report export error:', e);
+      alert(`Export error: ${e.message || 'Unable to download report JSON'}`);
+    }
   };
 
   return (
@@ -53,6 +61,14 @@ export const Reports: React.FC = () => {
             style={{ background: '#0284c7' }}
           >
             <RefreshCw size={14} /> {loading ? 'Compiling Report...' : 'Generate New Report'}
+          </button>
+
+          <button
+            onClick={exportTelemetryCsv}
+            className="btn btn-secondary"
+            title="Download authoritative simulation run telemetry CSV with all 23 flight parameters"
+          >
+            <Download size={14} /> Export Telemetry (CSV)
           </button>
 
           {report && (

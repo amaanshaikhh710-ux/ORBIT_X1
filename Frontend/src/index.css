@@ -1,20 +1,20 @@
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
 
 :root {
-  --bg-primary: #020814;
-  --bg-secondary: #050b14;
-  --bg-card: rgba(5, 11, 20, 0.82);
-  --bg-card-hover: rgba(15, 23, 42, 0.85);
+  --bg-primary: #0a0e17;
+  --bg-secondary: #0f1524;
+  --bg-card: #131b2e;
+  --bg-card-hover: #17223b;
   --border-color: rgba(255, 255, 255, 0.08);
-  --border-active: rgba(39, 199, 255, 0.35);
+  --border-active: rgba(56, 189, 248, 0.4);
 
-  --text-primary: #f5f8fc;
-  --text-secondary: #aab7c8;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
   --text-muted: #64748b;
 
-  --accent-cyan: #27c7ff;
+  --accent-cyan: #38bdf8;
   --accent-blue: #0284c7;
-  --status-normal: #27d17f;
+  --status-normal: #10b981;
   --status-warning: #f59e0b;
   --status-critical: #ef4444;
   --status-info: #0ea5e9;
@@ -66,11 +66,28 @@ body {
   border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 16px;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.2s ease;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
 .aerospace-card:hover {
   border-color: var(--border-active);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4), 0 0 16px rgba(56, 189, 248, 0.08);
+}
+
+@keyframes fadeInPage {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-container {
+  animation: fadeInPage 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .badge {

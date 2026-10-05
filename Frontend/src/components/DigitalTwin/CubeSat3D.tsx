@@ -8,14 +8,26 @@ import {
   createChassisTexture,
 } from './ProceduralTextures';
 import { ComponentDetailPanel } from './ComponentDetailPanel';
-import { ComponentDock } from './ComponentDock';
-import { CalloutOverlay, type ScreenAnchor } from './CalloutOverlay';
-import { RotateCcw, Move, ZoomIn, RefreshCw, Maximize, Clock } from 'lucide-react';
+import { ComponentDock, type ViewMode } from './ComponentDock';
+import { CalloutOverlay, type ScreenAnchor, getCardAnchorOrigin } from './CalloutOverlay';
+import { Clock } from 'lucide-react';
 
 export const CubeSat3D: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const resetViewRef = useRef<(() => void) | null>(null);
+  const rotateStepRef = useRef<(() => void) | null>(null);
+  const panStepRef = useRef<(() => void) | null>(null);
+  const zoomStepRef = useRef<(() => void) | null>(null);
+  const focusComponentRef = useRef<((id: string) => void) | null>(null);
+
   const { state, selectedComponent, setSelectedComponent } = useSimulation();
+
+  const [viewMode, setViewMode] = useState<ViewMode>('rotate');
+  const viewModeRef = useRef<ViewMode>('rotate');
+
+  useEffect(() => {
+    viewModeRef.current = viewMode;
+  }, [viewMode]);
 
   const stateRef = useRef(state);
   const selectedRef = useRef(selectedComponent);
@@ -28,8 +40,8 @@ export const CubeSat3D: React.FC = () => {
     selectedRef.current = selectedComponent;
   }, [selectedComponent]);
 
-  // Screen anchor coordinates for 2D callout leader lines
-  const [anchors, setAnchors] = useState<Record<string, ScreenAnchor>>({});
+  // Screen anchor coordinates for 2D callout leader lines (managed with high-performance DOM tracking)
+  const [anchors] = useState<Record<string, ScreenAnchor>>({});
   const [containerDimensions, setContainerDimensions] = useState({ width: 1200, height: 750 });
 
   // Format simulation seconds to HH:MM:SS
@@ -735,26 +747,78 @@ export const CubeSat3D: React.FC = () => {
     renderer.domElement.addEventListener('pointerdown', handlePointerDown);
     renderer.domElement.addEventListener('pointerup', handlePointerUp);
 
+    // View Action Callbacks for Bottom Control Dock
+    rotateStepRef.current = () => {
+      satelliteGroup.rotation.y += Math.PI / 4;
+    };
+
+    panStepRef.current = () => {
+      camera.position.x = Math.abs(camera.position.x - 3.8) < 0.1 ? 2.6 : 3.8;
+      camera.lookAt(0, 0, 0);
+    };
+
+    zoomStepRef.current = () => {
+      if (camera.position.z > 5.2) {
+        camera.position.z -= 1.4;
+      } else {
+        camera.position.z = 7.0;
+      }
+    };
+
+    focusComponentRef.current = (id: string) => {
+      const anchor = componentAnchors3D[id];
+      if (anchor) {
+        const targetAngleY = Math.atan2(anchor.x, anchor.z);
+        satelliteGroup.rotation.y = -targetAngleY + 0.25;
+      }
+    };
+
+    resetViewRef.current = () => {
+      camera.position.set(3.8, 2.6, 5.8);
+      camera.lookAt(0, 0, 0);
+      satelliteGroup.rotation.set(0, 0, 0);
+    };
+
     // ==========================================
     // Camera Controls (Rotate, Pan, Zoom)
     // ==========================================
     let isDragging = false;
     let isPanning = false;
+    let isZooming = false;
     let prevMouseX = 0;
     let prevMouseY = 0;
 
+    const updateCursor = (active: boolean) => {
+      if (!containerRef.current) return;
+      const mode = viewModeRef.current;
+      if (mode === 'pan') {
+        containerRef.current.style.cursor = active ? 'grabbing' : 'move';
+      } else if (mode === 'zoom') {
+        containerRef.current.style.cursor = 'ns-resize';
+      } else {
+        containerRef.current.style.cursor = active ? 'grabbing' : 'grab';
+      }
+    };
+
     const onMouseDown = (e: MouseEvent) => {
-      if (e.button === 2 || e.shiftKey) {
+      if (e.button === 2) {
         isPanning = true;
       } else if (e.button === 0) {
-        isDragging = true;
+        if (e.shiftKey || viewModeRef.current === 'pan') {
+          isPanning = true;
+        } else if (viewModeRef.current === 'zoom') {
+          isZooming = true;
+        } else {
+          isDragging = true;
+        }
       }
       prevMouseX = e.clientX;
       prevMouseY = e.clientY;
+      updateCursor(true);
     };
 
     const onMouseMove = (e: MouseEvent) => {
-      if (!isDragging && !isPanning) return;
+      if (!isDragging && !isPanning && !isZooming) return;
       const deltaX = e.clientX - prevMouseX;
       const deltaY = e.clientY - prevMouseY;
 
@@ -764,6 +828,8 @@ export const CubeSat3D: React.FC = () => {
       } else if (isPanning) {
         camera.position.x -= deltaX * 0.006;
         camera.position.y += deltaY * 0.006;
+      } else if (isZooming) {
+        camera.position.z = Math.max(3.0, Math.min(14.0, camera.position.z - deltaY * 0.015));
       }
       prevMouseX = e.clientX;
       prevMouseY = e.clientY;
@@ -772,6 +838,8 @@ export const CubeSat3D: React.FC = () => {
     const onMouseUp = () => {
       isDragging = false;
       isPanning = false;
+      isZooming = false;
+      updateCursor(false);
     };
 
     const onContextMenu = (e: MouseEvent) => e.preventDefault();
@@ -780,11 +848,7 @@ export const CubeSat3D: React.FC = () => {
       camera.position.z = Math.max(3.0, Math.min(14.0, camera.position.z + e.deltaY * 0.005));
     };
 
-    resetViewRef.current = () => {
-      camera.position.set(3.8, 2.6, 5.8);
-      camera.lookAt(0, 0, 0);
-      satelliteGroup.rotation.set(0, 0, 0);
-    };
+    updateCursor(false);
 
     renderer.domElement.addEventListener('contextmenu', onContextMenu);
     renderer.domElement.addEventListener('mousedown', onMouseDown);
@@ -798,6 +862,7 @@ export const CubeSat3D: React.FC = () => {
     let reqId: number;
     let clock = 0;
     const tempVec = new THREE.Vector3();
+    let lastHighlightedId: string | null = '__init__';
 
     const animate = () => {
       reqId = requestAnimationFrame(animate);
@@ -806,8 +871,11 @@ export const CubeSat3D: React.FC = () => {
       const cur = stateRef.current;
       const currentSelected = selectedRef.current;
 
-      // Update selection visual highlight
-      updateSelectionHighlight(currentSelected);
+      // Update selection visual highlight only when changed
+      if (currentSelected !== lastHighlightedId) {
+        updateSelectionHighlight(currentSelected);
+        lastHighlightedId = currentSelected;
+      }
 
       if (cur) {
         // 1. Sunlight vs Eclipse Environment Lighting
@@ -892,8 +960,7 @@ export const CubeSat3D: React.FC = () => {
       // Gentle orbital passive yaw drift
       satelliteGroup.rotation.y += 0.0015;
 
-      // Project 3D Component Anchor Positions to 2D Screen Coordinates for Callouts
-      const newAnchors: Record<string, ScreenAnchor> = {};
+      // Project 3D Component Anchor Positions directly to SVG leader lines without React re-renders
       const curW = renderer.domElement.clientWidth;
       const curH = renderer.domElement.clientHeight;
 
@@ -903,19 +970,46 @@ export const CubeSat3D: React.FC = () => {
         tempVec.project(camera);
 
         const isVisible = tempVec.z < 1.0;
-        const screenX = (tempVec.x * 0.5 + 0.5) * curW;
-        const screenY = (-(tempVec.y * 0.5) + 0.5) * curH;
+        const screenX = Math.round((tempVec.x * 0.5 + 0.5) * curW);
+        const screenY = Math.round((-(tempVec.y * 0.5) + 0.5) * curH);
 
-        newAnchors[id] = {
-          x: Math.round(screenX),
-          y: Math.round(screenY),
-          visible: isVisible,
-        };
+        let cached = calloutElementMap.get(id);
+        if (cached === undefined) {
+          const g = document.getElementById(`callout-anchor-${id}`);
+          if (g) {
+            const polyline = document.getElementById(`callout-line-${id}`) as unknown as SVGPolylineElement;
+            const dot = document.getElementById(`callout-dot-${id}`) as unknown as SVGCircleElement;
+            const ring = document.getElementById(`callout-ring-${id}`) as unknown as SVGCircleElement;
+            if (polyline && dot && ring) {
+              cached = { g, polyline, dot, ring };
+              calloutElementMap.set(id, cached);
+            }
+          }
+        }
+
+        if (cached) {
+          cached.g.style.display = isVisible ? 'inline' : 'none';
+          if (isVisible) {
+            const origin = getCardAnchorOrigin(id, curW, curH);
+            const midX = (origin.x + screenX) / 2;
+            cached.polyline.setAttribute('points', `${origin.x},${origin.y} ${midX},${screenY} ${screenX},${screenY}`);
+            cached.dot.setAttribute('cx', String(screenX));
+            cached.dot.setAttribute('cy', String(screenY));
+            cached.ring.setAttribute('cx', String(screenX));
+            cached.ring.setAttribute('cy', String(screenY));
+          }
+        }
       });
-      setAnchors(newAnchors);
 
       renderer.render(scene, camera);
     };
+
+    const calloutElementMap = new Map<string, {
+      g: HTMLElement;
+      polyline: SVGPolylineElement;
+      dot: SVGCircleElement;
+      ring: SVGCircleElement;
+    }>();
 
     animate();
 
@@ -946,11 +1040,27 @@ export const CubeSat3D: React.FC = () => {
     };
   }, [setSelectedComponent]);
 
+  const handleViewModeChange = (mode: ViewMode) => {
+    setViewMode(mode);
+    viewModeRef.current = mode;
+    if (mode === 'rotate') {
+      rotateStepRef.current?.();
+    } else if (mode === 'pan') {
+      panStepRef.current?.();
+    } else if (mode === 'zoom') {
+      zoomStepRef.current?.();
+    }
+  };
+
   const handleSelectComponent = useCallback(
     (componentId: string) => {
-      setSelectedComponent(componentId);
+      const next = selectedComponent === componentId ? null : componentId;
+      setSelectedComponent(next);
+      if (next) {
+        focusComponentRef.current?.(next);
+      }
     },
-    [setSelectedComponent]
+    [selectedComponent, setSelectedComponent]
   );
 
   return (
@@ -977,7 +1087,7 @@ export const CubeSat3D: React.FC = () => {
         containerHeight={containerDimensions.height}
       />
 
-      {/* Top-Left Simulation Time Card (matching reference design) */}
+      {/* Top-Left Simulation Time Card */}
       <div
         style={{
           position: 'absolute',
@@ -1010,106 +1120,35 @@ export const CubeSat3D: React.FC = () => {
         </div>
       </div>
 
-      {/* Bottom-Left View Controls HUD Card (matching reference design) */}
+      {/* Bottom Unified Control Dock (View Controls + Subsystems) */}
       <div
         style={{
           position: 'absolute',
-          bottom: '24px',
-          left: '24px',
-          background: 'rgba(9, 14, 26, 0.85)',
-          backdropFilter: 'blur(12px)',
-          border: '1px solid rgba(56, 189, 248, 0.25)',
-          borderRadius: '10px',
-          padding: '10px 16px',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5)',
-          zIndex: 10,
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '8px',
-          pointerEvents: 'auto',
-        }}
-      >
-        <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-secondary)', letterSpacing: '0.4px' }}>
-          View Controls
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px', color: 'var(--text-muted)', fontSize: '10px' }}>
-            <RotateCcw size={16} color="#94a3b8" />
-            <span>Rotate</span>
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px', color: 'var(--text-muted)', fontSize: '10px' }}>
-            <Move size={16} color="#94a3b8" />
-            <span>Pan</span>
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px', color: 'var(--text-muted)', fontSize: '10px' }}>
-            <ZoomIn size={16} color="#94a3b8" />
-            <span>Zoom</span>
-          </div>
-          <div style={{ width: '1px', height: '24px', background: 'rgba(255, 255, 255, 0.1)' }} />
-          <button
-            onClick={() => resetViewRef.current?.()}
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '2px',
-              background: 'transparent',
-              border: 'none',
-              color: 'var(--accent-cyan)',
-              cursor: 'pointer',
-              fontSize: '10px',
-              padding: '2px 4px',
-              borderRadius: '4px',
-            }}
-            title="Reset camera viewpoint"
-          >
-            <RefreshCw size={16} />
-            <span>Reset View</span>
-          </button>
-          <button
-            onClick={() => {
-              if (!containerRef.current) return;
-              if (!document.fullscreenElement) {
-                containerRef.current.parentElement?.requestFullscreen?.();
-              } else {
-                document.exitFullscreen?.();
-              }
-            }}
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '2px',
-              background: 'transparent',
-              border: 'none',
-              color: 'var(--accent-cyan)',
-              cursor: 'pointer',
-              fontSize: '10px',
-              padding: '2px 4px',
-              borderRadius: '4px',
-            }}
-            title="Toggle Fullscreen"
-          >
-            <Maximize size={16} />
-            <span>Fullscreen</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Bottom Component Dock (Solar, Battery, Payload, Comm, ADCS, Bus) */}
-      <div
-        style={{
-          position: 'absolute',
-          bottom: '24px',
+          bottom: '20px',
           left: '50%',
           transform: 'translateX(-50%)',
-          zIndex: 10,
+          zIndex: 15,
           pointerEvents: 'auto',
         }}
       >
         <ComponentDock
+          viewMode={viewMode}
+          onViewModeChange={handleViewModeChange}
+          onResetView={() => {
+            resetViewRef.current?.();
+            setViewMode('rotate');
+            viewModeRef.current = 'rotate';
+          }}
+          onToggleFullscreen={() => {
+            if (!containerRef.current) return;
+            if (!document.fullscreenElement) {
+              containerRef.current.parentElement?.requestFullscreen?.();
+            } else {
+              document.exitFullscreen?.();
+            }
+          }}
           selectedComponent={selectedComponent}
-          onSelect={handleSelectComponent}
+          onSelectComponent={handleSelectComponent}
         />
       </div>
 

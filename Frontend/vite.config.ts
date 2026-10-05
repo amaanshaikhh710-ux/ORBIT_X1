@@ -8,6 +8,8 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/auth': 'http://localhost:8000',
+      '/admin': 'http://localhost:8000',
+      '/history': 'http://localhost:8000',
       '/missions': 'http://localhost:8000',
       '/spacecraft': 'http://localhost:8000',
       '/simulation': 'http://localhost:8000',

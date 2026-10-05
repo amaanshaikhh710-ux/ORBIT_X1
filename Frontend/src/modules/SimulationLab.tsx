@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { useSimulation } from '../context/SimulationContext';
 import type { ActiveFault } from '../types/simulation';
-import { Sliders, Zap, AlertTriangle, Trash2, Play, Check, Sun, Moon, Globe } from 'lucide-react';
+import { Sliders, Zap, AlertTriangle, Trash2, Play, Check, Sun, Moon, Globe, RotateCcw } from 'lucide-react';
 
 export const SimulationLab: React.FC = () => {
-  const { faultCatalog, activeFaults, injectFault, clearFault, state, setEnvironment, setWorkflowStep, setActiveModule, activateV003Demo, user } = useSimulation();
+  const { faultCatalog, activeFaults, injectFault, clearFault, state, setEnvironment, setWorkflowStep, setActiveModule, activateV003Demo, resetV003Demo, user } = useSimulation();
 
   const userRole = user?.role || 'Mission Operator';
   const canInjectFault = userRole === 'Simulation Engineer' || userRole === 'Mission Administrator';
@@ -273,6 +273,27 @@ export const SimulationLab: React.FC = () => {
                 <span className="badge badge-warning" style={{ background: '#f59e0b', color: '#000', fontWeight: 'bold' }}>
                   DEMO MODE
                 </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={async () => {
+                  await resetV003Demo();
+                  setStatusMessage('V-003 Reset: Spacecraft restored to 85% SOC nominal baseline state.');
+                  setTimeout(() => setStatusMessage(null), 4000);
+                }}
+                className="btn btn-secondary"
+                style={{
+                  justifyContent: 'center',
+                  width: '100%',
+                  fontSize: '12px',
+                  borderColor: '#38bdf8',
+                  color: '#38bdf8',
+                  padding: '7px 12px',
+                }}
+                title="Reset V-003 demo back to nominal baseline (85% SOC, 24W Solar, 0 Faults)"
+              >
+                <RotateCcw size={14} /> Reset V-003 & Restore Baseline State
               </button>
 
               <button

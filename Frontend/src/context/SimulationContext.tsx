@@ -44,7 +44,10 @@ export type ActiveModule =
   | 'history'
   | 'docs';
 
-export function getRoleDefaultModule(_role?: string): ActiveModule {
+export function getRoleDefaultModule(role?: string): ActiveModule {
+  if (role === 'Mission Administrator') return 'mission-admin';
+  if (role === 'Flight Director') return 'flight-director';
+  if (role === 'Simulation Engineer') return 'simulation-dashboard';
   return 'mission-control';
 }
 
@@ -117,6 +120,7 @@ interface SimulationContextValue {
   activeFaults: ActiveFault[];
   isRunning: boolean;
   speed: number;
+  timestep: number;
   connected: boolean;
   workflowStep: WorkflowStep;
   activeModule: ActiveModule;
@@ -135,15 +139,17 @@ interface SimulationContextValue {
   start: () => void;
   pause: () => void;
   step: () => void;
-  reset: () => void;
+  reset: () => Promise<void>;
+  resetV003Demo: () => Promise<void>;
   setSpeed: (speed: number) => void;
+  setTimestep: (timestepS: number) => Promise<void>;
   injectFault: (fault: ActiveFault) => Promise<void>;
   clearFault: (faultId: string) => Promise<void>;
   activateV003Demo: () => Promise<any>;
   runRecoverySim: (policies: string[], durationS?: number) => Promise<RecoveryComparisonReport>;
   applyRecoveryPolicy: (policyId: string) => Promise<any>;
   setEnvironment: (state: string, durationS?: number) => Promise<any>;
-  exportTelemetryCsv: () => void;
+  exportTelemetryCsv: () => Promise<void>;
   generateReport: () => Promise<any>;
 }
 
@@ -160,6 +166,7 @@ export const SimulationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [activeFaults, setActiveFaults] = useState<ActiveFault[]>([]);
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [speed, setSpeedState] = useState<number>(1);
+  const [timestep, setTimestepState] = useState<number>(10);
   const [connected, setConnected] = useState<boolean>(false);
   const [workflowStep, setWorkflowStep] = useState<WorkflowStep>('OBSERVE');
 
@@ -242,6 +249,27 @@ export const SimulationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     };
   };
 
+  const pushHistoryPoint = (s: CanonicalSpacecraftState) => {
+    setHistory((prev) => {
+      // Don't append duplicate time
+      if (prev.length > 0 && prev[prev.length - 1].time_s === s.simulation_time_s) {
+        return prev;
+      }
+      const pt: TelemetryTimeSeriesPoint = {
+        time_s: s.simulation_time_s,
+        battery_soc_pct: s.battery_soc_pct,
+        solar_generation_w: s.solar_generation_w,
+        internal_temp_c: s.internal_temp_c,
+        storage_used_mb: s.storage_used_mb,
+        downlink_mbps: s.downlink_data_rate_mbps,
+        adcs_error_deg: s.adcs_pointing_error_deg,
+        power_state: s.power_state,
+      };
+      const updated = [...prev, pt];
+      return updated.slice(-120); // Keep last 120 points (20 minutes of 10s steps)
+    });
+  };
+
   const refreshMissionData = async () => {
     try {
       const [catResult, stateResult] = await Promise.allSettled([
@@ -294,15 +322,33 @@ export const SimulationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         setTelemetry(msg.telemetry);
       }
       if (msg.events && msg.events.length > 0) {
-        const normalizedEvents = msg.events.map((e: any) => ({
+        const normalizedEvents: AlertItem[] = msg.events.map((e: any) => ({
           ...e,
           timestamp_s: e.simulation_time_s ?? e.timestamp_s ?? 0,
           simulation_time_s: e.simulation_time_s ?? e.timestamp_s ?? 0,
+          severity: e.severity,
+          subsystem: e.subsystem,
+          message: e.message,
         }));
-        setAlerts((prev) => [...normalizedEvents, ...prev].slice(0, 50));
+        setAlerts((prev) => {
+          const existingSignatures = new Set(prev.map((p) => `${p.timestamp_s}-${p.subsystem}-${p.message}`));
+          const fresh = normalizedEvents.filter((e) => !existingSignatures.has(`${e.timestamp_s}-${e.subsystem}-${e.message}`));
+          if (fresh.length === 0) return prev;
+          return [...fresh, ...prev].slice(0, 50);
+        });
       }
       if (msg.causal_graph) {
-        setCausalGraph(msg.causal_graph);
+        const newGraph = msg.causal_graph;
+        setCausalGraph((prev) => {
+          if (!prev) return newGraph;
+          if (
+            prev.nodes.length === newGraph.nodes.length &&
+            prev.edges.length === newGraph.edges.length
+          ) {
+            return prev;
+          }
+          return newGraph;
+        });
       }
     });
 
@@ -314,27 +360,6 @@ export const SimulationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       ws.disconnect();
     };
   }, []);
-
-  const pushHistoryPoint = (s: CanonicalSpacecraftState) => {
-    setHistory((prev) => {
-      // Don't append duplicate time
-      if (prev.length > 0 && prev[prev.length - 1].time_s === s.simulation_time_s) {
-        return prev;
-      }
-      const pt: TelemetryTimeSeriesPoint = {
-        time_s: s.simulation_time_s,
-        battery_soc_pct: s.battery_soc_pct,
-        solar_generation_w: s.solar_generation_w,
-        internal_temp_c: s.internal_temp_c,
-        storage_used_mb: s.storage_used_mb,
-        downlink_mbps: s.downlink_data_rate_mbps,
-        adcs_error_deg: s.adcs_pointing_error_deg,
-        power_state: s.power_state,
-      };
-      const updated = [...prev, pt];
-      return updated.slice(-120); // Keep last 120 points (20 minutes of 10s steps)
-    });
-  };
 
   const start = () => {
     wsRef.current?.sendCommand('start');
@@ -359,22 +384,60 @@ export const SimulationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }).catch(console.error);
   };
 
-  const reset = () => {
+  const reset = async () => {
     wsRef.current?.sendCommand('reset');
-    api.resetSimulation().then(() => {
-      setHistory([]);
+    try {
+      const res = await api.resetSimulation('run-default');
+      if (res && res.state) {
+        const norm = normalizeState(res.state);
+        setState(norm);
+        setHistory([
+          {
+            time_s: norm.simulation_time_s,
+            battery_soc_pct: norm.battery_soc_pct,
+            solar_generation_w: norm.solar_generation_w,
+            internal_temp_c: norm.internal_temp_c,
+            storage_used_mb: norm.storage_used_mb,
+            downlink_mbps: norm.downlink_data_rate_mbps,
+            adcs_error_deg: norm.adcs_pointing_error_deg,
+            power_state: norm.power_state,
+          },
+        ]);
+      } else {
+        setState({ ...DEFAULT_BASELINE_STATE });
+        setHistory([]);
+      }
       setAlerts([]);
       setCausalGraph(null);
       setRecoveryReport(null);
       setActiveFaults([]);
-    }).catch(console.error);
+      setWorkflowStep('OBSERVE');
+    } catch (e) {
+      console.error('Reset error:', e);
+      setState({ ...DEFAULT_BASELINE_STATE });
+      setHistory([]);
+    }
     setIsRunning(false);
+  };
+
+  const resetV003Demo = async () => {
+    await reset();
+    setWorkflowStep('OBSERVE');
   };
 
   const setSpeed = (spd: number) => {
     wsRef.current?.sendCommand('set_speed', { speed: spd });
     api.setSpeed('run-default', spd).catch(console.error);
     setSpeedState(spd);
+  };
+
+  const setTimestep = async (ts: number) => {
+    try {
+      await api.setTimestep('run-default', ts);
+      setTimestepState(ts);
+    } catch (e) {
+      console.error('Failed to set timestep:', e);
+    }
   };
 
   const injectFault = async (fault: ActiveFault) => {
@@ -422,14 +485,13 @@ export const SimulationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     return res;
   };
 
-  const exportTelemetryCsv = () => {
-    const url = api.getTelemetryCsvUrl('run-default');
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', `orbital_twin_telemetry_run-default_${new Date().toISOString().slice(0, 19)}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const exportTelemetryCsv = async () => {
+    try {
+      await api.downloadTelemetryCsv('run-default');
+    } catch (e: any) {
+      console.error('Telemetry CSV export error:', e);
+      alert(`CSV Export Error: ${e.message || 'Unable to download telemetry data'}`);
+    }
   };
 
   const generateReport = async () => {
@@ -504,6 +566,7 @@ export const SimulationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       activeFaults,
       isRunning,
       speed,
+      timestep,
       connected,
       workflowStep,
       activeModule,
@@ -521,7 +584,9 @@ export const SimulationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       pause,
       step,
       reset,
+      resetV003Demo,
       setSpeed,
+      setTimestep,
       injectFault,
       clearFault,
       activateV003Demo,
@@ -542,6 +607,7 @@ export const SimulationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       activeFaults,
       isRunning,
       speed,
+      timestep,
       connected,
       workflowStep,
       activeModule,

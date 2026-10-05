@@ -5,10 +5,16 @@ import * as THREE from 'three';
  * Creates crisp, self-contained textures without requiring external image assets.
  */
 
+let _cachedSolarCellTexture: THREE.CanvasTexture | null = null;
+let _cachedGoldMLITexture: THREE.CanvasTexture | null = null;
+let _cachedEarthTexture: THREE.CanvasTexture | null = null;
+let _cachedChassisTexture: THREE.CanvasTexture | null = null;
+
 /**
  * High-efficiency space-grade monocrystalline solar cell wafer texture
  */
 export function createSolarCellTexture(): THREE.CanvasTexture {
+  if (_cachedSolarCellTexture) return _cachedSolarCellTexture;
   const canvas = document.createElement('canvas');
   canvas.width = 512;
   canvas.height = 512;
@@ -94,17 +100,18 @@ export function createSolarCellTexture(): THREE.CanvasTexture {
     }
   }
 
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.wrapS = THREE.RepeatWrapping;
-  texture.wrapT = THREE.RepeatWrapping;
-  texture.anisotropy = 8;
-  return texture;
+  _cachedSolarCellTexture = new THREE.CanvasTexture(canvas);
+  _cachedSolarCellTexture.wrapS = THREE.RepeatWrapping;
+  _cachedSolarCellTexture.wrapT = THREE.RepeatWrapping;
+  _cachedSolarCellTexture.anisotropy = 8;
+  return _cachedSolarCellTexture;
 }
 
 /**
  * Crinkled Kapton Gold Multi-Layer Insulation (MLI) Thermal Blanket Texture
  */
 export function createGoldMLITexture(): THREE.CanvasTexture {
+  if (_cachedGoldMLITexture) return _cachedGoldMLITexture;
   const canvas = document.createElement('canvas');
   canvas.width = 512;
   canvas.height = 512;
@@ -168,16 +175,17 @@ export function createGoldMLITexture(): THREE.CanvasTexture {
     ctx.stroke();
   }
 
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.wrapS = THREE.RepeatWrapping;
-  texture.wrapT = THREE.RepeatWrapping;
-  return texture;
+  _cachedGoldMLITexture = new THREE.CanvasTexture(canvas);
+  _cachedGoldMLITexture.wrapS = THREE.RepeatWrapping;
+  _cachedGoldMLITexture.wrapT = THREE.RepeatWrapping;
+  return _cachedGoldMLITexture;
 }
 
 /**
  * Realistic Earth Sphere Texture with Oceans, Continents, Clouds, and Night City Lights
  */
 export function createEarthTexture(): THREE.CanvasTexture {
+  if (_cachedEarthTexture) return _cachedEarthTexture;
   const canvas = document.createElement('canvas');
   canvas.width = 1024;
   canvas.height = 512;
@@ -262,16 +270,17 @@ export function createEarthTexture(): THREE.CanvasTexture {
   ctx.fillRect(0, 0, 1024, 16);
   ctx.fillRect(0, 496, 1024, 16);
 
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.wrapS = THREE.RepeatWrapping;
-  texture.wrapT = THREE.ClampToEdgeWrapping;
-  return texture;
+  _cachedEarthTexture = new THREE.CanvasTexture(canvas);
+  _cachedEarthTexture.wrapS = THREE.RepeatWrapping;
+  _cachedEarthTexture.wrapT = THREE.ClampToEdgeWrapping;
+  return _cachedEarthTexture;
 }
 
 /**
  * Anodized Dark Spacecraft Titanium & Screw Countersink Texture
  */
 export function createChassisTexture(): THREE.CanvasTexture {
+  if (_cachedChassisTexture) return _cachedChassisTexture;
   const canvas = document.createElement('canvas');
   canvas.width = 256;
   canvas.height = 256;
@@ -317,8 +326,8 @@ export function createChassisTexture(): THREE.CanvasTexture {
     ctx.stroke();
   });
 
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.wrapS = THREE.RepeatWrapping;
-  texture.wrapT = THREE.RepeatWrapping;
-  return texture;
+  _cachedChassisTexture = new THREE.CanvasTexture(canvas);
+  _cachedChassisTexture.wrapS = THREE.RepeatWrapping;
+  _cachedChassisTexture.wrapT = THREE.RepeatWrapping;
+  return _cachedChassisTexture;
 }

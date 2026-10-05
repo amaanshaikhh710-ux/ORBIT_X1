@@ -223,3 +223,28 @@ def test_api_csv_export_and_recovery_application():
     assert data["policy_id"] == "R-002"
 
 
+def test_timestep_and_auth_safeguards():
+    # 1. Test invalid login is properly rejected with 401
+    bad_login = client.post("/auth/login", json={"username": "non_existent_operator_xyz", "password": "anypassword"})
+    assert bad_login.status_code == 401
+    assert "Invalid operator credentials" in bad_login.text
+
+    # 2. Test timestep endpoint
+    run_id = "test-timestep-run"
+    client.post(f"/simulation/runs?run_id={run_id}")
+    for ts in [5.0, 10.0, 15.0, 20.0]:
+        ts_res = client.post(f"/simulation/runs/{run_id}/timestep", json={"timestep_s": ts})
+        assert ts_res.status_code == 200
+        assert ts_res.json()["timestep_s"] == ts
+
+    # 3. Test token query parameter authorization for CSV export
+    unauth_client = TestClient(app)
+    unauth_csv = unauth_client.get(f"/simulation/runs/{run_id}/telemetry/export.csv")
+    assert unauth_csv.status_code == 401
+
+    token_csv = unauth_client.get(f"/simulation/runs/{run_id}/telemetry/export.csv?token={_admin_token}")
+    assert token_csv.status_code == 200
+    assert "text/csv" in token_csv.headers["content-type"]
+
+
+

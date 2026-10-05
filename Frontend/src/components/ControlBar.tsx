@@ -3,12 +3,32 @@ import { useSimulation } from '../context/SimulationContext';
 import { Play, Pause, SkipForward, RotateCcw, Zap } from 'lucide-react';
 
 export const ControlBar: React.FC = () => {
-  const { isRunning, speed, state, start, pause, step, reset, setSpeed, activateV003Demo, user } = useSimulation();
+  const {
+    isRunning,
+    speed,
+    timestep,
+    state,
+    start,
+    pause,
+    step,
+    reset,
+    resetV003Demo,
+    setSpeed,
+    setTimestep,
+    activateV003Demo,
+    user,
+  } = useSimulation();
 
   const userRole = user?.role || 'Mission Operator';
   const canInjectFault = userRole === 'Simulation Engineer' || userRole === 'Mission Administrator';
 
   const speeds = [1, 5, 10, 25];
+  const timesteps = [
+    { s: 5, label: '5s Fast' },
+    { s: 10, label: '10s Normal' },
+    { s: 15, label: '15s Detailed' },
+    { s: 20, label: '20s Present' },
+  ];
 
   return (
     <div
@@ -16,13 +36,15 @@ export const ControlBar: React.FC = () => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: '10px 20px',
-        background: 'rgba(12, 17, 29, 0.95)',
+        flexWrap: 'wrap',
+        gap: '12px',
+        padding: '8px 20px',
+        background: 'var(--bg-secondary)',
         borderBottom: '1px solid var(--border-color)',
       }}
     >
       {/* Simulation Stepping & Execution Controls */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
         {isRunning ? (
           <button
             onClick={pause}
@@ -46,9 +68,9 @@ export const ControlBar: React.FC = () => {
         <button
           onClick={step}
           className="btn btn-secondary"
-          title="Advance single exact 10-second discrete timestep"
+          title={`Advance single exact ${timestep}-second discrete timestep`}
         >
-          <SkipForward size={15} /> Step (+10s)
+          <SkipForward size={15} /> Step (+{timestep}s)
         </button>
 
         <button
@@ -66,6 +88,7 @@ export const ControlBar: React.FC = () => {
           style={{
             borderColor: canInjectFault ? '#f59e0b' : 'rgba(255, 255, 255, 0.1)',
             color: canInjectFault ? '#f59e0b' : '#64748b',
+            background: state?.demo_mode === 'V-003_DEMO' ? 'rgba(245, 158, 11, 0.2)' : 'transparent',
             fontSize: '12px',
             opacity: canInjectFault ? 1 : 0.45,
             cursor: canInjectFault ? 'pointer' : 'not-allowed',
@@ -76,35 +99,83 @@ export const ControlBar: React.FC = () => {
               : "Simulation Engineer or Administrator role required to activate fault presets"
           }
         >
-          <Zap size={14} color={canInjectFault ? "#f59e0b" : "#64748b"} /> V-003 Demo {!canInjectFault && '(Locked)'}
+          <Zap size={14} color={canInjectFault ? "#f59e0b" : "#64748b"} />
+          <span>{state?.demo_mode === 'V-003_DEMO' ? 'V-003 Active' : 'V-003 Demo'}</span>
+          {!canInjectFault && ' (Locked)'}
+        </button>
+
+        <button
+          onClick={resetV003Demo}
+          className="btn btn-secondary"
+          style={{
+            borderColor: '#38bdf8',
+            color: '#38bdf8',
+            fontSize: '12px',
+            cursor: 'pointer',
+          }}
+          title="Completely reset V-003 demo to nominal baseline (85% SOC, 24W Solar, Nominal EPS, 0 Faults)"
+        >
+          <RotateCcw size={14} /> Reset V-003
         </button>
       </div>
 
-      {/* Speed Multiplier Gating */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
-          SPEED MULTIPLIER:
-        </span>
-        <div style={{ display: 'flex', gap: '4px' }}>
-          {speeds.map((s) => (
-            <button
-              key={s}
-              onClick={() => setSpeed(s)}
-              style={{
-                padding: '4px 10px',
-                borderRadius: '4px',
-                border: speed === s ? '1px solid var(--accent-cyan)' : '1px solid var(--border-color)',
-                background: speed === s ? 'rgba(56, 189, 248, 0.2)' : 'rgba(255, 255, 255, 0.03)',
-                color: speed === s ? '#fff' : 'var(--text-secondary)',
-                fontSize: '12px',
-                fontFamily: 'var(--font-mono)',
-                fontWeight: 600,
-                cursor: 'pointer',
-              }}
-            >
-              {s}x
-            </button>
-          ))}
+      {/* Discrete Timestep & Speed Controls */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
+        {/* Timestep Pacing Selection */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
+            TIMING:
+          </span>
+          <div style={{ display: 'flex', gap: '3px' }}>
+            {timesteps.map((item) => (
+              <button
+                key={item.s}
+                onClick={() => setTimestep(item.s)}
+                style={{
+                  padding: '3px 8px',
+                  borderRadius: '4px',
+                  border: timestep === item.s ? '1px solid var(--accent-cyan)' : '1px solid var(--border-color)',
+                  background: timestep === item.s ? 'rgba(56, 189, 248, 0.2)' : 'rgba(255, 255, 255, 0.03)',
+                  color: timestep === item.s ? '#fff' : 'var(--text-secondary)',
+                  fontSize: '11px',
+                  fontFamily: 'var(--font-mono)',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                }}
+                title={`Configure simulation timestep to ${item.s}s`}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Speed Multiplier */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
+            SPEED:
+          </span>
+          <div style={{ display: 'flex', gap: '3px' }}>
+            {speeds.map((s) => (
+              <button
+                key={s}
+                onClick={() => setSpeed(s)}
+                style={{
+                  padding: '3px 8px',
+                  borderRadius: '4px',
+                  border: speed === s ? '1px solid var(--accent-cyan)' : '1px solid var(--border-color)',
+                  background: speed === s ? 'rgba(56, 189, 248, 0.2)' : 'rgba(255, 255, 255, 0.03)',
+                  color: speed === s ? '#fff' : 'var(--text-secondary)',
+                  fontSize: '11px',
+                  fontFamily: 'var(--font-mono)',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                }}
+              >
+                {s}x
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 

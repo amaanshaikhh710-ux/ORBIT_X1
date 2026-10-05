@@ -61,6 +61,7 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["Content-Disposition"],
 )
 
 
@@ -118,11 +119,16 @@ class SimulationRunSession:
     async def _loop(self):
         """Background continuous stepping loop governed by simulation speed."""
         step_count = 0
+        last_broadcast_time = 0.0
         try:
             while self.is_running:
                 self.engine.step()
                 step_count += 1
-                await self.broadcast_state()
+                
+                now = time.monotonic()
+                if self.speed <= 5 or (now - last_broadcast_time) >= 0.10:
+                    await self.broadcast_state()
+                    last_broadcast_time = now
 
                 # Periodic persistent checkpoint every 6 steps (60s simulation time)
                 if step_count % 6 == 0:
@@ -205,6 +211,10 @@ class FaultInjectRequest(BaseModel):
 
 class SpeedRequest(BaseModel):
     speed: int = Field(..., ge=1, le=25)
+
+
+class TimestepRequest(BaseModel):
+    timestep_s: float = Field(..., ge=1.0, le=60.0)
 
 
 class RecoverySimulateRequest(BaseModel):
@@ -451,7 +461,13 @@ async def reset_simulation(run_id: str):
     session = get_session(run_id)
     session.reset()
     await session.broadcast_state()
-    return {"status": "reset", "run_id": run_id, "simulation_time_s": 0.0}
+    return {
+        "status": "reset",
+        "run_id": run_id,
+        "simulation_time_s": 0.0,
+        "state": session.engine.state.to_dict(),
+        "telemetry": TelemetryEngine.generate_snapshot(session.engine.state, session.run_id),
+    }
 
 
 @app.post("/simulation/runs/{run_id}/step", dependencies=[Depends(require_authenticated_user)])
@@ -473,6 +489,15 @@ async def set_simulation_speed(run_id: str, req: SpeedRequest):
     session = get_session(run_id)
     session.speed = req.speed
     return {"status": "speed_updated", "speed": session.speed}
+
+
+@app.post("/simulation/runs/{run_id}/timestep", dependencies=[Depends(require_authenticated_user)])
+async def set_simulation_timestep(run_id: str, req: TimestepRequest):
+    session = get_session(run_id)
+    session.engine.timestep_s = req.timestep_s
+    session.engine.state.time_step_s = req.timestep_s
+    await session.broadcast_state()
+    return {"status": "timestep_updated", "timestep_s": session.engine.timestep_s}
 
 
 @app.post("/simulation/runs/{run_id}/environment", dependencies=[Depends(require_authenticated_user)])

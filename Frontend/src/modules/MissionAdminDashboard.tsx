@@ -1,10 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useSimulation } from '../context/SimulationContext';
-import { api } from '../services/api';
-import type { AdminUser, ActiveModule } from '../types/simulation';
+import type { ActiveModule } from '../types/simulation';
 import {
   Shield,
-  Users,
   Satellite,
   Box,
   Compass,
@@ -29,36 +27,13 @@ export const MissionAdminDashboard: React.FC = () => {
     start,
     pause,
     reset,
+    resetV003Demo,
     activateV003Demo,
     setActiveModule,
     user,
   } = useSimulation();
 
-  const [operators, setOperators] = useState<AdminUser[]>([]);
-  const [loadingOperators, setLoadingOperators] = useState<boolean>(true);
-  const [adminError, setAdminError] = useState<string | null>(null);
   const [demoLoading, setDemoLoading] = useState<boolean>(false);
-
-  useEffect(() => {
-    let mounted = true;
-    api
-      .getAdminUsers()
-      .then((users) => {
-        if (mounted) {
-          setOperators(users);
-          setLoadingOperators(false);
-        }
-      })
-      .catch((err) => {
-        if (mounted) {
-          setAdminError(err.message || 'Unable to retrieve operator roster');
-          setLoadingOperators(false);
-        }
-      });
-    return () => {
-      mounted = false;
-    };
-  }, []);
 
   const handleActivateDemo = async () => {
     setDemoLoading(true);
@@ -266,6 +241,27 @@ export const MissionAdminDashboard: React.FC = () => {
             <Zap size={14} />
             <span>{demoLoading ? 'STAGE...' : 'V-003 DEMO'}</span>
           </button>
+
+          <button
+            onClick={resetV003Demo}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '8px 14px',
+              borderRadius: '6px',
+              border: '1px solid rgba(56, 189, 248, 0.5)',
+              background: 'rgba(56, 189, 248, 0.15)',
+              color: '#38BDF8',
+              fontWeight: 600,
+              fontSize: '12px',
+              cursor: 'pointer',
+            }}
+            title="Reset V-003 demo back to nominal baseline (85% SOC, 24W Solar, 0 Faults)"
+          >
+            <RotateCcw size={14} />
+            <span>RESET V-003</span>
+          </button>
         </div>
       </div>
 
@@ -319,108 +315,164 @@ export const MissionAdminDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* 3. Operator Roster & RBAC Authorization Table */}
+      {/* 3. Mission Administrator Authority & Security Profile */}
       <div
         style={{
           background: 'var(--card-bg)',
           border: '1px solid var(--border-color)',
           borderRadius: '10px',
-          padding: '20px',
+          padding: '22px 24px',
           marginBottom: '28px',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Users size={18} color="#FACC15" />
-            <h2 style={{ margin: 0, fontSize: '15px', fontWeight: 600 }}>Authoritative Operator Roster & Role Mapping</h2>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px', flexWrap: 'wrap', gap: '10px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: 34,
+                height: 34,
+                borderRadius: '8px',
+                background: 'rgba(234, 179, 8, 0.15)',
+                color: '#FACC15',
+                border: '1px solid rgba(234, 179, 8, 0.3)',
+              }}
+            >
+              <Shield size={18} />
+            </div>
+            <div>
+              <h2 style={{ margin: 0, fontSize: '15px', fontWeight: 600, color: '#FFFFFF' }}>
+                Mission Administrator Authority & Security Profile
+              </h2>
+              <div style={{ fontSize: '12px', color: '#94A3B8', marginTop: '2px' }}>
+                Authoritative single-operator security context with full command & control envelope
+              </div>
+            </div>
           </div>
-          <span style={{ fontSize: '11px', color: '#94A3B8' }}>Verified via backend API: <code>/admin/users</code></span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                fontSize: '11px',
+                fontWeight: 600,
+                color: '#4ADE80',
+                background: 'rgba(34, 197, 94, 0.12)',
+                border: '1px solid rgba(34, 197, 94, 0.3)',
+                padding: '4px 10px',
+                borderRadius: '6px',
+                fontFamily: 'var(--font-mono)',
+              }}
+            >
+              <CheckCircle2 size={13} />
+              AUTHENTICATED & VERIFIED
+            </span>
+          </div>
         </div>
 
-        {loadingOperators ? (
-          <div style={{ padding: '20px', textAlign: 'center', color: '#94A3B8', fontSize: '13px' }}>
-            Querying authoritative operator database...
+        {/* Profile Details Grid */}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+            gap: '16px',
+            marginBottom: '18px',
+          }}
+        >
+          <div
+            style={{
+              padding: '14px 16px',
+              background: 'rgba(15, 23, 42, 0.5)',
+              border: '1px solid rgba(255, 255, 255, 0.06)',
+              borderRadius: '8px',
+            }}
+          >
+            <div style={{ fontSize: '11px', color: '#94A3B8', fontFamily: 'var(--font-mono)' }}>OPERATOR CALL SIGN</div>
+            <div style={{ fontSize: '16px', fontWeight: 700, color: '#FACC15', marginTop: '4px', fontFamily: 'var(--font-mono)' }}>
+              {user?.username || 'mission_admin'}
+            </div>
+            <div style={{ fontSize: '11px', color: '#64748B', marginTop: '4px' }}>
+              Primary Flight Mission Administrator
+            </div>
           </div>
-        ) : adminError ? (
-          <div style={{ padding: '16px', background: 'rgba(239, 68, 68, 0.1)', color: '#f87171', borderRadius: '6px', fontSize: '13px' }}>
-            {adminError}
+
+          <div
+            style={{
+              padding: '14px 16px',
+              background: 'rgba(15, 23, 42, 0.5)',
+              border: '1px solid rgba(255, 255, 255, 0.06)',
+              borderRadius: '8px',
+            }}
+          >
+            <div style={{ fontSize: '11px', color: '#94A3B8', fontFamily: 'var(--font-mono)' }}>AUTHORITATIVE ROLE</div>
+            <div style={{ fontSize: '16px', fontWeight: 700, color: '#FFFFFF', marginTop: '4px' }}>
+              {user?.role || 'Mission Administrator'}
+            </div>
+            <div style={{ fontSize: '11px', color: '#64748B', marginTop: '4px' }}>
+              Command Level: Executive System Authority
+            </div>
           </div>
-        ) : (
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12.5px' }}>
-              <thead>
-                <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.08)', textAlign: 'left', color: '#94A3B8' }}>
-                  <th style={{ padding: '10px 12px' }}>CALL SIGN / USERNAME</th>
-                  <th style={{ padding: '10px 12px' }}>AUTHORITATIVE RBAC ROLE</th>
-                  <th style={{ padding: '10px 12px' }}>PERMISSION ENVELOPE</th>
-                  <th style={{ padding: '10px 12px' }}>DEFAULT DASHBOARD</th>
-                  <th style={{ padding: '10px 12px' }}>SYSTEM STATUS</th>
-                </tr>
-              </thead>
-              <tbody>
-                {operators.map((op) => (
-                  <tr
-                    key={op.id}
-                    style={{
-                      borderBottom: '1px solid rgba(255,255,255,0.04)',
-                      background: op.username === user?.username ? 'rgba(234, 179, 8, 0.08)' : 'transparent',
-                    }}
-                  >
-                    <td style={{ padding: '12px', fontWeight: 600, fontFamily: 'var(--font-mono)' }}>
-                      {op.username} {op.username === user?.username && ' (CURRENT)'}
-                    </td>
-                    <td style={{ padding: '12px' }}>
-                      <span
-                        style={{
-                          fontSize: '11px',
-                          fontWeight: 600,
-                          padding: '3px 8px',
-                          borderRadius: '4px',
-                          background:
-                            op.role === 'Mission Administrator'
-                              ? 'rgba(234, 179, 8, 0.15)'
-                              : op.role === 'Flight Director'
-                              ? 'rgba(168, 85, 247, 0.15)'
-                              : op.role === 'Simulation Engineer'
-                              ? 'rgba(34, 197, 94, 0.15)'
-                              : 'rgba(56, 189, 248, 0.15)',
-                          color:
-                            op.role === 'Mission Administrator'
-                              ? '#FACC15'
-                              : op.role === 'Flight Director'
-                              ? '#C084FC'
-                              : op.role === 'Simulation Engineer'
-                              ? '#4ADE80'
-                              : '#38BDF8',
-                          border: '1px solid rgba(255,255,255,0.1)',
-                        }}
-                      >
-                        {op.role}
-                      </span>
-                    </td>
-                    <td style={{ padding: '12px', color: '#CBD5E1' }}>
-                      {op.role === 'Mission Administrator' && 'Unrestricted Full Access · Fault Injection · Recovery Execution · User Audit'}
-                      {op.role === 'Mission Operator' && 'Read-only Telemetry Monitoring · Digital Twin · History Logs · Reports'}
-                      {op.role === 'Flight Director' && 'Flight Safety Envelope · Anomaly Evaluation · Live Recovery Policy Execution'}
-                      {op.role === 'Simulation Engineer' && 'Physics Lab Control · Subsystem Fault Injection · Causal Graph Verification'}
-                    </td>
-                    <td style={{ padding: '12px', fontFamily: 'var(--font-mono)', color: 'var(--accent-cyan)' }}>
-                      {op.role === 'Mission Administrator' && 'mission-admin'}
-                      {op.role === 'Mission Operator' && 'mission-control'}
-                      {op.role === 'Flight Director' && 'flight-director'}
-                      {op.role === 'Simulation Engineer' && 'simulation-dashboard'}
-                    </td>
-                    <td style={{ padding: '12px' }}>
-                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', color: '#4ADE80', fontSize: '11.5px' }}>
-                        <CheckCircle2 size={13} /> Active Credentials
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+
+          <div
+            style={{
+              padding: '14px 16px',
+              background: 'rgba(15, 23, 42, 0.5)',
+              border: '1px solid rgba(255, 255, 255, 0.06)',
+              borderRadius: '8px',
+            }}
+          >
+            <div style={{ fontSize: '11px', color: '#94A3B8', fontFamily: 'var(--font-mono)' }}>ASSIGNED SPACECRAFT</div>
+            <div style={{ fontSize: '16px', fontWeight: 700, color: '#38BDF8', marginTop: '4px', fontFamily: 'var(--font-mono)' }}>
+              sat-3u-01 / ORBIT-X1
+            </div>
+            <div style={{ fontSize: '11px', color: '#64748B', marginTop: '4px' }}>
+              Bus: 3U CubeSat Optical Remote Sensing
+            </div>
           </div>
-        )}
+
+          <div
+            style={{
+              padding: '14px 16px',
+              background: 'rgba(15, 23, 42, 0.5)',
+              border: '1px solid rgba(255, 255, 255, 0.06)',
+              borderRadius: '8px',
+            }}
+          >
+            <div style={{ fontSize: '11px', color: '#94A3B8', fontFamily: 'var(--font-mono)' }}>ACCESS PRIVILEGES</div>
+            <div style={{ fontSize: '16px', fontWeight: 700, color: '#4ADE80', marginTop: '4px' }}>
+              Full Mission Control
+            </div>
+            <div style={{ fontSize: '11px', color: '#64748B', marginTop: '4px' }}>
+              Unrestricted Telemetry, Simulation & FSW Command
+            </div>
+          </div>
+        </div>
+
+        {/* Command Envelope Capabilities Summary */}
+        <div
+          style={{
+            padding: '14px 18px',
+            background: 'rgba(234, 179, 8, 0.04)',
+            border: '1px solid rgba(234, 179, 8, 0.15)',
+            borderRadius: '8px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '12px',
+          }}
+        >
+          <div style={{ fontSize: '12.5px', color: '#CBD5E1', lineHeight: '1.6' }}>
+            <strong style={{ color: '#FACC15' }}>Active Command Capabilities: </strong>
+            Autonomous Fault Injection (V-001, V-002, V-003) · Flight Software Mitigation Execution (R-001–R-007) · Orbital Physics Timestep Control · Telemetry CSV & Mission Report Export.
+          </div>
+          <div style={{ fontSize: '11.5px', color: '#94A3B8', fontFamily: 'var(--font-mono)' }}>
+            Cryptographic Token: JWT HS256 · bcrypt Active
+          </div>
+        </div>
       </div>
 
       {/* 4. Full Access Module Direct Launchpad */}

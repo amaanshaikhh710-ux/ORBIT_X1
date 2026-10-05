@@ -25,6 +25,9 @@ export const Navbar: React.FC = () => {
   const userRole = user?.role || 'Mission Operator';
 
   const navItems: { id: ActiveModule; label: string; icon: React.ReactNode }[] = [
+    ...(userRole === 'Mission Administrator'
+      ? [{ id: 'mission-admin' as ActiveModule, label: 'Admin Console', icon: <Shield size={16} /> }]
+      : []),
     { id: 'mission-control', label: 'Mission Control', icon: <Satellite size={16} /> },
     { id: 'digital-twin', label: 'Digital Twin (3D)', icon: <Box size={16} /> },
     { id: 'telemetry', label: 'Telemetry', icon: <Activity size={16} /> },
@@ -38,7 +41,7 @@ export const Navbar: React.FC = () => {
   ];
 
   // Authoritative RBAC module filtering
-  const isAllowedModule = (moduleId: ActiveModule): boolean => {
+  const isAllowedModule = React.useCallback((moduleId: ActiveModule): boolean => {
     if (moduleId === 'landing' || moduleId === 'login') return true;
     // Mission Administrator has unrestricted full access to every module
     if (userRole === 'Mission Administrator') return true;
@@ -64,13 +67,13 @@ export const Navbar: React.FC = () => {
     }
 
     return false;
-  };
+  }, [userRole]);
 
   useEffect(() => {
     if (activeModule !== 'landing' && activeModule !== 'login' && !isAllowedModule(activeModule)) {
       setActiveModule(getRoleDefaultModule(userRole));
     }
-  }, [userRole, activeModule]);
+  }, [userRole, activeModule, setActiveModule, isAllowedModule]);
 
   const visibleNavItems = navItems.filter((item) => isAllowedModule(item.id));
 
@@ -86,7 +89,7 @@ export const Navbar: React.FC = () => {
       style={{
         display: 'flex',
         flexDirection: 'column',
-        background: '#090d16',
+        background: 'var(--bg-primary)',
         borderBottom: '1px solid var(--border-color)',
         position: 'sticky',
         top: 0,
@@ -312,7 +315,7 @@ export const Navbar: React.FC = () => {
           gap: '4px',
           padding: '0 16px',
           overflowX: 'auto',
-          background: '#070a12',
+          background: 'var(--bg-secondary)',
         }}
       >
         {visibleNavItems.map((item) => {

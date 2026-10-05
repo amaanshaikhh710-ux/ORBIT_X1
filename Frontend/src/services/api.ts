@@ -73,6 +73,15 @@ export const api = {
     return res.json();
   },
 
+  async setTimestep(runId = 'run-default', timestepS: number) {
+    const res = await fetch(`${API_BASE}/simulation/runs/${runId}/timestep`, {
+      method: 'POST',
+      headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ timestep_s: timestepS }),
+    });
+    return res.json();
+  },
+
   // State & Telemetry
   async getLatestState(spacecraftId = 'sat-3u-01'): Promise<CanonicalSpacecraftState> {
     const res = await fetch(`${API_BASE}/spacecraft/${spacecraftId}/state`, {
@@ -187,7 +196,50 @@ export const api = {
   },
 
   getTelemetryCsvUrl(runId = 'run-default') {
-    return `${API_BASE}/simulation/runs/${runId}/telemetry/export.csv`;
+    const token = localStorage.getItem('orbital_twin_token');
+    return `${API_BASE}/simulation/runs/${runId}/telemetry/export.csv${token ? `?token=${encodeURIComponent(token)}` : ''}`;
+  },
+
+  async downloadTelemetryCsv(runId = 'run-default') {
+    const token = localStorage.getItem('orbital_twin_token');
+    const url = `${API_BASE}/simulation/runs/${runId}/telemetry/export.csv${token ? `?token=${encodeURIComponent(token)}` : ''}`;
+    const res = await fetch(url, {
+      headers: getAuthHeaders(),
+    });
+    if (!res.ok) {
+      if (res.status === 401) {
+        throw new Error('Authentication required to export telemetry CSV. Please log in.');
+      }
+      throw new Error(`Failed to download telemetry CSV: HTTP ${res.status}`);
+    }
+    const blob = await res.blob();
+    if (blob.size === 0) {
+      throw new Error('Downloaded telemetry file is empty.');
+    }
+    
+    // Extract filename from Content-Disposition if present
+    let filename = `orbital_twin_telemetry_${runId}.csv`;
+    const disposition = res.headers.get('Content-Disposition');
+    if (disposition) {
+      const match = disposition.match(/filename="?([^";]+)"?/i);
+      if (match && match[1]) {
+        filename = match[1].trim();
+      }
+    }
+
+    const blobUrl = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = blobUrl;
+    link.setAttribute('download', filename);
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    // Keep object URL alive for 1.5s so Chromium/Windows browser download manager finishes streaming
+    setTimeout(() => {
+      window.URL.revokeObjectURL(blobUrl);
+    }, 1500);
   },
 
   // Timeline

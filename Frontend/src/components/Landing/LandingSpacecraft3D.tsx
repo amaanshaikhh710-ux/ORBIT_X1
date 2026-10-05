@@ -6,7 +6,12 @@ import * as THREE from 'three';
  * Features realistic deep midnight oceans, authentic continental contours,
  * natural wispy cloud bands, and pinpoint golden night-side metropolis clusters.
  */
+let _cachedLandingEarthTexture: THREE.CanvasTexture | null = null;
+let _cachedLandingSolarCellTexture: THREE.CanvasTexture | null = null;
+let _cachedLandingChassisTexture: THREE.CanvasTexture | null = null;
+
 function createLandingOrbitalEarthTexture(): THREE.CanvasTexture {
+  if (_cachedLandingEarthTexture) return _cachedLandingEarthTexture;
   const canvas = document.createElement('canvas');
   canvas.width = 2048;
   canvas.height = 1024;
@@ -184,11 +189,11 @@ function createLandingOrbitalEarthTexture(): THREE.CanvasTexture {
     ctx.fill();
   }
 
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.wrapS = THREE.RepeatWrapping;
-  texture.wrapT = THREE.ClampToEdgeWrapping;
-  texture.anisotropy = 8;
-  return texture;
+  _cachedLandingEarthTexture = new THREE.CanvasTexture(canvas);
+  _cachedLandingEarthTexture.wrapS = THREE.RepeatWrapping;
+  _cachedLandingEarthTexture.wrapT = THREE.ClampToEdgeWrapping;
+  _cachedLandingEarthTexture.anisotropy = 8;
+  return _cachedLandingEarthTexture;
 }
 
 /**
@@ -196,6 +201,7 @@ function createLandingOrbitalEarthTexture(): THREE.CanvasTexture {
  * Features deep blue photovoltaic silicon cells with visible wafer borders and silver busbars.
  */
 function createLandingSolarCellTexture(): THREE.CanvasTexture {
+  if (_cachedLandingSolarCellTexture) return _cachedLandingSolarCellTexture;
   const canvas = document.createElement('canvas');
   canvas.width = 512;
   canvas.height = 512;
@@ -289,11 +295,11 @@ function createLandingSolarCellTexture(): THREE.CanvasTexture {
     }
   }
 
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.wrapS = THREE.RepeatWrapping;
-  texture.wrapT = THREE.RepeatWrapping;
-  texture.anisotropy = 8;
-  return texture;
+  _cachedLandingSolarCellTexture = new THREE.CanvasTexture(canvas);
+  _cachedLandingSolarCellTexture.wrapS = THREE.RepeatWrapping;
+  _cachedLandingSolarCellTexture.wrapT = THREE.RepeatWrapping;
+  _cachedLandingSolarCellTexture.anisotropy = 8;
+  return _cachedLandingSolarCellTexture;
 }
 
 /**
@@ -301,6 +307,7 @@ function createLandingSolarCellTexture(): THREE.CanvasTexture {
  * Produces subtle mid-tone graphite panel division seams and aerospace screw points
  */
 function createLandingChassisTexture(): THREE.CanvasTexture {
+  if (_cachedLandingChassisTexture) return _cachedLandingChassisTexture;
   const canvas = document.createElement('canvas');
   canvas.width = 512;
   canvas.height = 512;
@@ -340,9 +347,9 @@ function createLandingChassisTexture(): THREE.CanvasTexture {
     });
   });
 
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.anisotropy = 8;
-  return texture;
+  _cachedLandingChassisTexture = new THREE.CanvasTexture(canvas);
+  _cachedLandingChassisTexture.anisotropy = 8;
+  return _cachedLandingChassisTexture;
 }
 
 /**

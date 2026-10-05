@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { useSimulation } from '../context/SimulationContext';
-import { Shield, Lock, User, ArrowLeft, ArrowRight, Satellite, AlertCircle } from 'lucide-react';
+import { Shield, Lock, User, ArrowLeft, ArrowRight, Satellite, AlertCircle, Eye, EyeOff } from 'lucide-react';
 
 export const LoginPage: React.FC = () => {
   const { login, setActiveModule } = useSimulation();
 
   const [username, setUsername] = useState('mission_admin');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -284,7 +285,7 @@ export const LoginPage: React.FC = () => {
             >
               <Lock size={16} color="#64748B" />
               <input
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••••••"
@@ -299,6 +300,46 @@ export const LoginPage: React.FC = () => {
                   fontSize: '14px',
                 }}
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  color: '#94A3B8',
+                  padding: '2px',
+                  display: 'flex',
+                  alignItems: 'center',
+                }}
+                title={showPassword ? 'Hide password' : 'Show password'}
+              >
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
+            {/* Quick Demo Fill */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '6px' }}>
+              <span style={{ fontSize: '11px', color: '#64748B', fontFamily: 'var(--font-mono)' }}>
+                Demo: mission_admin / admin123
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  setUsername('mission_admin');
+                  setPassword('admin123');
+                }}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: '#38BDF8',
+                  fontSize: '11px',
+                  fontFamily: 'var(--font-mono)',
+                  cursor: 'pointer',
+                  textDecoration: 'underline',
+                }}
+              >
+                Autofill Demo
+              </button>
             </div>
           </div>
 

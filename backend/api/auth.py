@@ -11,7 +11,7 @@ from enum import Enum
 from typing import Optional, List
 import bcrypt
 import jwt
-from fastapi import Header, HTTPException, Depends, status
+from fastapi import Header, Query, HTTPException, Depends, status
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 from backend.db.session import SessionLocal
@@ -101,20 +101,8 @@ def authenticate_user(db: Session, username: str, password: str, fallback_role: 
     Role is strictly retrieved from the database, never from frontend input.
     """
     user = db.query(User).filter_by(username=username).first()
-
-    # Pre-seeded dynamic registration fallback if database was fresh
     if not user:
-        role = fallback_role if (fallback_role in VALID_ROLES) else UserRole.MISSION_OPERATOR.value
-        user = User(
-            username=username,
-            password_hash=hash_password(password),
-            role=role,
-            created_at=datetime.now(timezone.utc),
-        )
-        db.add(user)
-        db.commit()
-        db.refresh(user)
-        return user
+        return None
 
     if verify_password(password, user.password_hash):
         return user
@@ -126,20 +114,24 @@ def authenticate_user(db: Session, username: str, password: str, fallback_role: 
 # 4. Reusable RBAC FastAPI Dependencies
 # ==========================================
 
-def require_authenticated_user(authorization: Optional[str] = Header(None)) -> dict:
+def require_authenticated_user(
+    authorization: Optional[str] = Header(None),
+    token: Optional[str] = Query(None),
+) -> dict:
     """
-    Validates JWT token from the Authorization header.
+    Validates JWT token from the Authorization header or token query parameter.
     Returns authoritative operator identity from the database.
     Raises HTTP 401 if unauthenticated.
     """
-    if not authorization:
+    raw_token = authorization or (f"Bearer {token}" if token else None)
+    if not raw_token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Authentication credentials required",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    payload = decode_access_token(authorization)
+    payload = decode_access_token(raw_token)
     if not payload or "sub" not in payload:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
