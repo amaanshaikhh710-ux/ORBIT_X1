@@ -1,0 +1,17 @@
+fault_id,subsystem,parameter,effect,severity_range,propagation
+F-SOLAR-001,Solar,solar_health,multiplicative generation reduction,0..1,Solar->Power->Battery->Scheduler->Payload->Mission
+F-BATT-001,Battery,usable_capacity,reduces usable capacity,0..1,Battery->Power State->Mission
+F-REG-001,Power Distribution,regulator_health,reduces available bus power,0..1,Power Bus->Subsystems
+F-THERM-001,Thermal,heat_rejection_coefficient,reduces heat rejection,0..1,Thermal->Payload/OBC->Mission
+F-COMM-001,Communication,comm_health,reduces effective link rate,0..1,Comm->Storage->Payload->Mission
+F-COMM-002,Communication,packet_loss,increases packet loss,0..1,Comm->Storage->Mission
+F-ANT-001,Communication,antenna_health,reduces link availability/rate,0..1,Comm->Mission
+F-PAY-001,Payload,payload_health,blocks or degrades imaging,0..1,Payload->Storage->Mission
+F-PROC-001,OBC,cpu_fault_load,increases CPU load,0..1,OBC->Payload->Mission
+F-STOR-001,Storage,storage_health,reduces usable storage,0..1,Storage->Payload->Mission
+F-STOR-002,Storage,overflow,increases storage utilization,0..1,Storage->Payload->Mission
+F-SENS-001,Sensors,bias,introduces measurement bias,0..1,Sensors->Telemetry->Analysis
+F-SENS-002,Sensors,dropout,removes measurements,0..1,Sensors->Telemetry->Analysis
+F-OBC-001,OBC,overload,increases CPU utilization,0..1,OBC->Payload->Mission
+F-ADCS-001,ADCS,attitude_bias,increases pointing error,0..1,ADCS->Payload->Mission
+F-WHEEL-001,ADCS,control_authority,reduces attitude correction,0..1,ADCS->Payload->Mission

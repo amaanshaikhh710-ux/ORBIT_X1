@@ -1,0 +1,44 @@
+parameter,value,unit,classification,used_by,notes
+mission_type,Earth observation,,MODEL ASSUMPTION,mission model,Representative CubeSat mission
+bus_class,3U,,MODEL ASSUMPTION,spacecraft config,Representative not exact real spacecraft
+mass,4.0,kg,MODEL ASSUMPTION,spacecraft config,Reference-scale mass
+simulation_timestep,10,s,MODEL ASSUMPTION,simulation engine,Internal timestep
+nominal_solar_peak,24,W,REFERENCE-RANGE,power model,Peak generation
+battery_usable_capacity,72,Wh,REFERENCE-RANGE,power model,Usable not nameplate
+initial_soc,85,%,MODEL ASSUMPTION,power model,Demo initial state
+low_power_soc,25,%,MODEL ASSUMPTION,scheduler,Enter low power
+critical_soc,15,%,MODEL ASSUMPTION,scheduler,Critical power
+emergency_soc,10,%,MODEL ASSUMPTION,scheduler,Emergency shutdown
+charge_efficiency,0.90,fraction,REFERENCE-RANGE,power model,Charging efficiency
+discharge_efficiency,0.90,fraction,REFERENCE-RANGE,power model,Discharging efficiency
+housekeeping_load,5,W,MODEL ASSUMPTION,power model,Nominal bus load
+payload_imaging_load,8,W,MODEL ASSUMPTION,payload/power,Active imaging load
+processing_load,3,W,MODEL ASSUMPTION,OBC/power,Active image processing
+comm_high_rate_load,7,W,MODEL ASSUMPTION,communication/power,High-rate downlink
+storage_capacity,8,GB,MODEL ASSUMPTION,storage,Representative capacity
+initial_storage_used,1,GB,MODEL ASSUMPTION,storage,Demo initial state
+raw_image_size,120,MB,MODEL ASSUMPTION,payload/storage,Per image
+processed_image_size,35,MB,MODEL ASSUMPTION,payload/storage,Per image after processing
+imaging_duration,30,s,payload,Payload task duration
+processing_duration,60,s,payload/OBC,Processing duration
+downlink_rate,2,Mbps,REFERENCE-RANGE,communication,Nominal high-rate link
+nominal_packet_loss,0.01,fraction,MODEL ASSUMPTION,communication,Healthy link
+degraded_packet_loss_max,0.20,fraction,communication faults,Upper simulated degradation
+nominal_signal_strength,-70,dBm,MODEL ASSUMPTION,communication,Visualization/model baseline
+nominal_temperature,20,C,MODEL ASSUMPTION,thermal,Initial internal temperature
+external_temp_min,-20,C,environment/thermal,Representative range
+external_temp_max,25,C,environment/thermal,Representative range
+thermal_warning,40,C,thermal,Warning threshold
+thermal_critical,50,C,thermal,Critical threshold
+thermal_capacitance,1500,J/K,MODEL ASSUMPTION,thermal,Lumped thermal model
+heat_rejection_coefficient,0.8,W/K,MODEL ASSUMPTION,thermal,Lumped model
+heat_conversion_factor,0.90,fraction,MODEL ASSUMPTION,thermal,Electrical load to heat
+cpu_baseline,35,%,MODEL ASSUMPTION,OBC,Nominal utilization
+cpu_processing_increment,25,percentage_points,MODEL ASSUMPTION,OBC,Image processing increment
+cpu_warning,80,%,MODEL ASSUMPTION,OBC,Warning threshold
+cpu_critical,95,%,MODEL ASSUMPTION,OBC,Critical threshold
+nominal_pointing_error,0.5,deg,MODEL ASSUMPTION,ADCS,Nominal error
+pointing_warning,2,deg,MODEL ASSUMPTION,ADCS,Imaging requirement
+pointing_critical,5,deg,MODEL ASSUMPTION,ADCS,Critical pointing error
+imaging_max_pointing_error,2,deg,MODEL ASSUMPTION,payload/ADCS,Task acceptance threshold
+solar_degradation_demo_severity,0.70,fraction,demo scenario,fault engine,70% generation loss

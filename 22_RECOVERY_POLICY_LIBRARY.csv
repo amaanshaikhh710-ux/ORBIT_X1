@@ -1,0 +1,8 @@
+policy_id,policy_name,actions,expected_effects
+R-001,Reduce Imaging,reduce imaging frequency,decrease payload power and data generation
+R-002,Payload Safe Mode,disable non-critical payload,decrease payload power and processing load
+R-003,Low Power Mode,enter low-power mode,decrease non-critical loads and defer optional tasks
+R-004,Downlink Priority,prioritize downlink when visible,reduce stored data sooner
+R-005,Communication Throttle,reduce communication activity when not urgent,decrease comm power consumption
+R-006,Sunlight Reschedule,reschedule imaging to high-illumination windows,improve energy availability
+R-007,Thermal Throttle,reduce high-load activities,decrease heat generation

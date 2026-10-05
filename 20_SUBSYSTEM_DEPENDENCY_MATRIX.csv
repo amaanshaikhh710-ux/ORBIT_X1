@@ -1,0 +1,26 @@
+from,to,relationship,trigger_or_effect
+Solar,Power Bus,generation,solar generation supplies power
+Power Bus,Battery,charge_discharge,positive margin charges battery and negative margin discharges it
+Battery,Power State,threshold,SOC determines operational power state
+Power State,Mission Scheduler,control,low/critical power defers non-critical tasks
+Power State,Payload,availability,critical power can disable imaging
+Payload,OBC,load,imaging/processing increases CPU and power load
+Payload,Storage,data,images generate data
+Storage,Payload,capacity,high storage can block new imaging
+Ground Station,Communication,visibility,downlink only when link is visible
+Communication,Storage,data,successful downlink reduces stored data
+Communication,Power Bus,load,active downlink consumes power
+Thermal,Payload,availability,critical temperature throttles or blocks payload
+Thermal,OBC,availability,critical temperature throttles processing
+OBC,Payload,processing,image processing depends on OBC availability
+Sensors,Telemetry,measurement,sensors provide measured state
+Sensors,Fault Analysis,diagnostic,sensor faults can create misleading measurements
+ADCS,Payload,pointing,imaging requires pointing error <= 2 deg
+ADCS,Mission Objective,quality,poor pointing can invalidate image task
+Environment,Solar,illumination,eclipse removes solar generation
+Environment,Ground Station,visibility,visibility windows control downlink
+Power Bus,Thermal,heat,electrical load contributes to heat generation
+Fault Engine,Any Subsystem,degradation,active fault modifies subsystem parameters
+Recovery Policy,Mission Scheduler,control,recovery changes task priorities
+Recovery Policy,Power Bus,load,recovery can reduce non-critical loads
+Recovery Policy,Communication,priority,recovery can prioritize downlink

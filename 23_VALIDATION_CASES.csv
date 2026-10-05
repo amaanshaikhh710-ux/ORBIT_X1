@@ -1,0 +1,13 @@
+case_id,scenario,expected_result
+V-001,No-fault sunlight,battery remains bounded and responds to net power
+V-002,Eclipse,solar generation becomes zero
+V-003,70% solar degradation,solar generation is 30% of nominal before other modifiers
+V-004,SOC bounds,SOC remains between 0 and 100 percent
+V-005,No ground station visibility,no data is downlinked
+V-006,Visible ground station + stored data + healthy link,storage decreases
+V-007,Storage capacity,storage never exceeds capacity
+V-008,High temperature,thermal warning/critical states activate at thresholds
+V-009,Pointing error above 2 degrees,nominal imaging is deferred/invalid
+V-010,Low power,non-critical imaging is deferred
+V-011,Recovery rerun,recovery simulation starts from identical baseline
+V-012,Determinism,same seed/config/scenario produces identical output
