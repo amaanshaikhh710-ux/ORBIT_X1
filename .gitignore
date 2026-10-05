@@ -1,0 +1,59 @@
+# ==================================
+# ORBITAL TWIN — GITIGNORE
+# ==================================
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Python Virtual Environments
+.venv/
+venv/
+env/
+
+# Node.js / React / Vite
+node_modules/
+dist/
+.vite/
+coverage/
+*.tsbuildinfo
+
+# Environment Variables & Secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Local Databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+
+# IDE / Editor
+.vscode/
+.idea/
+
+# Operating System
+.DS_Store
+Thumbs.db
+
+# Temporary Files
+*.tmp
+*.temp
+*.bak
+
+# Build Artifacts
+build/
