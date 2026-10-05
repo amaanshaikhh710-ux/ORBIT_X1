@@ -43,6 +43,8 @@ from backend.api.auth import (
 async def lifespan(app: FastAPI):
     # Initialize PostgreSQL / SQLite database schema & seeds on startup
     init_db()
+    # Only after init_db() succeeds, ensure run-default persistence
+    DEFAULT_SESSION.ensure_persisted()
     yield
 
 app = FastAPI(
@@ -82,7 +84,8 @@ class SimulationRunSession:
         self._task: asyncio.Task | None = None
         self.subscribers: set[WebSocket] = set()
 
-        # Persist initial record in PostgreSQL
+    def ensure_persisted(self):
+        """Persists the initial run record in the database if not already present."""
         try:
             HistoryService.ensure_run_record(
                 run_id=self.run_id,
@@ -186,7 +189,9 @@ RUN_SESSIONS["run-default"] = DEFAULT_SESSION
 
 def get_session(run_id: str) -> SimulationRunSession:
     if run_id not in RUN_SESSIONS:
-        RUN_SESSIONS[run_id] = SimulationRunSession(run_id=run_id)
+        session = SimulationRunSession(run_id=run_id)
+        session.ensure_persisted()
+        RUN_SESSIONS[run_id] = session
     return RUN_SESSIONS[run_id]
 
 

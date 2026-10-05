@@ -54,6 +54,8 @@ class MissionModel(Base):
     mission_config_json = Column(Text, nullable=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
+    spacecraft = relationship("SpacecraftModel")
+
     def to_dict(self):
         return {
             "id": self.id,

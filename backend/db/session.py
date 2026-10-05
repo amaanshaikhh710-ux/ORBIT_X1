@@ -4,10 +4,19 @@ Configured for PostgreSQL on Render and local development fallback.
 """
 import os
 import logging
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, event
+from sqlalchemy.engine import Engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
 logger = logging.getLogger("orbital_twin.db")
+
+@event.listens_for(Engine, "connect")
+def _set_sqlite_pragma(dbapi_connection, connection_record):
+    """Enable foreign key constraints for SQLite connections to match PostgreSQL behavior."""
+    if type(dbapi_connection).__module__.startswith("sqlite3"):
+        cursor = dbapi_connection.cursor()
+        cursor.execute("PRAGMA foreign_keys=ON")
+        cursor.close()
 
 # Read database URL from environment
 RAW_DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
@@ -102,7 +111,9 @@ def init_db():
                 elif existing.role == "System Engineer":
                     existing.role = UserRole.SIMULATION_ENGINEER.value
 
-        # 2. Seed baseline spacecraft if not present
+        db.commit()
+
+        # 2. Seed baseline spacecraft BEFORE inserting mission (dependency-safe)
         existing_sc = db.query(models.SpacecraftModel).filter_by(id="sat-3u-01").first()
         if not existing_sc:
             sc = models.SpacecraftModel(
@@ -119,8 +130,9 @@ def init_db():
                 created_at=datetime.now(timezone.utc),
             )
             db.add(sc)
+            db.commit()
 
-        # 3. Seed baseline mission if not present
+        # 3. Seed baseline mission AFTER spacecraft is committed
         existing_mission = db.query(models.MissionModel).filter_by(id="eo-mission-01").first()
         if not existing_mission:
             mission = models.MissionModel(
@@ -136,8 +148,9 @@ def init_db():
                 created_at=datetime.now(timezone.utc),
             )
             db.add(mission)
+            db.commit()
 
-        # 4. Seed initial default simulation run if not present
+        # 4. Seed initial default simulation run AFTER spacecraft and mission
         existing_run = db.query(models.SimulationRunRecord).filter_by(id="run-default").first()
         if not existing_run:
             default_run = models.SimulationRunRecord(
@@ -159,10 +172,11 @@ def init_db():
                 started_at=datetime.now(timezone.utc),
             )
             db.add(default_run)
+            db.commit()
 
-        db.commit()
     except Exception as e:
         db.rollback()
-        logger.warning("Database seed warning: %s", e)
+        logger.error("Database initialization failed: %s", e, exc_info=True)
+        raise
     finally:
         db.close()
