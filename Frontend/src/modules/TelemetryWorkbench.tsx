@@ -9,7 +9,7 @@ export const TelemetryWorkbench: React.FC = () => {
   >('battery_soc_pct');
 
   const metricConfigs = {
-    battery_soc_pct: { label: 'Battery State of Charge', unit: '%', color: '#10b981', min: 0, max: 100, source: 'SIMULATED' },
+    battery_soc_pct: { label: 'Battery State of Charge', unit: '%', color: '#22c55e', min: 0, max: 100, source: 'SIMULATED' },
     solar_generation_w: { label: 'Solar Array Generation', unit: 'W', color: '#38bdf8', min: 0, max: 25, source: 'SIMULATED' },
     internal_temp_c: { label: 'Internal Spacecraft Temp', unit: '°C', color: '#f59e0b', min: 0, max: 60, source: 'SIMULATED' },
     storage_used_mb: { label: 'Flash Science Storage Used', unit: 'MB', color: '#818cf8', min: 0, max: 8000, source: 'SIMULATED' },
@@ -159,8 +159,8 @@ export const TelemetryWorkbench: React.FC = () => {
                   style={{
                     padding: '6px 12px',
                     borderRadius: '4px',
-                    border: isSelected ? '1px solid var(--accent-cyan)' : '1px solid var(--border-color)',
-                    background: isSelected ? 'rgba(56, 189, 248, 0.15)' : 'rgba(255, 255, 255, 0.02)',
+                    border: isSelected ? '1px solid var(--accent-orange)' : '1px solid var(--border-color)',
+                    background: isSelected ? 'rgba(249, 115, 22, 0.16)' : 'rgba(255, 255, 255, 0.02)',
                     color: isSelected ? '#fff' : 'var(--text-secondary)',
                     fontSize: '12px',
                     fontFamily: 'var(--font-mono)',

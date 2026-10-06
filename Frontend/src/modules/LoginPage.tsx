@@ -35,7 +35,7 @@ export const LoginPage: React.FC = () => {
         position: 'relative',
         minHeight: '100vh',
         width: '100%',
-        background: 'radial-gradient(ellipse at 50% 30%, #081d3f 0%, #051329 50%, #020814 100%)',
+        background: 'radial-gradient(ellipse at 50% 30%, #0b1528 0%, #080c14 50%, #05070d 100%)',
         color: '#F5F8FC',
         display: 'flex',
         flexDirection: 'column',

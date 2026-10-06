@@ -24,7 +24,7 @@ export const LandingPage: React.FC = () => {
         position: 'relative',
         width: '100%',
         minHeight: '100vh',
-        background: 'radial-gradient(ellipse at 70% 25%, #081d3f 0%, #051329 45%, #020814 100%)',
+        background: 'radial-gradient(ellipse at 70% 25%, #0b1528 0%, #080c14 45%, #05070d 100%)',
         color: '#F5F8FC',
         overflowX: 'hidden',
         overflowY: 'auto',

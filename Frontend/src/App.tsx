@@ -15,7 +15,6 @@ import { Documentation } from './modules/Documentation';
 import { LandingPage } from './modules/LandingPage';
 import { LoginPage } from './modules/LoginPage';
 import { MissionHistory } from './modules/MissionHistory';
-import { MissionAdminDashboard } from './modules/MissionAdminDashboard';
 import { FlightDirectorDashboard } from './modules/FlightDirectorDashboard';
 import { SimulationDashboard } from './modules/SimulationDashboard';
 import { AlertCircle, RefreshCw } from 'lucide-react';
@@ -125,31 +124,10 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
 const FallbackModule: React.FC = () => {
   const { user, setActiveModule } = useSimulation();
   const defaultMod = getRoleDefaultModule(user?.role);
-  return (
-    <div style={{ padding: '60px 24px', textAlign: 'center', color: '#F1F5F9' }}>
-      <h2 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--accent-cyan)' }}>
-        Routing to Authorized Operations Console
-      </h2>
-      <p style={{ color: '#94A3B8', maxWidth: '480px', margin: '12px auto 24px', fontSize: '13px' }}>
-        The selected module view is not defined or requires different authorization. Return to your primary role dashboard below.
-      </p>
-      <button
-        onClick={() => setActiveModule(defaultMod)}
-        style={{
-          padding: '10px 22px',
-          background: 'var(--accent-cyan)',
-          border: 'none',
-          borderRadius: '6px',
-          color: '#000',
-          fontWeight: 600,
-          fontSize: '13px',
-          cursor: 'pointer',
-        }}
-      >
-        Go to Primary Dashboard ({defaultMod})
-      </button>
-    </div>
-  );
+  React.useEffect(() => {
+    setActiveModule(defaultMod);
+  }, [defaultMod, setActiveModule]);
+  return null;
 };
 
 const MainContent: React.FC = () => {
@@ -157,7 +135,6 @@ const MainContent: React.FC = () => {
 
   return (
     <main style={{ minHeight: 'calc(100vh - 150px)', background: 'var(--bg-primary)' }}>
-      {activeModule === 'mission-admin' && <MissionAdminDashboard />}
       {activeModule === 'flight-director' && <FlightDirectorDashboard />}
       {activeModule === 'simulation-dashboard' && <SimulationDashboard />}
       {activeModule === 'mission-control' && <MissionControl />}
@@ -171,7 +148,6 @@ const MainContent: React.FC = () => {
       {activeModule === 'history' && <MissionHistory />}
       {activeModule === 'docs' && <Documentation />}
       {![
-        'mission-admin',
         'flight-director',
         'simulation-dashboard',
         'mission-control',

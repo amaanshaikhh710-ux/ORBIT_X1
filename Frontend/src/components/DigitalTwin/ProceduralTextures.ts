@@ -182,97 +182,210 @@ export function createGoldMLITexture(): THREE.CanvasTexture {
 }
 
 /**
- * Realistic Earth Sphere Texture with Oceans, Continents, Clouds, and Night City Lights
+ * Realistic Earth Sphere Texture with Oceans, Detailed Continents, Clouds, and Night City Lights
  */
 export function createEarthTexture(): THREE.CanvasTexture {
   if (_cachedEarthTexture) return _cachedEarthTexture;
   const canvas = document.createElement('canvas');
-  canvas.width = 1024;
-  canvas.height = 512;
+  canvas.width = 2048;
+  canvas.height = 1024;
   const ctx = canvas.getContext('2d');
   if (!ctx) return new THREE.CanvasTexture(canvas);
 
-  // 1. Deep Oceanic Base with Subtle Rayleigh Scattering Gradient
-  const oceanGrad = ctx.createLinearGradient(0, 0, 0, 512);
-  oceanGrad.addColorStop(0, '#020917');
-  oceanGrad.addColorStop(0.22, '#051329');
-  oceanGrad.addColorStop(0.5, '#081c3b');
-  oceanGrad.addColorStop(0.78, '#051329');
-  oceanGrad.addColorStop(1, '#020917');
+  // 1. Deep Oceanic Base with Realistic Bathymetric Depth
+  const oceanGrad = ctx.createLinearGradient(0, 0, 0, 1024);
+  oceanGrad.addColorStop(0, '#010814');
+  oceanGrad.addColorStop(0.18, '#031229');
+  oceanGrad.addColorStop(0.5, '#051d3e');
+  oceanGrad.addColorStop(0.82, '#031229');
+  oceanGrad.addColorStop(1, '#010814');
   ctx.fillStyle = oceanGrad;
-  ctx.fillRect(0, 0, 1024, 512);
+  ctx.fillRect(0, 0, 2048, 1024);
 
-  // 2. Continents & Landmasses - Realistic muted deep forest & slate tones
-  ctx.fillStyle = '#0f241a';
+  // 2. Continental Shelf Margins (shallow coastal marine cyan)
+  ctx.fillStyle = '#062d4f';
+  // North America shelf
+  ctx.beginPath();
+  ctx.ellipse(450, 310, 210, 140, 0.2, 0, Math.PI * 2);
+  ctx.fill();
+  // South America shelf
+  ctx.beginPath();
+  ctx.ellipse(620, 680, 125, 200, 0.2, 0, Math.PI * 2);
+  ctx.fill();
+  // Eurasia shelf
+  ctx.beginPath();
+  ctx.ellipse(1320, 310, 330, 180, -0.1, 0, Math.PI * 2);
+  ctx.fill();
+  // Africa shelf
+  ctx.beginPath();
+  ctx.ellipse(1090, 560, 160, 210, 0.1, 0, Math.PI * 2);
+  ctx.fill();
+  // Australia shelf
+  ctx.beginPath();
+  ctx.ellipse(1660, 720, 115, 90, 0.2, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 3. Continents & Major Landmasses - Realistic Natural Biomes
+  // Base vegetation green
+  ctx.fillStyle = '#183827';
+
   // North America
   ctx.beginPath();
-  ctx.ellipse(220, 160, 90, 60, 0.2, 0, Math.PI * 2);
-  ctx.fill();
-  // South America
-  ctx.beginPath();
-  ctx.ellipse(300, 340, 50, 90, 0.2, 0, Math.PI * 2);
-  ctx.fill();
-  // Eurasia
-  ctx.beginPath();
-  ctx.ellipse(650, 160, 150, 80, -0.1, 0, Math.PI * 2);
-  ctx.fill();
-  // Africa
-  ctx.beginPath();
-  ctx.ellipse(540, 280, 70, 95, 0.1, 0, Math.PI * 2);
-  ctx.fill();
-  // Australia
-  ctx.beginPath();
-  ctx.ellipse(820, 360, 45, 35, 0.2, 0, Math.PI * 2);
+  ctx.ellipse(440, 305, 180, 120, 0.2, 0, Math.PI * 2);
+  ctx.ellipse(360, 240, 90, 70, 0.3, 0, Math.PI * 2); // Alaska / NW
+  ctx.ellipse(540, 370, 45, 55, 0.2, 0, Math.PI * 2); // Florida / SE
   ctx.fill();
 
-  // Subtle coastal shelf contour - thin deep marine cyan
-  ctx.strokeStyle = '#063254';
-  ctx.lineWidth = 2.5;
+  // Greenland (glacier tundra)
+  ctx.fillStyle = '#cbd5e1';
+  ctx.beginPath();
+  ctx.ellipse(660, 140, 60, 85, -0.2, 0, Math.PI * 2);
+  ctx.fill();
+
+  // South America
+  ctx.fillStyle = '#163b26'; // Amazon lush green
+  ctx.beginPath();
+  ctx.ellipse(615, 670, 105, 175, 0.2, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Europe & British Isles
+  ctx.fillStyle = '#1b3d2b';
+  ctx.beginPath();
+  ctx.ellipse(1040, 260, 110, 75, -0.1, 0, Math.PI * 2); // Europe
+  ctx.ellipse(980, 230, 25, 40, -0.2, 0, Math.PI * 2); // British Isles
+  ctx.ellipse(1080, 170, 45, 90, 0.3, 0, Math.PI * 2); // Scandinavia
+  ctx.fill();
+
+  // Eurasia Main Landmass
+  ctx.fillStyle = '#173624';
+  ctx.beginPath();
+  ctx.ellipse(1350, 300, 290, 150, -0.1, 0, Math.PI * 2); // Russia/Siberia
+  ctx.ellipse(1460, 430, 95, 75, 0.1, 0, Math.PI * 2); // East Asia
+  ctx.ellipse(1320, 490, 65, 85, 0.1, 0, Math.PI * 2); // India
+  ctx.ellipse(1560, 370, 20, 75, 0.4, 0, Math.PI * 2); // Japan
+  ctx.fill();
+
+  // Africa
+  ctx.fillStyle = '#223c2a'; // Sub-saharan savannah & Congo
+  ctx.beginPath();
+  ctx.ellipse(1085, 560, 140, 185, 0.1, 0, Math.PI * 2);
+  ctx.fill();
+  // Madagascar
+  ctx.beginPath();
+  ctx.ellipse(1260, 680, 20, 55, 0.3, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Australia
+  ctx.fillStyle = '#2d3320';
+  ctx.beginPath();
+  ctx.ellipse(1650, 720, 95, 75, 0.2, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Arid Deserts & Plateaus (Sahara, Arabian Peninsula, Gobi, Australian Outback)
+  ctx.fillStyle = '#3c301e';
+  // Sahara & Sahel
+  ctx.beginPath();
+  ctx.ellipse(1080, 460, 110, 55, 0, 0, Math.PI * 2);
+  ctx.fill();
+  // Arabian Peninsula
+  ctx.beginPath();
+  ctx.ellipse(1220, 440, 50, 40, 0.2, 0, Math.PI * 2);
+  ctx.fill();
+  // Central Asian Steppes & Gobi
+  ctx.beginPath();
+  ctx.ellipse(1360, 350, 120, 45, 0, 0, Math.PI * 2);
+  ctx.fill();
+  // Australian Outback (red sand / arid plateau)
+  ctx.fillStyle = '#442d1c';
+  ctx.beginPath();
+  ctx.ellipse(1650, 720, 65, 45, 0.2, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Mountain Ranges (Highlands / Snow peaks)
+  ctx.fillStyle = '#2b231c';
+  ctx.beginPath();
+  ctx.ellipse(370, 330, 25, 120, 0.1, 0, Math.PI * 2); // Rockies
+  ctx.ellipse(560, 710, 20, 150, 0.2, 0, Math.PI * 2); // Andes
+  ctx.ellipse(1350, 420, 85, 25, -0.1, 0, Math.PI * 2); // Himalayas
+  ctx.fill();
+
+  // Thin coastal shelf contour - delicate marine cyan boundary
+  ctx.strokeStyle = '#084873';
+  ctx.lineWidth = 3.5;
   ctx.stroke();
 
-  // Continental terrain texture (arid sahara & mountain highlands)
-  ctx.fillStyle = '#261e16';
-  ctx.beginPath();
-  ctx.ellipse(540, 230, 45, 25, 0, 0, Math.PI * 2); // Sahara
-  ctx.ellipse(660, 180, 50, 20, 0, 0, Math.PI * 2); // Central Asia
-  ctx.fill();
-
-  // 3. Night-Side City Lights (Pinpoint warm amber clusters)
-  ctx.fillStyle = '#fbbf24';
+  // 4. Night-Side City Lights (Pinpoint warm incandescent clusters)
+  // These clusters give the night side authentic aerospace realism
   const cityClusters = [
-    [520, 150], [535, 140], [550, 160], [600, 145], [680, 190],
-    [720, 200], [750, 220], [770, 180], [800, 170], [830, 220],
-    [540, 360], [560, 370], [820, 380], [840, 390],
+    // US East Coast & Great Lakes
+    [480, 300], [510, 290], [525, 310], [490, 330], [540, 360],
+    // US West Coast
+    [360, 300], [350, 340], [380, 360],
+    // South America (SE Coast)
+    [660, 700], [640, 740], [600, 680],
+    // Western & Central Europe
+    [1020, 240], [1050, 250], [1070, 240], [1040, 270], [1090, 280],
+    // Middle East & Nile Delta
+    [1130, 400], [1200, 420], [1240, 450],
+    // India
+    [1300, 470], [1330, 490], [1320, 520], [1350, 480],
+    // East Asia & Japan
+    [1460, 380], [1480, 420], [1500, 440], [1550, 360], [1570, 380],
+    // Australia Coast
+    [1690, 730], [1710, 750], [1640, 750],
   ];
+
   cityClusters.forEach(([cx, cy]) => {
-    ctx.shadowColor = '#d97706';
-    ctx.shadowBlur = 3;
-    for (let i = 0; i < 9; i++) {
-      const ox = (Math.random() - 0.5) * 20;
-      const oy = (Math.random() - 0.5) * 14;
-      ctx.fillRect(cx + ox, cy + oy, 1.5, 1.5);
+    ctx.shadowColor = '#f59e0b';
+    ctx.shadowBlur = 4;
+    ctx.fillStyle = '#fef08a';
+    for (let i = 0; i < 11; i++) {
+      const ox = (Math.sin(i * 9.2 + cx) * 22);
+      const oy = (Math.cos(i * 7.4 + cy) * 16);
+      ctx.fillRect(cx + ox, cy + oy, 1.8, 1.8);
     }
   });
   ctx.shadowBlur = 0;
 
-  // 4. Subtle Atmospheric Wispy Cloud Layers (Delicate transparency so it never looks white)
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.14)';
-  for (let i = 0; i < 35; i++) {
-    const rx = ((i * 37) % 1024);
-    const ry = 90 + ((i * 47) % 340);
+  // 5. Delicate Atmospheric Wispy Cloud Layers (Soft translucent swirling bands)
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.16)';
+  for (let i = 0; i < 55; i++) {
+    const rx = ((i * 73) % 2048);
+    const ry = 140 + ((i * 61) % 740);
+    const rw = 80 + (i % 60) * 2.5;
+    const rh = 16 + (i % 16);
+    const rot = (i * 0.14) - 0.3;
+
     ctx.beginPath();
-    ctx.ellipse(rx, ry, 50 + (i % 25), 10 + (i % 6), (i * 0.12), 0, Math.PI * 2);
+    ctx.ellipse(rx, ry, rw, rh, rot, 0, Math.PI * 2);
     ctx.fill();
   }
 
-  // Polar ice frost (very subtle, thin)
-  ctx.fillStyle = 'rgba(203, 213, 225, 0.28)';
-  ctx.fillRect(0, 0, 1024, 16);
-  ctx.fillRect(0, 496, 1024, 16);
+  // Cyclonic Storm Vortex System (Mid-Atlantic & Pacific)
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.22)';
+  ctx.beginPath();
+  ctx.arc(800, 340, 60, 0, Math.PI * 1.5);
+  ctx.lineWidth = 14;
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.18)';
+  ctx.stroke();
+
+  // Polar Ice Caps (Glacial white with subtle gradient falloff)
+  const northIce = ctx.createLinearGradient(0, 0, 0, 60);
+  northIce.addColorStop(0, 'rgba(235, 245, 255, 0.65)');
+  northIce.addColorStop(1, 'rgba(235, 245, 255, 0)');
+  ctx.fillStyle = northIce;
+  ctx.fillRect(0, 0, 2048, 60);
+
+  const southIce = ctx.createLinearGradient(0, 960, 0, 1024);
+  southIce.addColorStop(0, 'rgba(235, 245, 255, 0)');
+  southIce.addColorStop(1, 'rgba(235, 245, 255, 0.7)');
+  ctx.fillStyle = southIce;
+  ctx.fillRect(0, 960, 2048, 64);
 
   _cachedEarthTexture = new THREE.CanvasTexture(canvas);
   _cachedEarthTexture.wrapS = THREE.RepeatWrapping;
   _cachedEarthTexture.wrapT = THREE.ClampToEdgeWrapping;
+  _cachedEarthTexture.anisotropy = 8;
   return _cachedEarthTexture;
 }
 

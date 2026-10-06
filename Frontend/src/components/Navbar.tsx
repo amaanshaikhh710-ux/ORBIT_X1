@@ -25,9 +25,6 @@ export const Navbar: React.FC = () => {
   const userRole = user?.role || 'Mission Operator';
 
   const navItems: { id: ActiveModule; label: string; icon: React.ReactNode }[] = [
-    ...(userRole === 'Mission Administrator'
-      ? [{ id: 'mission-admin' as ActiveModule, label: 'Admin Console', icon: <Shield size={16} /> }]
-      : []),
     { id: 'mission-control', label: 'Mission Control', icon: <Satellite size={16} /> },
     { id: 'digital-twin', label: 'Digital Twin (3D)', icon: <Box size={16} /> },
     { id: 'telemetry', label: 'Telemetry', icon: <Activity size={16} /> },
@@ -329,10 +326,10 @@ export const Navbar: React.FC = () => {
                 alignItems: 'center',
                 gap: '8px',
                 padding: '10px 14px',
-                background: isActive ? 'rgba(56, 189, 248, 0.12)' : 'transparent',
-                color: isActive ? 'var(--accent-cyan)' : 'var(--text-secondary)',
+                background: isActive ? 'rgba(249, 115, 22, 0.12)' : 'transparent',
+                color: isActive ? 'var(--accent-orange)' : 'var(--text-secondary)',
                 border: 'none',
-                borderBottom: isActive ? '2px solid var(--accent-cyan)' : '2px solid transparent',
+                borderBottom: isActive ? '2px solid var(--accent-orange)' : '2px solid transparent',
                 borderRadius: '4px 4px 0 0',
                 fontSize: '13px',
                 fontWeight: isActive ? 600 : 400,

@@ -30,7 +30,6 @@ export type WorkflowStep =
 export type ActiveModule =
   | 'landing'
   | 'login'
-  | 'mission-admin'
   | 'flight-director'
   | 'simulation-dashboard'
   | 'mission-control'
@@ -45,7 +44,6 @@ export type ActiveModule =
   | 'docs';
 
 export function getRoleDefaultModule(role?: string): ActiveModule {
-  if (role === 'Mission Administrator') return 'mission-admin';
   if (role === 'Flight Director') return 'flight-director';
   if (role === 'Simulation Engineer') return 'simulation-dashboard';
   return 'mission-control';
@@ -191,10 +189,14 @@ export const SimulationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   });
 
   const [activeModule, setActiveModuleState] = useState<ActiveModule>(() => {
-    const saved = localStorage.getItem('orbital_twin_module') as ActiveModule | null;
+    let saved = localStorage.getItem('orbital_twin_module') as any;
+    if (saved === 'mission-admin') {
+      localStorage.setItem('orbital_twin_module', 'mission-control');
+      saved = 'mission-control';
+    }
     const token = localStorage.getItem('orbital_twin_token');
     if (saved && token) {
-      return saved;
+      return saved as ActiveModule;
     }
     if (token) {
       try {
@@ -210,9 +212,10 @@ export const SimulationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   });
 
   const setActiveModule = (mod: ActiveModule) => {
-    setActiveModuleState(mod);
-    if (mod !== 'login' && mod !== 'landing') {
-      localStorage.setItem('orbital_twin_module', mod);
+    const targetMod = (mod as any) === 'mission-admin' ? 'mission-control' : mod;
+    setActiveModuleState(targetMod);
+    if (targetMod !== 'login' && targetMod !== 'landing') {
+      localStorage.setItem('orbital_twin_module', targetMod);
     }
   };
 
@@ -291,6 +294,11 @@ export const SimulationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
   // Initialize data on mount
   useEffect(() => {
+    // Sanitize any stale Admin Console selection in storage
+    if (localStorage.getItem('orbital_twin_module') === 'mission-admin') {
+      localStorage.setItem('orbital_twin_module', 'mission-control');
+    }
+
     // 1. Fetch catalog
     api.getFaultCatalog().then((cat) => {
       if (Array.isArray(cat)) setFaultCatalog(cat);

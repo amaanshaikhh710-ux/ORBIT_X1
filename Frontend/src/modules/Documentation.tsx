@@ -61,7 +61,7 @@ export const Documentation: React.FC = () => {
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '12px', fontFamily: 'var(--font-mono)' }}>
-          <div style={{ padding: '10px', background: 'rgba(15, 23, 42, 0.8)', borderRadius: '4px' }}>
+          <div style={{ padding: '10px 14px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '4px' }}>
             <span style={{ color: 'var(--accent-cyan)' }}>// 1. Power Generation & SOC</span>
             <div style={{ color: 'var(--text-primary)', marginTop: '4px' }}>
               P_gen = P_peak × solar_health × max(0, cos(solar_incidence_angle)) × (1 - 0.004 × (T - 25°C))<br />
@@ -69,7 +69,7 @@ export const Documentation: React.FC = () => {
             </div>
           </div>
 
-          <div style={{ padding: '10px', background: 'rgba(15, 23, 42, 0.8)', borderRadius: '4px' }}>
+          <div style={{ padding: '10px 14px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '4px' }}>
             <span style={{ color: 'var(--accent-cyan)' }}>// 2. Lumped-Capacitance Thermal Model</span>
             <div style={{ color: 'var(--text-primary)', marginTop: '4px' }}>
               C × (dT / dt) = Q_internal + Q_solar_abs - Q_radiated<br />
@@ -77,7 +77,7 @@ export const Documentation: React.FC = () => {
             </div>
           </div>
 
-          <div style={{ padding: '10px', background: 'rgba(15, 23, 42, 0.8)', borderRadius: '4px' }}>
+          <div style={{ padding: '10px 14px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '4px' }}>
             <span style={{ color: 'var(--accent-cyan)' }}>// 3. Ground Station Pass & Downlink Accounting</span>
             <div style={{ color: 'var(--text-primary)', marginTop: '4px' }}>
               Downlink_Rate = 2.0 Mbps = 0.25 MB/s = 2.5 MB / 10s timestep (nominal)<br />

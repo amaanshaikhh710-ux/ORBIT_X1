@@ -50,12 +50,12 @@ export const ComponentDetailPanel: React.FC<ComponentDetailPanelProps> = ({ comp
     <div
       style={{
         width: '360px',
-        background: 'rgba(9, 14, 26, 0.92)',
+        background: 'rgba(8, 12, 20, 0.94)',
         backdropFilter: 'blur(16px)',
-        border: '1px solid rgba(56, 189, 248, 0.35)',
+        border: '1px solid rgba(255, 255, 255, 0.08)',
         borderRadius: '10px',
         padding: '16px 18px',
-        boxShadow: '0 12px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(56, 189, 248, 0.1)',
+        boxShadow: '0 12px 40px rgba(0, 0, 0, 0.7)',
         color: 'var(--text-primary)',
         display: 'flex',
         flexDirection: 'column',

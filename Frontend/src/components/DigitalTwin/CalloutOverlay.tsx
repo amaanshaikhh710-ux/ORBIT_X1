@@ -156,7 +156,7 @@ export const CalloutOverlay: React.FC<CalloutOverlayProps> = React.memo(({
                 id={`callout-line-${c.id}`}
                 points={`${origin.x},${origin.y} ${midX},${anchorY} ${anchorX},${anchorY}`}
                 fill="none"
-                stroke={isSelected ? '#38bdf8' : 'rgba(56, 189, 248, 0.45)'}
+                stroke={isSelected ? '#f97316' : 'rgba(56, 189, 248, 0.45)'}
                 strokeWidth={isSelected ? 1.8 : 1.2}
                 strokeDasharray={isSelected ? 'none' : '3 2'}
                 filter="url(#cyanGlow)"
@@ -167,7 +167,7 @@ export const CalloutOverlay: React.FC<CalloutOverlayProps> = React.memo(({
                 cx={anchorX}
                 cy={anchorY}
                 r={isSelected ? 5 : 3.5}
-                fill="#38bdf8"
+                fill={isSelected ? '#f97316' : '#38bdf8'}
                 filter="url(#cyanGlow)"
               />
               <circle
@@ -176,7 +176,7 @@ export const CalloutOverlay: React.FC<CalloutOverlayProps> = React.memo(({
                 cy={anchorY}
                 r={isSelected ? 9 : 7}
                 fill="none"
-                stroke="#38bdf8"
+                stroke={isSelected ? '#f97316' : '#38bdf8'}
                 strokeWidth={1}
                 opacity={0.8}
               />
@@ -200,14 +200,14 @@ export const CalloutOverlay: React.FC<CalloutOverlayProps> = React.memo(({
               pointerEvents: 'auto',
               cursor: 'pointer',
               zIndex: 3,
-              background: isSelected ? 'rgba(11, 20, 38, 0.94)' : 'rgba(11, 19, 35, 0.82)',
+              background: isSelected ? 'rgba(11, 20, 38, 0.94)' : 'rgba(8, 12, 20, 0.88)',
               backdropFilter: 'blur(10px)',
-              border: isSelected ? '1.5px solid #38bdf8' : '1px solid rgba(56, 189, 248, 0.28)',
+              border: isSelected ? '1.5px solid #f97316' : '1px solid rgba(255, 255, 255, 0.08)',
               borderRadius: '8px',
               padding: '8px 12px',
               minWidth: '150px',
               boxShadow: isSelected
-                ? '0 0 20px rgba(56, 189, 248, 0.4), 0 4px 16px rgba(0,0,0,0.6)'
+                ? '0 0 18px rgba(249, 115, 22, 0.35), 0 4px 16px rgba(0,0,0,0.6)'
                 : '0 4px 16px rgba(0,0,0,0.5)',
               transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
               transform: isSelected ? 'scale(1.03)' : 'scale(1)',

@@ -134,8 +134,8 @@ export const ControlBar: React.FC = () => {
                 style={{
                   padding: '3px 8px',
                   borderRadius: '4px',
-                  border: timestep === item.s ? '1px solid var(--accent-cyan)' : '1px solid var(--border-color)',
-                  background: timestep === item.s ? 'rgba(56, 189, 248, 0.2)' : 'rgba(255, 255, 255, 0.03)',
+                  border: timestep === item.s ? '1px solid var(--accent-orange)' : '1px solid var(--border-color)',
+                  background: timestep === item.s ? 'rgba(249, 115, 22, 0.2)' : 'rgba(255, 255, 255, 0.03)',
                   color: timestep === item.s ? '#fff' : 'var(--text-secondary)',
                   fontSize: '11px',
                   fontFamily: 'var(--font-mono)',
@@ -163,8 +163,8 @@ export const ControlBar: React.FC = () => {
                 style={{
                   padding: '3px 8px',
                   borderRadius: '4px',
-                  border: speed === s ? '1px solid var(--accent-cyan)' : '1px solid var(--border-color)',
-                  background: speed === s ? 'rgba(56, 189, 248, 0.2)' : 'rgba(255, 255, 255, 0.03)',
+                  border: speed === s ? '1px solid var(--accent-orange)' : '1px solid var(--border-color)',
+                  background: speed === s ? 'rgba(249, 115, 22, 0.2)' : 'rgba(255, 255, 255, 0.03)',
                   color: speed === s ? '#fff' : 'var(--text-secondary)',
                   fontSize: '11px',
                   fontFamily: 'var(--font-mono)',

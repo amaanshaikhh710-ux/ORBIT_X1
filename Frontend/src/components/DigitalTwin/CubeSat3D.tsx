@@ -63,7 +63,7 @@ export const CubeSat3D: React.FC = () => {
     // Three.js Scene, Camera, Renderer
     // ==========================================
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x030712);
+    scene.background = new THREE.Color(0x05070d);
 
     const camera = new THREE.PerspectiveCamera(42, width / height, 0.1, 1000);
     camera.position.set(3.8, 2.6, 5.8);
@@ -75,7 +75,7 @@ export const CubeSat3D: React.FC = () => {
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.1;
+    renderer.toneMappingExposure = 1.15;
 
     container.innerHTML = '';
     container.appendChild(renderer.domElement);
@@ -88,26 +88,32 @@ export const CubeSat3D: React.FC = () => {
     const earthTex = createEarthTexture();
     const chassisTex = createChassisTexture();
 
-    // 1. Lighting Setup
-    const ambientLight = new THREE.AmbientLight(0x1e293b, 0.7);
+    // 1. Professional Aerospace Lighting Setup
+    // Balanced ambient fill ensures dark face components (camera, bus, batteries) are clearly visible
+    const ambientLight = new THREE.AmbientLight(0x1e2e44, 0.95);
     scene.add(ambientLight);
 
-    // Directional Sunlight (from upper-left, matching the sunburst flare in reference image)
-    const sunLight = new THREE.DirectionalLight(0xfffbeb, 2.4);
+    // Directional Sunlight (key light illuminating solar wings, top deck, and MLI)
+    const sunLight = new THREE.DirectionalLight(0xfff8ee, 2.7);
     sunLight.position.set(-14, 16, 10);
     sunLight.castShadow = true;
     sunLight.shadow.mapSize.width = 1024;
     sunLight.shadow.mapSize.height = 1024;
     scene.add(sunLight);
 
-    // Subtle Earth-shine reflection from below
-    const earthShineLight = new THREE.DirectionalLight(0x0284c7, 0.6);
-    earthShineLight.position.set(0, -10, 0);
+    // Subtle Front-Right Fill Light (reveals payload camera aperture, antennas, and structural rails)
+    const fillLight = new THREE.DirectionalLight(0xb0c4de, 0.85);
+    fillLight.position.set(10, 5, 12);
+    scene.add(fillLight);
+
+    // Subtle Earth-shine reflection from below (realistic orbital bounce)
+    const earthShineLight = new THREE.DirectionalLight(0x0ea5e9, 0.75);
+    earthShineLight.position.set(0, -12, 0);
     scene.add(earthShineLight);
 
-    // Rim backlight for silhouette separation
-    const rimLight = new THREE.DirectionalLight(0x38bdf8, 0.8);
-    rimLight.position.set(10, -5, -10);
+    // Crisp Rim backlight for spacecraft silhouette separation against space
+    const rimLight = new THREE.DirectionalLight(0x7dd3fc, 1.15);
+    rimLight.position.set(10, -4, -10);
     scene.add(rimLight);
 
     // ==========================================
@@ -178,11 +184,11 @@ export const CubeSat3D: React.FC = () => {
 
     // Realistic Curved Earth below spacecraft
     const earthRadius = 26;
-    const earthGeo = new THREE.SphereGeometry(earthRadius, 64, 64);
+    const earthGeo = new THREE.SphereGeometry(earthRadius, 96, 96);
     const earthMat = new THREE.MeshStandardMaterial({
       map: earthTex,
-      roughness: 0.8,
-      metalness: 0.1,
+      roughness: 0.78,
+      metalness: 0.08,
     });
     const earthMesh = new THREE.Mesh(earthGeo, earthMat);
     earthMesh.position.set(0, -27.8, -4);
@@ -190,18 +196,30 @@ export const CubeSat3D: React.FC = () => {
     earthMesh.rotation.y = 1.2;
     scene.add(earthMesh);
 
-    // Glowing Atmospheric Limb Ring (Atmosphere haze)
-    const atmoGeo = new THREE.SphereGeometry(earthRadius * 1.018, 64, 64);
+    // Subtle Dual-Layer Atmospheric Limb Glow (Tropospheric dense + exospheric soft haze)
+    const atmoGeo = new THREE.SphereGeometry(earthRadius * 1.012, 96, 96);
     const atmoMat = new THREE.MeshBasicMaterial({
-      color: 0x38bdf8,
+      color: 0x0284c7,
       transparent: true,
-      opacity: 0.38,
+      opacity: 0.42,
       blending: THREE.AdditiveBlending,
       side: THREE.BackSide,
     });
     const atmoMesh = new THREE.Mesh(atmoGeo, atmoMat);
     atmoMesh.position.copy(earthMesh.position);
     scene.add(atmoMesh);
+
+    const outerAtmoGeo = new THREE.SphereGeometry(earthRadius * 1.026, 96, 96);
+    const outerAtmoMat = new THREE.MeshBasicMaterial({
+      color: 0x38bdf8,
+      transparent: true,
+      opacity: 0.22,
+      blending: THREE.AdditiveBlending,
+      side: THREE.BackSide,
+    });
+    const outerAtmoMesh = new THREE.Mesh(outerAtmoGeo, outerAtmoMat);
+    outerAtmoMesh.position.copy(earthMesh.position);
+    scene.add(outerAtmoMesh);
 
     // ==========================================
     // Spacecraft Master Group

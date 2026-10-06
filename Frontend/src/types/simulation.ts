@@ -270,7 +270,6 @@ export interface AdminUser {
 export type ActiveModule =
   | 'landing'
   | 'login'
-  | 'mission-admin'
   | 'flight-director'
   | 'simulation-dashboard'
   | 'mission-control'

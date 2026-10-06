@@ -9,7 +9,7 @@ export const DigitalTwinModule: React.FC = () => {
         width: '100%',
         height: 'calc(100vh - 128px)',
         minHeight: '750px',
-        background: '#030712',
+        background: 'var(--bg-primary)',
         overflow: 'hidden',
       }}
     >

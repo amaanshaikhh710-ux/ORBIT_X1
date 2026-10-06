@@ -1,23 +1,31 @@
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
 
 :root {
-  --bg-primary: #0a0e17;
-  --bg-secondary: #0f1524;
-  --bg-card: #131b2e;
-  --bg-card-hover: #17223b;
+  /* Aerospace Backgrounds */
+  --bg-primary: #05070d;
+  --bg-secondary: #080c14;
+  --bg-card: #0b101a;
+  --bg-card-hover: #101726;
+  --card-bg: var(--bg-card);
   --border-color: rgba(255, 255, 255, 0.08);
-  --border-active: rgba(56, 189, 248, 0.4);
+  --border-active: rgba(249, 115, 22, 0.5);
 
+  /* Typography Colors */
   --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
 
+  /* Restrained Accents */
+  --accent-orange: #f97316;
+  --accent-orange-hover: #ff8a3d;
   --accent-cyan: #38bdf8;
   --accent-blue: #0284c7;
-  --status-normal: #10b981;
+
+  /* Status Colors */
+  --status-normal: #22c55e;
   --status-warning: #f59e0b;
   --status-critical: #ef4444;
-  --status-info: #0ea5e9;
+  --status-info: #38bdf8;
 
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
@@ -71,8 +79,8 @@ body {
 }
 
 .aerospace-card:hover {
-  border-color: var(--border-active);
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4), 0 0 16px rgba(56, 189, 248, 0.08);
+  border-color: rgba(56, 189, 248, 0.35);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.45), 0 0 12px rgba(56, 189, 248, 0.08);
 }
 
 @keyframes fadeInPage {

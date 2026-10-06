@@ -26,7 +26,7 @@ export const FaultAnalysis: React.FC = () => {
             setActiveModule('recovery-planner');
           }}
           className="btn btn-primary"
-          style={{ background: '#0284c7' }}
+          style={{ background: 'var(--accent-orange)' }}
         >
           Formulate Recovery Strategy →
         </button>
@@ -101,7 +101,7 @@ export const FaultAnalysis: React.FC = () => {
                     style={{
                       width: '100%',
                       maxWidth: '520px',
-                      background: 'rgba(15, 23, 42, 0.95)',
+                      background: 'var(--bg-card)',
                       border: idx === 0 ? '1px solid var(--status-critical)' : '1px solid var(--border-active)',
                       borderRadius: '8px',
                       padding: '14px 18px',

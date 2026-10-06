@@ -58,7 +58,7 @@ export const MissionControl: React.FC = () => {
                 </span>
               )}
               {state.recovery_mode && state.recovery_mode !== 'NOMINAL' && (
-                <span className="badge badge-normal" style={{ background: '#10b981', color: '#fff', fontSize: '11px' }}>
+                <span className="badge badge-normal" style={{ background: 'var(--status-normal)', color: '#fff', fontSize: '11px' }}>
                   POLICY: {state.recovery_mode} ACTIVE
                 </span>
               )}
@@ -87,7 +87,7 @@ export const MissionControl: React.FC = () => {
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 {state.recovery_mode && state.recovery_mode !== 'NOMINAL' && (
-                  <span className="badge badge-info" style={{ borderColor: '#10b981', color: '#10b981', fontSize: '10px' }}>
+                  <span className="badge badge-info" style={{ borderColor: 'var(--status-normal)', color: 'var(--status-normal)', fontSize: '10px' }}>
                     MODE: {state.recovery_mode}
                   </span>
                 )}
@@ -129,7 +129,7 @@ export const MissionControl: React.FC = () => {
                 style={{
                   height: '100%',
                   width: `${Math.min(100, Math.max(0, state.battery_soc_pct))}%`,
-                  background: state.battery_soc_pct > 40 ? '#10b981' : state.battery_soc_pct > 20 ? '#f59e0b' : '#ef4444',
+                  background: state.battery_soc_pct > 40 ? 'var(--status-normal)' : state.battery_soc_pct > 20 ? 'var(--status-warning)' : 'var(--status-critical)',
                   transition: 'width 0.3s ease',
                 }}
               />

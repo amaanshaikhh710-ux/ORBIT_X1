@@ -81,11 +81,11 @@ export const ComponentDock: React.FC<ComponentDockProps> = ({
         alignItems: 'center',
         gap: '12px',
         padding: '8px 14px',
-        background: 'rgba(10, 14, 23, 0.90)',
+        background: 'rgba(8, 12, 20, 0.92)',
         backdropFilter: 'blur(16px)',
-        border: '1px solid rgba(56, 189, 248, 0.24)',
+        border: '1px solid rgba(255, 255, 255, 0.08)',
         borderRadius: '12px',
-        boxShadow: '0 12px 36px rgba(0, 0, 0, 0.65), 0 0 1px rgba(56, 189, 248, 0.3)',
+        boxShadow: '0 12px 36px rgba(0, 0, 0, 0.7)',
         maxWidth: 'calc(100vw - 32px)',
         overflowX: 'auto',
         pointerEvents: 'auto',
@@ -244,13 +244,13 @@ export const ComponentDock: React.FC<ComponentDockProps> = ({
                   width: '64px',
                   height: '56px',
                   padding: '4px',
-                  background: isSelected ? 'rgba(14, 165, 233, 0.18)' : 'rgba(255, 255, 255, 0.03)',
-                  border: isSelected ? '1.5px solid #38bdf8' : '1px solid rgba(255, 255, 255, 0.08)',
+                  background: isSelected ? 'rgba(249, 115, 22, 0.18)' : 'rgba(255, 255, 255, 0.03)',
+                  border: isSelected ? '1.5px solid #f97316' : '1px solid rgba(255, 255, 255, 0.08)',
                   borderRadius: '8px',
                   cursor: 'pointer',
-                  color: isSelected ? '#38bdf8' : 'var(--text-secondary)',
+                  color: isSelected ? '#f97316' : 'var(--text-secondary)',
                   boxShadow: isSelected
-                    ? '0 0 14px rgba(56, 189, 248, 0.35), inset 0 0 6px rgba(56, 189, 248, 0.15)'
+                    ? '0 0 14px rgba(249, 115, 22, 0.35), inset 0 0 6px rgba(249, 115, 22, 0.15)'
                     : 'none',
                   transition: 'all 0.18s cubic-bezier(0.4, 0, 0.2, 1)',
                   transform: isSelected ? 'translateY(-1px)' : 'translateY(0)',
@@ -262,7 +262,7 @@ export const ComponentDock: React.FC<ComponentDockProps> = ({
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    color: isSelected ? '#38bdf8' : c.activeColor,
+                    color: isSelected ? '#f97316' : c.activeColor,
                   }}
                 >
                   {c.icon}

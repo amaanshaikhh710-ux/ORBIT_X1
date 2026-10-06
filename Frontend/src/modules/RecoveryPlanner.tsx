@@ -83,7 +83,7 @@ export const RecoveryPlanner: React.FC = () => {
           onClick={handleSimulate}
           disabled={loading || selectedPolicies.length === 0}
           className="btn btn-primary"
-          style={{ background: '#10b981' }}
+          style={{ background: 'var(--accent-orange)' }}
         >
           <Play size={15} /> {loading ? 'Re-simulating Scenarios...' : 'Run Multi-Scenario Comparison'}
         </button>
@@ -119,8 +119,8 @@ export const RecoveryPlanner: React.FC = () => {
                 style={{
                   padding: '12px',
                   borderRadius: '6px',
-                  border: isSelected ? '1px solid var(--accent-cyan)' : '1px solid var(--border-color)',
-                  background: isSelected ? 'rgba(56, 189, 248, 0.08)' : 'rgba(255, 255, 255, 0.02)',
+                  border: isSelected ? '1px solid var(--accent-orange)' : '1px solid var(--border-color)',
+                  background: isSelected ? 'rgba(249, 115, 22, 0.10)' : 'rgba(255, 255, 255, 0.02)',
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'flex-start',
@@ -128,7 +128,7 @@ export const RecoveryPlanner: React.FC = () => {
                   transition: 'all 0.15s ease',
                 }}
               >
-                <div style={{ marginTop: '2px', color: isSelected ? 'var(--accent-cyan)' : 'var(--text-muted)' }}>
+                <div style={{ marginTop: '2px', color: isSelected ? 'var(--accent-orange)' : 'var(--text-muted)' }}>
                   {isSelected ? <CheckSquare size={16} /> : <Square size={16} />}
                 </div>
                 <div>

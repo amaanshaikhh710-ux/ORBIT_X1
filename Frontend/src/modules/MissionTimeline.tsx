@@ -37,8 +37,8 @@ export const MissionTimeline: React.FC = () => {
               style={{
                 padding: '4px 10px',
                 borderRadius: '4px',
-                border: filterSeverity === sev ? '1px solid var(--accent-cyan)' : '1px solid var(--border-color)',
-                background: filterSeverity === sev ? 'rgba(56, 189, 248, 0.2)' : 'rgba(255, 255, 255, 0.02)',
+                border: filterSeverity === sev ? '1px solid var(--accent-orange)' : '1px solid var(--border-color)',
+                background: filterSeverity === sev ? 'rgba(249, 115, 22, 0.2)' : 'rgba(255, 255, 255, 0.02)',
                 color: filterSeverity === sev ? '#fff' : 'var(--text-secondary)',
                 fontSize: '11px',
                 fontFamily: 'var(--font-mono)',

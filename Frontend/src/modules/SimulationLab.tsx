@@ -235,7 +235,7 @@ export const SimulationLab: React.FC = () => {
                 style={{ fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}
                 title="Return to Keplerian/SGP4 eclipse cycle"
               >
-                <Globe size={13} color="#10b981" /> Nominal Orbit
+                <Globe size={13} color="var(--status-normal)" /> Nominal Orbit
               </button>
             </div>
           </div>

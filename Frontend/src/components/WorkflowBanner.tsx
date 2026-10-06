@@ -33,7 +33,7 @@ export const WorkflowBanner: React.FC = () => {
   return (
     <div
       style={{
-        background: '#090d16',
+        background: 'var(--bg-secondary)',
         borderBottom: '1px solid var(--border-color)',
         padding: '8px 16px',
         overflowX: 'auto',
@@ -69,17 +69,17 @@ export const WorkflowBanner: React.FC = () => {
                   padding: '4px 10px',
                   borderRadius: '4px',
                   border: isActive
-                    ? '1px solid var(--accent-cyan)'
+                    ? '1px solid var(--accent-orange)'
                     : isPassed
-                    ? '1px solid rgba(16, 185, 129, 0.3)'
-                    : '1px solid transparent',
+                    ? '1px solid rgba(34, 197, 94, 0.35)'
+                    : '1px solid var(--border-color)',
                   background: isActive
-                    ? 'rgba(56, 189, 248, 0.15)'
+                    ? 'rgba(249, 115, 22, 0.16)'
                     : isPassed
-                    ? 'rgba(16, 185, 129, 0.08)'
+                    ? 'rgba(34, 197, 94, 0.10)'
                     : 'rgba(255, 255, 255, 0.02)',
                   color: isActive
-                    ? '#fff'
+                    ? '#ffffff'
                     : isPassed
                     ? 'var(--status-normal)'
                     : 'var(--text-muted)',

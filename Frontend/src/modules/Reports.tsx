@@ -58,7 +58,7 @@ export const Reports: React.FC = () => {
             onClick={handleGenerate}
             disabled={loading}
             className="btn btn-primary"
-            style={{ background: '#0284c7' }}
+            style={{ background: 'var(--accent-orange)' }}
           >
             <RefreshCw size={14} /> {loading ? 'Compiling Report...' : 'Generate New Report'}
           </button>
