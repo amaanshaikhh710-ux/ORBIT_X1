@@ -45,8 +45,6 @@ from backend.api.auth import (
 async def lifespan(app: FastAPI):
     # Initialize PostgreSQL / SQLite database schema & seeds on startup
     init_db()
-    # Only after init_db() succeeds, ensure run-default persistence
-    DEFAULT_SESSION.ensure_persisted()
     yield
 
 app = FastAPI(
@@ -80,7 +78,7 @@ class SimulationRunSession:
         self.mission_id = mission_id
         self.engine = SimulationEngine(run_id=run_id)
         self.is_running: bool = False
-        self.status: str = "CREATED"  # CREATED, RUNNING, PAUSED, COMPLETED, ABORTED
+        self.status: str = "READY"  # READY, RUNNING, PAUSED, COMPLETED, ABORTED
         self.real_started_at: datetime | None = None
         self.real_completed_at: datetime | None = None
         self.persisted_event_count: int = 0
@@ -91,7 +89,9 @@ class SimulationRunSession:
         self.subscribers: set[WebSocket] = set()
 
     def ensure_persisted(self):
-        """Persists the initial run record in the database if not already present."""
+        """Persists the initial run record in the database only when running."""
+        if self.run_id == "run-default" or self.status in ("READY", "CREATED"):
+            return
         try:
             HistoryService.ensure_run_record(
                 run_id=self.run_id,
@@ -254,7 +254,7 @@ class SimulationRunSession:
             self.pause()
 
         self.engine.reset()
-        self.status = "CREATED"
+        self.status = "READY"
         self.real_started_at = None
         self.real_completed_at = None
         self.persisted_event_count = 0
@@ -282,7 +282,6 @@ def get_session(run_id: str) -> SimulationRunSession:
     global ACTIVE_RUN_ID
     if run_id not in RUN_SESSIONS:
         session = SimulationRunSession(run_id=run_id)
-        session.ensure_persisted()
         RUN_SESSIONS[run_id] = session
     return RUN_SESSIONS[run_id]
 
@@ -575,13 +574,7 @@ async def get_simulation_run(run_id: str):
 async def start_simulation(run_id: str):
     global ACTIVE_RUN_ID
     session = get_session(run_id)
-    if session.status in ("COMPLETED", "ABORTED"):
-        new_id = generate_mission_run_id()
-        ACTIVE_RUN_ID = new_id
-        old_session = session
-        session = get_session(new_id)
-        session.subscribers = old_session.subscribers.copy()
-    elif session.run_id == "run-default":
+    if session.status in ("COMPLETED", "ABORTED") or session.run_id == "run-default" or session.run_id.startswith("run-"):
         new_id = generate_mission_run_id()
         ACTIVE_RUN_ID = new_id
         old_session = session
@@ -590,8 +583,12 @@ async def start_simulation(run_id: str):
     else:
         ACTIVE_RUN_ID = session.run_id
 
+    # Record real wall-clock start timestamp
+    if session.real_started_at is None:
+        session.real_started_at = datetime.now(timezone.utc)
+
     # Record MISSION_STARTED event if starting fresh
-    if session.engine.state.simulation_time_s == 0.0 and session.real_started_at is None:
+    if session.engine.state.simulation_time_s == 0.0:
         session.engine._record_event(
             event_type="MISSION_STARTED",
             subsystem="MISSION",
@@ -646,12 +643,26 @@ async def end_simulation(run_id: str):
     global ACTIVE_RUN_ID
     session = get_session(run_id)
 
+    # If run_id is run-default, assign a real mission run ID so it can be saved properly
+    if session.run_id == "run-default" or session.run_id.startswith("run-"):
+        proper_id = generate_mission_run_id()
+        old_session = session
+        session = get_session(proper_id)
+        session.subscribers = old_session.subscribers.copy()
+        session.engine.state = old_session.engine.state.clone()
+        session.engine.active_faults = list(old_session.engine.active_faults)
+        session.engine.event_log = list(old_session.engine.event_log)
+        session.real_started_at = old_session.real_started_at or datetime.now(timezone.utc)
+        ACTIVE_RUN_ID = session.run_id
+
     # 1. Stop active simulation advancement
     session.pause()
 
-    # 2. Record formal mission ended event in simulation timeline
+    # 2. Capture final simulation time
     final_sim_time = session.engine.state.simulation_time_s
     final_soc = session.engine.state.battery_soc_pct
+
+    # 3. Record formal mission ended event in simulation timeline
     session.engine._record_event(
         event_type="MISSION_ENDED",
         subsystem="MISSION",
@@ -659,48 +670,49 @@ async def end_simulation(run_id: str):
         message=f"Mission {session.run_id} formally concluded at T+{final_sim_time:.0f}s",
     )
 
-    # 3. Mark completed and persist complete historical mission state
-    session.end(status="COMPLETED")
+    # 4. Record real wall-clock end timestamp
+    now_utc = datetime.now(timezone.utc)
+    if session.real_started_at is None:
+        session.real_started_at = now_utc
+    session.real_completed_at = now_utc
+    session.status = "COMPLETED"
 
-    # 4. Automatically generate and persist formal post-flight report
-    try:
-        rep_id = f"rep-{session.run_id}-{uuid.uuid4().hex[:8]}"
-        report_data = {
-            "id": rep_id,
-            "run_id": session.run_id,
-            "created_at": datetime.now(timezone.utc).isoformat(),
-            "real_started_at": session.real_started_at.isoformat() if session.real_started_at else None,
-            "real_completed_at": session.real_completed_at.isoformat() if session.real_completed_at else None,
-            "mission": "Orbital Twin Earth Observation Demo",
-            "simulation_duration_s": final_sim_time,
-            "final_state": session.engine.state.to_dict(),
-            "summary": {
-                "images_completed": session.engine.state.images_completed,
-                "images_deferred": session.engine.state.images_deferred,
-                "images_failed": session.engine.state.images_failed,
-                "total_downlinked_mb": round(session.engine.state.total_downlinked_data_mb, 2),
-                "final_battery_soc": round(final_soc, 2),
-                "final_internal_temp_c": round(session.engine.state.internal_temp_c, 2),
-                "active_faults": list(session.engine.active_faults),
-                "total_events_logged": len(session.engine.event_log),
-            },
-            "epistemic_declarations": {
-                "model_type": "Representative 3U CubeSat discrete-time simulation",
-                "fidelity": "Physics-informed, not flight-certified",
-                "parameters_source": "18_ENGINEERING_BASELINE.md and 19_ENGINEERING_PARAMETER_REGISTER.csv",
-            }
-        }
-        session.reports[rep_id] = report_data
-        HistoryService.record_report(session.run_id, report_data)
-    except Exception:
-        pass
+    # 5. Persist all newly generated events
+    new_events = session.engine.event_log[session.persisted_event_count:]
+    if new_events:
+        HistoryService.record_events(session.run_id, new_events)
+        session.persisted_event_count = len(session.engine.event_log)
+
+    # 6. Synchronize active faults list
+    session.engine.state.active_faults = list(session.engine.active_faults)
+
+    # 7. Persist COMPLETE mission record in database
+    HistoryService.complete_run(
+        run_id=session.run_id,
+        state=session.engine.state,
+        status="COMPLETED",
+        completed_at=session.real_completed_at,
+        started_at=session.real_started_at,
+    )
+    HistoryService.record_telemetry_snapshot(session.run_id, session.engine.state)
+
+    # 8. Compile and persist the authoritative historical report in ReportRecord
+    compiled_report = HistoryService.compile_and_record_run_report(session.run_id)
+    if compiled_report:
+        session.reports[compiled_report["id"]] = compiled_report
+
+    # 9. Verify persistence succeeded
+    verification = HistoryService.get_run_details(session.run_id)
+    if not verification:
+        logger.error("Persistence verification failed for run %s", session.run_id)
 
     completed_run_id = session.run_id
-    real_started_str = session.real_started_at.isoformat() if session.real_started_at else None
-    real_completed_str = session.real_completed_at.isoformat() if session.real_completed_at else None
+    real_started_str = session.real_started_at.isoformat()
+    real_completed_str = session.real_completed_at.isoformat()
+    real_elapsed_s = max(0.0, (session.real_completed_at - session.real_started_at).total_seconds())
     events_count = len(session.engine.event_log)
 
-    # 5. ONLY AFTER PERSISTENCE: Reset active simulation to a fresh session at T+00:00:00 READY
+    # 10. ONLY AFTER SUCCESSFUL PERSISTENCE: Reset active simulation to a fresh session at T+00:00:00 READY
     next_run_id = generate_mission_run_id()
     ACTIVE_RUN_ID = next_run_id
     next_session = get_session(next_run_id)
@@ -718,10 +730,12 @@ async def end_simulation(run_id: str):
         "active_state": next_session.engine.state.to_dict(),
         "real_started_at": real_started_str,
         "real_completed_at": real_completed_str,
+        "real_elapsed_s": real_elapsed_s,
         "simulation_time_s": final_sim_time,
         "duration_s": final_sim_time,
         "final_battery_soc": final_soc,
         "events_count": events_count,
+        "persisted": True,
     }
 
 
@@ -743,10 +757,11 @@ async def advance_simulation(run_id: str, req: AdvanceTimeRequest):
     if total_seconds <= 0:
         raise HTTPException(status_code=400, detail="Advance simulation time must be greater than 0 seconds")
 
-    # If mission wasn't started yet, record start time and baseline start event
+    # If mission wasn't started yet, record real start time and baseline start event
     if session.real_started_at is None:
         session.real_started_at = datetime.now(timezone.utc)
-        session.status = "RUNNING"
+        if session.status != "RUNNING":
+            session.status = "RUNNING"
         HistoryService.start_run(session.run_id, session.engine.state, started_at=session.real_started_at)
         session.engine._record_event(
             event_type="MISSION_STARTED",
@@ -771,48 +786,13 @@ async def advance_simulation(run_id: str, req: AdvanceTimeRequest):
         "advanced_seconds": total_seconds,
         "simulation_time_s": session.engine.state.simulation_time_s,
         "state": session.engine.state.to_dict(),
+        "real_started_at": session.real_started_at.isoformat() if session.real_started_at else None,
     }
 
 
 @app.post("/simulation/runs/{run_id}/reset", dependencies=[Depends(require_authenticated_user)])
 async def reset_simulation(run_id: str):
-    global ACTIVE_RUN_ID
     session = get_session(run_id)
-
-    # If session was already completed, do NOT overwrite the completed historical record!
-    if session.status == "COMPLETED":
-        next_run_id = generate_mission_run_id()
-        ACTIVE_RUN_ID = next_run_id
-        new_session = get_session(next_run_id)
-        new_session.status = "READY"
-        new_session.subscribers = session.subscribers.copy()
-        await new_session.broadcast_state()
-        return {
-            "status": "reset",
-            "run_id": next_run_id,
-            "simulation_time_s": 0.0,
-            "state": new_session.engine.state.to_dict(),
-            "telemetry": TelemetryEngine.generate_snapshot(new_session.engine.state, next_run_id),
-        }
-
-    # If session had progress and was in-flight, preserve as ABORTED before resetting
-    if session.status in ("RUNNING", "PAUSED") and (session.engine.state.simulation_time_s > 0 or len(session.engine.active_faults) > 0):
-        session.end(status="ABORTED")
-        next_run_id = generate_mission_run_id()
-        ACTIVE_RUN_ID = next_run_id
-        new_session = get_session(next_run_id)
-        new_session.status = "READY"
-        new_session.subscribers = session.subscribers.copy()
-        await new_session.broadcast_state()
-        return {
-            "status": "reset",
-            "run_id": next_run_id,
-            "simulation_time_s": 0.0,
-            "state": new_session.engine.state.to_dict(),
-            "telemetry": TelemetryEngine.generate_snapshot(new_session.engine.state, next_run_id),
-        }
-
-    # Otherwise reset clean
     session.reset()
     await session.broadcast_state()
     return {
@@ -849,12 +829,26 @@ async def record_user_timeline_event(run_id: str, req: TimelineEventRequest):
 @app.post("/simulation/runs/{run_id}/step", dependencies=[Depends(require_authenticated_user)])
 async def step_simulation(run_id: str):
     session = get_session(run_id)
+    if session.real_started_at is None:
+        session.real_started_at = datetime.now(timezone.utc)
+        if session.status != "RUNNING":
+            session.status = "RUNNING"
+        HistoryService.start_run(session.run_id, session.engine.state, started_at=session.real_started_at)
+        session.engine._record_event(
+            event_type="MISSION_STARTED",
+            subsystem="MISSION",
+            severity=AlertSeverity.INFO,
+            message=f"Mission {session.run_id} started at baseline T+00:00:00",
+        )
+
     session.step()
     await session.broadcast_state()
     return {
         "status": "stepped",
+        "run_id": session.run_id,
         "simulation_time_s": session.engine.state.simulation_time_s,
         "state": session.engine.state.to_dict(),
+        "real_started_at": session.real_started_at.isoformat() if session.real_started_at else None,
     }
 
 
@@ -962,6 +956,12 @@ async def get_fault_catalog():
 @app.post("/simulation/runs/{run_id}/faults", dependencies=[Depends(require_any_role(UserRole.SIMULATION_ENGINEER))])
 async def inject_fault(run_id: str, req: FaultInjectRequest):
     session = get_session(run_id)
+    if session.real_started_at is None:
+        session.real_started_at = datetime.now(timezone.utc)
+        if session.status != "RUNNING":
+            session.status = "RUNNING"
+        HistoryService.start_run(session.run_id, session.engine.state, started_at=session.real_started_at)
+
     session.engine.inject_fault(
         fault_id=req.fault_id,
         subsystem=req.subsystem,
@@ -971,10 +971,10 @@ async def inject_fault(run_id: str, req: FaultInjectRequest):
         duration_s=req.duration_s,
     )
     try:
-        HistoryService.record_fault_event(run_id, req.model_dump())
+        HistoryService.record_fault_event(session.run_id, req.model_dump())
     except Exception:
         pass
-    return {"status": "injected", "fault": req.model_dump()}
+    return {"status": "injected", "fault": req.model_dump(), "run_id": session.run_id}
 
 
 @app.delete("/simulation/runs/{run_id}/faults/{fault_id}", dependencies=[Depends(require_any_role(UserRole.SIMULATION_ENGINEER))])
@@ -1140,77 +1140,78 @@ async def get_timeline_events(run_id: str):
 @app.post("/simulation/runs/{run_id}/reports", dependencies=[Depends(require_authenticated_user)])
 async def generate_report(run_id: str):
     session = RUN_SESSIONS.get(run_id)
-    rep_id = f"rep-{int(time.time())}"
-    if session:
-        state_dict = session.engine.state.to_dict()
-        duration_s = session.engine.state.simulation_time_s
-        events_count = len(session.engine.event_log)
-        active_faults = session.engine.active_faults
-        images_completed = session.engine.state.images_completed
-        images_deferred = session.engine.state.images_deferred
-        images_failed = session.engine.state.images_failed
-        total_downlinked_mb = session.engine.state.total_downlinked_data_mb
-        battery_soc = session.engine.state.battery_soc_pct
-        internal_temp = session.engine.state.internal_temp_c
-        real_start = session.real_started_at.isoformat() if session.real_started_at else None
-        real_end = session.real_completed_at.isoformat() if session.real_completed_at else None
-    else:
-        details = HistoryService.get_run_details(run_id)
-        if not details:
-            raise HTTPException(status_code=404, detail="Run not found in history")
-        state_dict = details.get("final_state") or {}
-        duration_s = details["duration_s"]
-        events_count = len(details.get("timeline_events", []))
-        active_faults = details.get("fault_events", [])
-        images_completed = details["images_completed"]
-        images_deferred = details["images_deferred"]
-        images_failed = 0
-        total_downlinked_mb = details["total_downlinked_mb"]
-        battery_soc = details["final_battery_soc"]
-        internal_temp = 21.0
-        real_start = details["started_at"]
-        real_end = details["completed_at"]
-
-    report_data = {
-        "id": rep_id,
-        "run_id": run_id,
-        "created_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-        "real_started_at": real_start,
-        "real_completed_at": real_end,
-        "mission": "Orbital Twin Earth Observation Demo",
-        "simulation_duration_s": duration_s,
-        "final_state": state_dict,
-        "summary": {
-            "images_completed": images_completed,
-            "images_deferred": images_deferred,
-            "images_failed": images_failed,
-            "total_downlinked_mb": round(total_downlinked_mb, 2),
-            "final_battery_soc": round(battery_soc, 2),
-            "final_internal_temp_c": round(internal_temp, 2),
-            "active_faults": active_faults,
-            "total_events_logged": events_count,
-        },
-        "epistemic_declarations": {
-            "model_type": "Representative 3U CubeSat discrete-time simulation",
-            "fidelity": "Physics-informed, not flight-certified",
-            "parameters_source": "18_ENGINEERING_BASELINE.md and 19_ENGINEERING_PARAMETER_REGISTER.csv",
+    rep = HistoryService.compile_and_record_run_report(run_id)
+    if not rep and session:
+        rep_id = f"rep-{run_id}-{int(time.time())}"
+        rep = {
+            "id": rep_id,
+            "run_id": run_id,
+            "mission_id": run_id,
+            "status": session.status,
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "real_started_at": session.real_started_at.isoformat() if session.real_started_at else None,
+            "real_completed_at": session.real_completed_at.isoformat() if session.real_completed_at else None,
+            "mission": "Orbital Twin Earth Observation Demo",
+            "simulation_duration_s": session.engine.state.simulation_time_s,
+            "final_state": session.engine.state.to_dict(),
+            "summary": {
+                "images_completed": session.engine.state.images_completed,
+                "images_deferred": session.engine.state.images_deferred,
+                "images_failed": session.engine.state.images_failed,
+                "total_downlinked_mb": round(session.engine.state.total_downlinked_data_mb, 2),
+                "final_battery_soc": round(session.engine.state.battery_soc_pct, 2),
+                "final_internal_temp_c": round(session.engine.state.internal_temp_c, 2),
+                "active_faults": list(session.engine.active_faults),
+                "total_events_logged": len(session.engine.event_log),
+            },
+            "epistemic_declarations": {
+                "model_type": "Representative 3U CubeSat discrete-time simulation",
+                "fidelity": "Physics-informed, not flight-certified",
+                "parameters_source": "18_ENGINEERING_BASELINE.md and 19_ENGINEERING_PARAMETER_REGISTER.csv",
+            }
         }
-    }
+        session.reports[rep_id] = rep
+        try:
+            HistoryService.record_report(run_id, rep)
+        except Exception:
+            pass
+
+    if not rep:
+        raise HTTPException(status_code=404, detail=f"Cannot generate report for run '{run_id}'")
+
     if session:
-        session.reports[rep_id] = report_data
-    try:
-        HistoryService.record_report(run_id, report_data)
-    except Exception:
-        pass
-    return {"status": "generated", "report_id": rep_id, "report": report_data}
+        session.reports[rep["id"]] = rep
+
+    return {"status": "generated", "report_id": rep["id"], "report": rep}
 
 
 @app.get("/simulation/runs/{run_id}/reports/{report_id}", dependencies=[Depends(require_authenticated_user)])
 async def get_report(run_id: str, report_id: str):
-    session = get_session(run_id)
-    if report_id not in session.reports:
-        raise HTTPException(status_code=404, detail="Report not found")
-    return session.reports[report_id]
+    session = RUN_SESSIONS.get(run_id)
+    if session and report_id in session.reports:
+        return session.reports[report_id]
+    db_report = HistoryService.get_run_report(run_id)
+    if db_report:
+        return db_report
+    raise HTTPException(status_code=404, detail="Report not found")
+
+
+@app.get("/simulation/runs/{run_id}/report", dependencies=[Depends(require_authenticated_user)])
+async def get_simulation_run_report(run_id: str):
+    """Retrieves authoritative report for a run."""
+    report = HistoryService.get_run_report(run_id)
+    if not report:
+        raise HTTPException(status_code=404, detail=f"Report not found for run '{run_id}'")
+    return report
+
+
+@app.get("/history/runs/{run_id}/report", dependencies=[Depends(require_authenticated_user)])
+async def get_historical_run_report(run_id: str):
+    """Retrieves authoritative persisted report for a completed historical run."""
+    report = HistoryService.get_run_report(run_id)
+    if not report:
+        raise HTTPException(status_code=404, detail=f"Historical report not found for run '{run_id}'")
+    return report
 
 
 # ==========================================

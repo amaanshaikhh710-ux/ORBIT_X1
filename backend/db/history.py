@@ -6,6 +6,7 @@ Designed to run asynchronously or via quick non-blocking writes to protect the 1
 import json
 import logging
 from datetime import datetime, timezone
+from sqlalchemy import or_
 from backend.db.session import SessionLocal
 from backend.db.models import (
     SimulationRunRecord,
@@ -122,16 +123,24 @@ class HistoryService:
             db.close()
 
     @staticmethod
-    def complete_run(run_id: str, state, status: str = "COMPLETED", completed_at: datetime | None = None):
+    def complete_run(
+        run_id: str,
+        state,
+        status: str = "COMPLETED",
+        completed_at: datetime | None = None,
+        started_at: datetime | None = None,
+    ):
         """Marks run as completed/ended and records real wall-clock completed_at, final state JSON and stats."""
         db = SessionLocal()
         try:
             run = db.query(SimulationRunRecord).filter_by(id=run_id).first()
             if not run:
-                HistoryService.ensure_run_record(run_id, getattr(state, "battery_soc_pct", 100.0))
+                HistoryService.ensure_run_record(run_id, getattr(state, "battery_soc_pct", 100.0), started_at=started_at)
                 run = db.query(SimulationRunRecord).filter_by(id=run_id).first()
             if run:
                 run.status = status
+                if started_at and (not run.started_at or run.status in ("CREATED", "NOMINAL", "READY")):
+                    run.started_at = started_at
                 run.completed_at = completed_at or datetime.now(timezone.utc)
                 soc = getattr(state, "battery_soc_pct", run.final_battery_soc)
                 run.final_battery_soc = soc
@@ -278,11 +287,241 @@ class HistoryService:
 
     @staticmethod
     def get_all_runs():
-        """Returns all persisted simulation runs sorted by most recent."""
+        """Returns all persisted completed/ended simulation runs sorted by most recent."""
         db = SessionLocal()
         try:
-            runs = db.query(SimulationRunRecord).order_by(SimulationRunRecord.started_at.desc()).all()
+            runs = (
+                db.query(SimulationRunRecord)
+                .filter(
+                    SimulationRunRecord.id != "run-default",
+                    ~SimulationRunRecord.id.like("%ACCEPTANCE%"),
+                    SimulationRunRecord.status.notin_(["CREATED", "READY"]),
+                    or_(
+                        SimulationRunRecord.status.in_(["COMPLETED", "RECOVERED", "ABORTED"]),
+                        SimulationRunRecord.completed_at.isnot(None),
+                        db.query(ReportRecord).filter(ReportRecord.run_id == SimulationRunRecord.id).exists(),
+                    ),
+                )
+                .order_by(SimulationRunRecord.completed_at.desc(), SimulationRunRecord.started_at.desc())
+                .all()
+            )
             return [r.to_dict() for r in runs]
+        finally:
+            db.close()
+
+    @staticmethod
+    def get_run_report(run_id: str) -> dict | None:
+        """Retrieves authoritative persisted report for a specific simulation run."""
+        db = SessionLocal()
+        try:
+            report = (
+                db.query(ReportRecord)
+                .filter_by(run_id=run_id)
+                .order_by(ReportRecord.created_at.desc())
+                .first()
+            )
+            if report and report.content_json:
+                try:
+                    return json.loads(report.content_json)
+                except Exception:
+                    pass
+            # If report record is missing, compile from run details if run exists
+            run = db.query(SimulationRunRecord).filter_by(id=run_id).first()
+            if not run:
+                return None
+            return HistoryService.compile_and_record_run_report(run_id)
+        finally:
+            db.close()
+
+    @staticmethod
+    def compile_and_record_run_report(run_id: str) -> dict | None:
+        """Compiles and persists a complete authoritative historical report from run records."""
+        db = SessionLocal()
+        try:
+            run = db.query(SimulationRunRecord).filter_by(id=run_id).first()
+            if not run:
+                return None
+
+            started_iso = run.started_at.isoformat() if run.started_at else None
+            completed_iso = run.completed_at.isoformat() if run.completed_at else None
+            real_elapsed_s = None
+            if run.started_at and run.completed_at:
+                real_elapsed_s = max(0.0, (run.completed_at - run.started_at).total_seconds())
+
+            sim_time_s = run.duration_s
+
+            def fmt_clock(sec: float) -> str:
+                s = int(max(0, sec))
+                h = s // 3600; m = (s % 3600) // 60; sc = s % 60
+                return f"T+{h:02d}:{m:02d}:{sc:02d}"
+
+            def fmt_elapsed(sec: float | None) -> str:
+                if sec is None:
+                    return "N/A"
+                s = int(max(0, sec))
+                h = s // 3600; m = (s % 3600) // 60; sc = s % 60
+                if h > 0: return f"{h}h {m}m {sc}s"
+                if m > 0: return f"{m}m {sc}s"
+                return f"{sc}s"
+
+            events = [
+                {
+                    "simulation_time_s": ev.simulation_time_s,
+                    "simulation_time_formatted": fmt_clock(ev.simulation_time_s),
+                    "event_type": ev.event_type,
+                    "subsystem": ev.subsystem,
+                    "severity": ev.severity,
+                    "description": ev.message,
+                    "message": ev.message,
+                    "result": "Logged to mission timeline",
+                }
+                for ev in sorted(run.timeline_events, key=lambda e: e.simulation_time_s)
+            ]
+
+            faults = [
+                {
+                    "fault_id": f.fault_id,
+                    "name": f.fault_id,
+                    "subsystem": f.subsystem,
+                    "parameter": f.parameter,
+                    "severity": f.severity,
+                    "injected_sim_time_s": f.start_time_s,
+                    "injected_sim_time_formatted": fmt_clock(f.start_time_s),
+                    "duration_s": f.duration_s,
+                    "cleared_at_s": f.cleared_at_s,
+                    "status": "CLEARED" if f.cleared_at_s is not None else "ACTIVE",
+                    "impact": f"Degraded {f.subsystem} ({f.parameter}) by {int(f.severity * 100)}%",
+                }
+                for f in run.fault_events
+            ]
+
+            recoveries = []
+            for r in run.recovery_actions:
+                acts = []
+                if r.actions_json:
+                    try: acts = json.loads(r.actions_json)
+                    except Exception: pass
+                effs = []
+                if r.expected_effects_json:
+                    try: effs = json.loads(r.expected_effects_json)
+                    except Exception: pass
+                recoveries.append({
+                    "recovery_name": r.policy_name,
+                    "policy_id": r.policy_id,
+                    "applied_sim_time_s": r.applied_at_sim_time_s,
+                    "applied_sim_time_formatted": fmt_clock(r.applied_at_sim_time_s),
+                    "actions": acts,
+                    "expected_effects": effs,
+                    "result": "Applied to canonical spacecraft bus",
+                    "final_status": "Successful",
+                })
+
+            final_st = {}
+            if run.final_state_json:
+                try: final_st = json.loads(run.final_state_json)
+                except Exception: pass
+
+            outcome = run.to_dict().get("outcome", run.status)
+            recovery_status = "Successful" if len(recoveries) > 0 else ("None Required" if len(faults) == 0 else "Unrecovered Anomaly")
+
+            rep_id = f"rep-{run.id}"
+            report_data = {
+                "id": rep_id,
+                "run_id": run.id,
+                "mission_id": run.id,
+                "status": run.status,
+                "outcome": outcome,
+                "simulation_duration_s": sim_time_s,
+                "real_started_at": started_iso,
+                "real_completed_at": completed_iso,
+                "real_elapsed_s": real_elapsed_s,
+                "created_at": completed_iso or datetime.now(timezone.utc).isoformat(),
+                "mission_info": {
+                    "mission_id": run.id,
+                    "status": run.status,
+                    "outcome": outcome,
+                    "recovery_status": recovery_status,
+                    "real_started_at": started_iso,
+                    "real_completed_at": completed_iso,
+                    "real_elapsed_s": real_elapsed_s,
+                    "real_elapsed_formatted": fmt_elapsed(real_elapsed_s),
+                    "simulation_duration_s": sim_time_s,
+                    "simulation_duration_formatted": f"T+00:00:00 → {fmt_clock(sim_time_s)}",
+                },
+                "timeline": events,
+                "timeline_events": events,
+                "faults": faults,
+                "fault_analysis": {
+                    "causal_graph": {"nodes": [], "edges": []},
+                    "causal_chains": [],
+                },
+                "recovery": {
+                    "actions": recoveries,
+                    "policy_applied": run.recovery_action_taken or "None",
+                    "recovery_status": recovery_status,
+                    "comparisons": [],
+                },
+                "final_outcome": {
+                    "simulation_time_s": sim_time_s,
+                    "simulation_time_formatted": fmt_clock(sim_time_s),
+                    "battery_soc_pct": run.final_battery_soc,
+                    "min_battery_soc": run.min_battery_soc,
+                    "power_state": run.power_state,
+                    "solar_generation_w": final_st.get("solar_generation_w", 24.5),
+                    "battery_stored_wh": final_st.get("battery_stored_wh", 61.2),
+                    "internal_temp_c": final_st.get("internal_temp_c", 21.0),
+                    "payload_state": final_st.get("payload_state", "IDLE"),
+                    "comm_link_state": final_st.get("comm_link_state", "LOCKED"),
+                    "images_completed": run.images_completed,
+                    "images_deferred": run.images_deferred,
+                    "images_failed": final_st.get("images_failed", 0),
+                    "total_downlinked_mb": run.total_downlinked_mb,
+                    "active_faults_count": run.active_faults_count,
+                    "recovery_status": recovery_status,
+                    "outcome": outcome,
+                    "spacecraft_state": final_st,
+                    "objective_status": {
+                        "imagery": {"target": 20, "achieved": run.images_completed, "met": run.images_completed >= 20},
+                        "downlink": {"target": 500.0, "achieved": run.total_downlinked_mb, "met": run.total_downlinked_mb >= 500.0},
+                        "battery": {"threshold": 25.0, "final": run.final_battery_soc, "met": run.final_battery_soc >= 25.0},
+                    },
+                },
+                "summary": {
+                    "images_completed": run.images_completed,
+                    "images_deferred": run.images_deferred,
+                    "total_downlinked_mb": run.total_downlinked_mb,
+                    "final_battery_soc": run.final_battery_soc,
+                    "min_battery_soc": run.min_battery_soc,
+                    "final_internal_temp_c": final_st.get("internal_temp_c", 21.0),
+                    "active_faults": faults,
+                    "total_events_logged": len(events),
+                },
+                "epistemic_declarations": {
+                    "model_type": "Representative 3U CubeSat discrete-time simulation",
+                    "fidelity": "Physics-informed, not flight-certified",
+                    "parameters_source": "18_ENGINEERING_BASELINE.md and 19_ENGINEERING_PARAMETER_REGISTER.csv",
+                },
+            }
+
+            existing_rep = db.query(ReportRecord).filter_by(id=rep_id).first()
+            if not existing_rep:
+                rep_record = ReportRecord(
+                    id=rep_id,
+                    run_id=run.id,
+                    report_type="MISSION_REPORT",
+                    title=f"Mission ORBIT-X1 Flight Analysis ({run.id})",
+                    simulation_duration_s=sim_time_s,
+                    summary_json=json.dumps(report_data.get("summary", {})),
+                    content_json=json.dumps(report_data),
+                    created_at=run.completed_at or datetime.now(timezone.utc),
+                )
+                db.add(rep_record)
+                db.commit()
+            return report_data
+        except Exception as e:
+            db.rollback()
+            logger.error("Error compiling report for run %s: %s", run_id, e)
+            return None
         finally:
             db.close()
 

@@ -2,6 +2,7 @@
 Orbital Twin SQLAlchemy Persistent History Models
 Implements schema defined in 08_DATABASE_SCHEMA.md for Mission ORBIT-X1.
 """
+import json
 from datetime import datetime, timezone
 from sqlalchemy import Column, Integer, String, Float, Text, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
@@ -98,6 +99,27 @@ class SimulationRunRecord(Base):
     timeline_events = relationship("MissionEventRecord", back_populates="run", cascade="all, delete-orphan", order_by="MissionEventRecord.simulation_time_s")
 
     def to_dict(self):
+        real_elapsed_s = None
+        if self.started_at and self.completed_at:
+            real_elapsed_s = max(0.0, (self.completed_at - self.started_at).total_seconds())
+
+        outcome = self.status
+        if self.status in ("COMPLETED", "RECOVERED"):
+            if self.recovery_action_taken and self.recovery_action_taken != "None":
+                outcome = "MISSION RECOVERED"
+            elif self.active_faults_count > 0:
+                outcome = "ANOMALY ACTIVE"
+            else:
+                outcome = "NOMINAL SUCCESS"
+        elif self.status == "ABORTED":
+            outcome = "MISSION ABORTED"
+
+        recovery_status = "None Required"
+        if self.recovery_action_taken and self.recovery_action_taken != "None":
+            recovery_status = "Successful"
+        elif self.active_faults_count > 0:
+            recovery_status = "Unrecovered Anomaly"
+
         return {
             "id": self.id,
             "scenario_id": self.scenario_id,
@@ -105,7 +127,11 @@ class SimulationRunRecord(Base):
             "mission_id": self.mission_id,
             "engine_version": self.engine_version,
             "status": self.status,
+            "outcome": outcome,
+            "recovery_status": recovery_status,
             "duration_s": round(self.duration_s, 1),
+            "simulation_duration_s": round(self.duration_s, 1),
+            "real_elapsed_s": round(real_elapsed_s, 1) if real_elapsed_s is not None else None,
             "initial_battery_soc": round(self.initial_battery_soc, 2),
             "final_battery_soc": round(self.final_battery_soc, 2),
             "min_battery_soc": round(self.min_battery_soc, 2),
@@ -227,12 +253,27 @@ class ReportRecord(Base):
     run = relationship("SimulationRunRecord", back_populates="reports")
 
     def to_dict(self):
+        summary = None
+        if self.summary_json:
+            try:
+                summary = json.loads(self.summary_json)
+            except Exception:
+                summary = None
+        content = None
+        if self.content_json:
+            try:
+                content = json.loads(self.content_json)
+            except Exception:
+                content = None
+
         return {
             "id": self.id,
             "run_id": self.run_id,
             "report_type": self.report_type,
             "title": self.title,
             "simulation_duration_s": self.simulation_duration_s,
+            "summary": summary,
+            "content": content,
             "created_at": self.created_at.isoformat() if self.created_at else None,
         }
 

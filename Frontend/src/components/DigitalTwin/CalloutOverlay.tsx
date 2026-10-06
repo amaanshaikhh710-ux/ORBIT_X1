@@ -66,7 +66,7 @@ export const CalloutOverlay: React.FC<CalloutOverlayProps> = React.memo(({
       line1: (s) => `Downlink: ${(s?.downlink_data_rate_mbps ?? 2.0).toFixed(1)} Mbps`,
       line2: (s) => ({
         text: `Status: ${s?.comm_link_state === 'DOWNLINKING' ? 'Downlinking' : (s?.comm_health ?? 1.0) >= 0.8 ? 'Nominal' : 'Degraded'}`,
-        color: s?.comm_link_state === 'DOWNLINKING' ? '#38bdf8' : '#10b981',
+        color: s?.comm_link_state === 'DOWNLINKING' ? '#38bdf8' : '#22c55e',
       }),
       defaultPos: { left: '42%', top: '12%' },
     },
@@ -77,7 +77,7 @@ export const CalloutOverlay: React.FC<CalloutOverlayProps> = React.memo(({
       line1: (s) => `Pointing Error: ${(s?.adcs_pointing_error_deg ?? 0.5).toFixed(1)}°`,
       line2: (s) => ({
         text: `Status: ${(s?.adcs_pointing_error_deg ?? 0.5) <= 2.0 ? 'Nominal' : 'Wobble'}`,
-        color: (s?.adcs_pointing_error_deg ?? 0.5) <= 2.0 ? '#10b981' : '#ef4444',
+        color: (s?.adcs_pointing_error_deg ?? 0.5) <= 2.0 ? '#22c55e' : '#ef4444',
       }),
       defaultPos: { right: '34%', top: '34%' },
     },
@@ -95,11 +95,11 @@ export const CalloutOverlay: React.FC<CalloutOverlayProps> = React.memo(({
     {
       id: 'battery',
       title: 'Battery',
-      icon: <Battery size={15} color="#10b981" />,
+      icon: <Battery size={15} color="#22c55e" />,
       line1: (s) => `SOC: ${(s?.battery_soc_pct ?? 100).toFixed(0)}%`,
       line2: (s) => ({
         text: `Capacity: ${(s?.battery_capacity_wh ?? 72).toFixed(0)} Wh`,
-        color: (s?.battery_soc_pct ?? 100) > 40 ? '#10b981' : (s?.battery_soc_pct ?? 100) > 20 ? '#f59e0b' : '#ef4444',
+        color: (s?.battery_soc_pct ?? 100) > 40 ? '#22c55e' : (s?.battery_soc_pct ?? 100) > 20 ? '#f59e0b' : '#ef4444',
       }),
       defaultPos: { left: '12%', bottom: '22%' },
     },

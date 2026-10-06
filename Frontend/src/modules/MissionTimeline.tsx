@@ -119,15 +119,15 @@ export const MissionTimeline: React.FC = () => {
                 style={{
                   padding: '4px 12px',
                   borderRadius: '4px',
-                  border: filterSeverity === sev ? '1px solid rgba(157, 0, 255, 0.65)' : '1px solid var(--border-color)',
-                  background: filterSeverity === sev ? 'rgba(157, 0, 255, 0.22)' : 'rgba(255, 255, 255, 0.02)',
-                  color: filterSeverity === sev ? '#ffffff' : 'var(--text-secondary)',
+                  border: filterSeverity === sev ? '1px solid rgba(249, 115, 22, 0.65)' : '1px solid var(--border-color)',
+                  background: filterSeverity === sev ? 'rgba(249, 115, 22, 0.16)' : 'rgba(255, 255, 255, 0.02)',
+                  color: filterSeverity === sev ? '#f97316' : 'var(--text-secondary)',
                   fontSize: '11px',
                   fontFamily: 'var(--font-mono)',
                   fontWeight: filterSeverity === sev ? 700 : 500,
                   cursor: 'pointer',
                   transition: 'all 0.18s ease',
-                  boxShadow: filterSeverity === sev ? '0 0 10px rgba(157, 0, 255, 0.3)' : 'none',
+                  boxShadow: filterSeverity === sev ? '0 0 8px rgba(249, 115, 22, 0.25)' : 'none',
                 }}
               >
                 {sev}

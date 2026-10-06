@@ -265,15 +265,15 @@ export const ControlBar: React.FC = () => {
                 style={{
                   padding: '3px 8px',
                   borderRadius: '4px',
-                  border: timestep === item.s ? '1px solid rgba(157, 0, 255, 0.6)' : '1px solid rgba(255, 255, 255, 0.1)',
-                  background: timestep === item.s ? 'rgba(157, 0, 255, 0.22)' : 'rgba(255, 255, 255, 0.03)',
-                  color: timestep === item.s ? '#ffffff' : '#CBD5E1',
+                  border: timestep === item.s ? '1px solid rgba(249, 115, 22, 0.6)' : '1px solid rgba(255, 255, 255, 0.08)',
+                  background: timestep === item.s ? 'rgba(249, 115, 22, 0.16)' : 'rgba(255, 255, 255, 0.02)',
+                  color: timestep === item.s ? '#f97316' : '#CBD5E1',
                   fontSize: '11px',
                   fontFamily: 'var(--font-mono)',
                   fontWeight: 600,
                   cursor: 'pointer',
                   transition: 'all 0.18s ease',
-                  boxShadow: timestep === item.s ? '0 0 8px rgba(157, 0, 255, 0.25)' : 'none',
+                  boxShadow: timestep === item.s ? '0 0 8px rgba(249, 115, 22, 0.25)' : 'none',
                 }}
                 title={`Configure simulation timestep to ${item.s}s`}
               >
@@ -296,15 +296,15 @@ export const ControlBar: React.FC = () => {
                 style={{
                   padding: '3px 8px',
                   borderRadius: '4px',
-                  border: speed === s ? '1px solid rgba(157, 0, 255, 0.6)' : '1px solid rgba(255, 255, 255, 0.1)',
-                  background: speed === s ? 'rgba(157, 0, 255, 0.22)' : 'rgba(255, 255, 255, 0.03)',
-                  color: speed === s ? '#ffffff' : '#CBD5E1',
+                  border: speed === s ? '1px solid rgba(249, 115, 22, 0.6)' : '1px solid rgba(255, 255, 255, 0.08)',
+                  background: speed === s ? 'rgba(249, 115, 22, 0.16)' : 'rgba(255, 255, 255, 0.02)',
+                  color: speed === s ? '#f97316' : '#CBD5E1',
                   fontSize: '11px',
                   fontFamily: 'var(--font-mono)',
                   fontWeight: 600,
                   cursor: 'pointer',
                   transition: 'all 0.18s ease',
-                  boxShadow: speed === s ? '0 0 8px rgba(157, 0, 255, 0.25)' : 'none',
+                  boxShadow: speed === s ? '0 0 8px rgba(249, 115, 22, 0.25)' : 'none',
                 }}
               >
                 {s}x

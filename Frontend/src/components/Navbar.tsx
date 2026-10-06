@@ -118,22 +118,22 @@ export const Navbar: React.FC = () => {
               width: 34,
               height: 34,
               borderRadius: 8,
-              background: 'linear-gradient(135deg, #1e1b2e 0%, #0d121f 100%)',
-              border: '1px solid rgba(212, 175, 55, 0.45)',
-              boxShadow: '0 0 14px rgba(212, 175, 55, 0.25)',
+              background: 'linear-gradient(135deg, #131d2e 0%, #070c14 100%)',
+              border: '1px solid rgba(249, 115, 22, 0.45)',
+              boxShadow: '0 0 12px rgba(249, 115, 22, 0.2)',
             }}
           >
-            <Satellite size={18} color="var(--accent-gold)" />
+            <Satellite size={18} color="var(--accent-orange)" />
           </div>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span style={{ fontWeight: 800, letterSpacing: '0.6px', fontSize: '15px', color: '#FFFFFF' }}>
-                ORBITAL <span style={{ color: 'var(--accent-gold)' }}>TWIN</span>
+                ORBITAL <span style={{ color: 'var(--accent-orange)' }}>TWIN</span>
               </span>
               <span className="badge badge-gold" style={{ fontSize: '10px' }}>3U CUBESAT</span>
               <span className="source-tag">AUTHORITATIVE DIGITAL TWIN</span>
             </div>
-            <div style={{ fontSize: '11px', color: '#8493A8' }}>
+            <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
               Mission: Earth Observation & High-Rate Svalbard Downlink
             </div>
           </div>
@@ -148,17 +148,17 @@ export const Navbar: React.FC = () => {
               alignItems: 'center',
               gap: '6px',
               padding: '4px 10px',
-              background: 'rgba(12, 20, 36, 0.7)',
+              background: 'rgba(11, 16, 26, 0.85)',
               borderRadius: '6px',
               border: '1px solid var(--border-color)',
             }}
           >
             {state?.in_sunlight ? (
-              <span style={{ display: 'flex', alignItems: 'center', gap: '5px', color: 'var(--accent-gold)', fontSize: '11.5px', fontFamily: 'var(--font-mono)', fontWeight: 600 }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '5px', color: 'var(--accent-orange)', fontSize: '11.5px', fontFamily: 'var(--font-mono)', fontWeight: 600 }}>
                 <Sun size={13} /> SUNLIGHT ({(state.true_anomaly_deg || 0).toFixed(1)}°)
               </span>
             ) : (
-              <span style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#B026FF', fontSize: '11.5px', fontFamily: 'var(--font-mono)', fontWeight: 600 }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '5px', color: 'var(--accent-cyan)', fontSize: '11.5px', fontFamily: 'var(--font-mono)', fontWeight: 600 }}>
                 <Moon size={13} /> ECLIPSE (UMBRA)
               </span>
             )}
@@ -171,9 +171,9 @@ export const Navbar: React.FC = () => {
               alignItems: 'center',
               gap: '6px',
               padding: '4px 10px',
-              background: state?.ground_station_visible ? 'rgba(212, 175, 55, 0.12)' : 'rgba(12, 20, 36, 0.7)',
+              background: state?.ground_station_visible ? 'rgba(249, 115, 22, 0.12)' : 'rgba(11, 16, 26, 0.85)',
               borderRadius: '6px',
-              border: state?.ground_station_visible ? '1px solid rgba(212, 175, 55, 0.45)' : '1px solid var(--border-color)',
+              border: state?.ground_station_visible ? '1px solid rgba(249, 115, 22, 0.45)' : '1px solid var(--border-color)',
             }}
           >
             <span
@@ -181,7 +181,7 @@ export const Navbar: React.FC = () => {
                 fontSize: '11.5px',
                 fontFamily: 'var(--font-mono)',
                 fontWeight: 600,
-                color: state?.ground_station_visible ? 'var(--accent-gold)' : 'var(--text-muted)',
+                color: state?.ground_station_visible ? 'var(--accent-orange)' : 'var(--text-muted)',
               }}
             >
               GS SVALBARD: {state?.ground_station_visible ? 'AOS (VISIBLE)' : 'LOS'}
@@ -193,13 +193,13 @@ export const Navbar: React.FC = () => {
             style={{
               padding: '4px 12px',
               borderRadius: '6px',
-              background: 'rgba(9, 15, 28, 0.9)',
-              border: '1px solid rgba(212, 175, 55, 0.35)',
-              boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.5), 0 0 10px rgba(212, 175, 55, 0.1)',
+              background: 'rgba(11, 16, 26, 0.95)',
+              border: '1px solid rgba(249, 115, 22, 0.35)',
+              boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.5), 0 0 8px rgba(249, 115, 22, 0.1)',
               fontFamily: 'var(--font-mono)',
               fontWeight: 700,
               fontSize: '13px',
-              color: 'var(--accent-gold)',
+              color: 'var(--accent-orange)',
               letterSpacing: '1px',
             }}
           >
@@ -252,30 +252,30 @@ export const Navbar: React.FC = () => {
                 transition: 'opacity 0.2s ease',
                 background:
                   userRole === 'Mission Administrator'
-                    ? 'rgba(212, 175, 55, 0.15)'
+                    ? 'rgba(245, 158, 11, 0.12)'
                     : userRole === 'Flight Director'
-                    ? 'rgba(157, 0, 255, 0.15)'
+                    ? 'rgba(56, 189, 248, 0.12)'
                     : userRole === 'Simulation Engineer'
-                    ? 'rgba(34, 197, 94, 0.15)'
-                    : 'rgba(212, 175, 55, 0.15)',
+                    ? 'rgba(34, 197, 94, 0.12)'
+                    : 'rgba(245, 158, 11, 0.12)',
                 border:
                   userRole === 'Mission Administrator'
-                    ? '1px solid rgba(212, 175, 55, 0.45)'
+                    ? '1px solid rgba(245, 158, 11, 0.4)'
                     : userRole === 'Flight Director'
-                    ? '1px solid rgba(157, 0, 255, 0.45)'
+                    ? '1px solid rgba(56, 189, 248, 0.4)'
                     : userRole === 'Simulation Engineer'
-                    ? '1px solid rgba(34, 197, 94, 0.4)'
-                    : '1px solid rgba(212, 175, 55, 0.35)',
+                    ? '1px solid rgba(34, 197, 94, 0.35)'
+                    : '1px solid rgba(245, 158, 11, 0.35)',
                 borderRadius: '6px',
                 fontSize: '11.5px',
                 color:
                   userRole === 'Mission Administrator'
-                    ? 'var(--accent-gold)'
+                    ? 'var(--accent-amber)'
                     : userRole === 'Flight Director'
-                    ? '#C084FC'
+                    ? 'var(--accent-cyan)'
                     : userRole === 'Simulation Engineer'
-                    ? '#4ADE80'
-                    : 'var(--accent-gold)',
+                    ? '#22c55e'
+                    : 'var(--accent-amber)',
                 fontFamily: 'var(--font-mono)',
                 fontWeight: 600,
               }}
@@ -287,7 +287,7 @@ export const Navbar: React.FC = () => {
                   fontSize: '10px',
                   padding: '1px 6px',
                   borderRadius: '4px',
-                  background: 'rgba(255,255,255,0.1)',
+                  background: 'rgba(255,255,255,0.08)',
                   letterSpacing: '0.4px',
                 }}
               >
@@ -301,10 +301,10 @@ export const Navbar: React.FC = () => {
                 alignItems: 'center',
                 gap: '5px',
                 padding: '4px 10px',
-                background: 'rgba(224, 17, 95, 0.14)',
-                border: '1px solid rgba(224, 17, 95, 0.4)',
+                background: 'rgba(239, 68, 68, 0.12)',
+                border: '1px solid rgba(239, 68, 68, 0.35)',
                 borderRadius: '6px',
-                color: '#ff85ab',
+                color: '#f87171',
                 fontSize: '11px',
                 fontWeight: 600,
                 cursor: 'pointer',
@@ -327,8 +327,8 @@ export const Navbar: React.FC = () => {
           gap: '4px',
           padding: '0 16px',
           overflowX: 'auto',
-          background: 'rgba(8, 13, 25, 0.98)',
-          borderBottom: '1px solid rgba(157, 0, 255, 0.12)',
+          background: 'var(--bg-secondary)',
+          borderBottom: '1px solid var(--border-color)',
         }}
       >
         {visibleNavItems.map((item) => {
@@ -342,20 +342,20 @@ export const Navbar: React.FC = () => {
                 alignItems: 'center',
                 gap: '8px',
                 padding: '10px 14px',
-                background: isActive ? 'rgba(157, 0, 255, 0.14)' : 'transparent',
-                color: isActive ? '#FFFFFF' : 'var(--text-secondary)',
+                background: isActive ? 'rgba(249, 115, 22, 0.12)' : 'transparent',
+                color: isActive ? '#F8FAFC' : 'var(--text-secondary)',
                 border: 'none',
-                borderBottom: isActive ? '2px solid var(--accent-violet)' : '2px solid transparent',
+                borderBottom: isActive ? '2px solid var(--accent-orange)' : '2px solid transparent',
                 borderRadius: '4px 4px 0 0',
                 fontSize: '13px',
                 fontWeight: isActive ? 600 : 500,
                 cursor: 'pointer',
                 whiteSpace: 'nowrap',
                 transition: 'all 0.18s ease',
-                boxShadow: isActive ? 'inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 2px 10px rgba(157, 0, 255, 0.15)' : 'none',
+                boxShadow: 'none',
               }}
             >
-              <span style={{ color: isActive ? '#B026FF' : 'inherit' }}>{item.icon}</span>
+              <span style={{ color: isActive ? 'var(--accent-orange)' : 'inherit' }}>{item.icon}</span>
               <span>{item.label}</span>
             </button>
           );

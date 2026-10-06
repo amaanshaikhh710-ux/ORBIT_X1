@@ -150,30 +150,6 @@ def init_db():
             db.add(mission)
             db.commit()
 
-        # 4. Seed initial default simulation run AFTER spacecraft and mission
-        existing_run = db.query(models.SimulationRunRecord).filter_by(id="run-default").first()
-        if not existing_run:
-            default_run = models.SimulationRunRecord(
-                id="run-default",
-                scenario_id="SCN-NOMINAL-01",
-                spacecraft_id="sat-3u-01",
-                mission_id="eo-mission-01",
-                engine_version="1.0.0",
-                status="NOMINAL",
-                duration_s=0.0,
-                initial_battery_soc=100.0,
-                final_battery_soc=100.0,
-                min_battery_soc=100.0,
-                power_state="NOMINAL",
-                images_completed=0,
-                images_deferred=0,
-                total_downlinked_mb=0.0,
-                active_faults_count=0,
-                started_at=datetime.now(timezone.utc),
-            )
-            db.add(default_run)
-            db.commit()
-
     except Exception as e:
         db.rollback()
         logger.error("Database initialization failed: %s", e, exc_info=True)

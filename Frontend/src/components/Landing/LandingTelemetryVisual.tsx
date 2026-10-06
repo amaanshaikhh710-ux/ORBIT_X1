@@ -45,9 +45,9 @@ export const LandingTelemetryVisual: React.FC = () => {
       unit: 'W',
       subValue: 'SOLAR PEAK 24 W NOMINAL',
       status: 'SUNLIT NOMINAL',
-      statusColor: '#10B981',
-      strokeColor: '#D4AF37',
-      icon: <Zap size={16} color="var(--accent-gold)" />,
+      statusColor: '#22c55e',
+      strokeColor: '#f59e0b',
+      icon: <Zap size={16} color="var(--accent-orange)" />,
       points: [22.8, 23.5, 23.9, 24.1, 24.0, 24.2, 23.8, 24.0, 24.1],
     },
     {
@@ -57,9 +57,9 @@ export const LandingTelemetryVisual: React.FC = () => {
       unit: '%',
       subValue: '72 Wh BATTERY CAPACITY',
       status: 'INITIAL SOC 85%',
-      statusColor: '#10B981',
-      strokeColor: '#D4AF37',
-      icon: <Battery size={16} color="var(--accent-gold)" />,
+      statusColor: '#22c55e',
+      strokeColor: '#f97316',
+      icon: <Battery size={16} color="var(--accent-orange)" />,
       points: [84.2, 84.6, 84.9, 85.0, 85.1, 85.0, 84.8, 85.0, 85.1],
     },
     {
@@ -69,9 +69,9 @@ export const LandingTelemetryVisual: React.FC = () => {
       unit: '°C',
       subValue: 'NOMINAL 20°C BUS',
       status: 'EQUILIBRIUM',
-      statusColor: '#B026FF',
-      strokeColor: '#9D00FF',
-      icon: <Thermometer size={16} color="#B026FF" />,
+      statusColor: '#38bdf8',
+      strokeColor: '#38bdf8',
+      icon: <Thermometer size={16} color="var(--accent-cyan)" />,
       points: [19.8, 19.9, 20.0, 20.1, 20.0, 20.2, 20.0, 19.9, 20.0],
     },
     {
@@ -81,9 +81,9 @@ export const LandingTelemetryVisual: React.FC = () => {
       unit: 'Mbps',
       subValue: 'NOMINAL 2 Mbps DOWNLINK',
       status: 'LINK NOMINAL',
-      statusColor: '#10B981',
-      strokeColor: '#9D00FF',
-      icon: <Radio size={16} color="#B026FF" />,
+      statusColor: '#22c55e',
+      strokeColor: '#0284c7',
+      icon: <Radio size={16} color="var(--accent-cyan)" />,
       points: [1.96, 1.98, 2.01, 2.00, 2.02, 1.99, 2.01, 2.00, 2.02],
     },
   ];
@@ -227,7 +227,7 @@ export const LandingTelemetryVisual: React.FC = () => {
                     fontSize: '28px',
                     fontWeight: 800,
                     letterSpacing: '-0.5px',
-                    color: chan.strokeColor === '#D4AF37' ? 'var(--accent-gold)' : '#F8FAFC',
+                    color: chan.strokeColor === '#f59e0b' ? 'var(--accent-orange)' : '#F8FAFC',
                   }}
                 >
                   {chan.value}

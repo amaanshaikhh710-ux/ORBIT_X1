@@ -213,7 +213,11 @@ export interface HistoricalSimulationRun {
   mission_id: string;
   engine_version: string;
   status: string;
+  outcome?: string;
+  recovery_status?: string;
   duration_s: number;
+  simulation_duration_s?: number;
+  real_elapsed_s?: number | null;
   initial_battery_soc: number;
   final_battery_soc: number;
   min_battery_soc: number;
@@ -259,6 +263,96 @@ export interface HistoricalRunDetails extends HistoricalSimulationRun {
   snapshots_count?: number;
   final_state?: any;
   timeline_events?: any[];
+}
+
+export interface HistoricalMissionReport {
+  id: string;
+  run_id: string;
+  mission_id: string;
+  status: string;
+  outcome: string;
+  created_at: string;
+  mission_info: {
+    mission_id: string;
+    status: string;
+    outcome: string;
+    recovery_status: string;
+    real_started_at: string | null;
+    real_completed_at: string | null;
+    real_elapsed_s: number | null;
+    real_elapsed_formatted: string;
+    simulation_duration_s: number;
+    simulation_duration_formatted: string;
+  };
+  timeline: Array<{
+    simulation_time_s: number;
+    simulation_time_formatted: string;
+    event_type: string;
+    subsystem: string;
+    severity: string;
+    description: string;
+    message: string;
+    result?: string;
+  }>;
+  faults: Array<{
+    fault_id: string;
+    name: string;
+    subsystem: string;
+    parameter: string;
+    severity: number;
+    injected_sim_time_s: number;
+    injected_sim_time_formatted: string;
+    duration_s: number;
+    cleared_at_s?: number | null;
+    status: string;
+    impact: string;
+  }>;
+  fault_analysis: {
+    causal_graph: any;
+    causal_chains: any[];
+  };
+  recovery: {
+    actions: Array<{
+      recovery_name: string;
+      policy_id: string;
+      applied_sim_time_s: number;
+      applied_sim_time_formatted: string;
+      actions: string[];
+      expected_effects: string[];
+      result: string;
+      final_status: string;
+    }>;
+    policy_applied: string;
+    recovery_status: string;
+    comparisons: any[];
+  };
+  final_outcome: {
+    simulation_time_s: number;
+    simulation_time_formatted: string;
+    battery_soc_pct: number;
+    min_battery_soc: number;
+    power_state: string;
+    solar_generation_w?: number;
+    battery_stored_wh?: number;
+    internal_temp_c?: number;
+    payload_state?: string;
+    comm_link_state?: string;
+    images_completed: number;
+    images_deferred: number;
+    images_failed: number;
+    total_downlinked_mb: number;
+    active_faults_count: number;
+    recovery_status: string;
+    outcome: string;
+    spacecraft_state?: any;
+    objective_status?: any;
+  };
+  summary: any;
+  epistemic_declarations: {
+    model_type: string;
+    fidelity: string;
+    parameters_source: string;
+  };
 }
 
 export interface AdminUser {

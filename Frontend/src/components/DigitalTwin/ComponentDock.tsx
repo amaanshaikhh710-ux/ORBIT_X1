@@ -67,10 +67,10 @@ export const ComponentDock: React.FC<ComponentDockProps> = ({
 
   const components: ComponentItem[] = [
     { id: 'solar', name: 'Solar', icon: <Sun size={18} />, activeColor: '#f59e0b' },
-    { id: 'battery', name: 'Battery', icon: <Battery size={18} />, activeColor: '#10b981' },
+    { id: 'battery', name: 'Battery', icon: <Battery size={18} />, activeColor: '#22c55e' },
     { id: 'payload', name: 'Payload', icon: <Camera size={18} />, activeColor: '#38bdf8' },
     { id: 'comm', name: 'Comm', icon: <Radio size={18} />, activeColor: '#38bdf8' },
-    { id: 'adcs', name: 'ADCS', icon: <Compass size={18} />, activeColor: '#c084fc' },
+    { id: 'adcs', name: 'ADCS', icon: <Compass size={18} />, activeColor: '#38bdf8' },
     { id: 'bus', name: 'Bus', icon: <Box size={18} />, activeColor: '#94a3b8' },
   ];
 

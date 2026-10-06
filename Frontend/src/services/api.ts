@@ -14,6 +14,7 @@ import type {
   SimulationMessage,
   HistoricalSimulationRun,
   HistoricalRunDetails,
+  HistoricalMissionReport,
   OperatorUser,
   AdminUser,
 } from '../types/simulation';
@@ -399,6 +400,22 @@ export const api = {
     });
     if (!res.ok) {
       throw new Error(`Simulation run ${runId} not found`);
+    }
+    return res.json();
+  },
+
+  async getHistoricalRunReport(runId: string): Promise<HistoricalMissionReport> {
+    const res = await fetch(`${API_BASE}/history/runs/${runId}/report`, {
+      headers: getAuthHeaders(),
+    });
+    if (!res.ok) {
+      const res2 = await fetch(`${API_BASE}/simulation/runs/${runId}/report`, {
+        headers: getAuthHeaders(),
+      });
+      if (!res2.ok) {
+        throw new Error(`Report for mission ${runId} not found`);
+      }
+      return res2.json();
     }
     return res.json();
   },
