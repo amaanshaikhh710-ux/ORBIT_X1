@@ -24,8 +24,9 @@ export const LandingPage: React.FC = () => {
         position: 'relative',
         width: '100%',
         minHeight: '100vh',
-        background: 'radial-gradient(ellipse at 70% 25%, #0b1528 0%, #080c14 45%, #05070d 100%)',
-        color: '#F5F8FC',
+        background:
+          'radial-gradient(circle at 85% 18%, rgba(157, 0, 255, 0.12) 0%, transparent 45%), radial-gradient(circle at 12% 82%, rgba(224, 17, 95, 0.06) 0%, transparent 40%), radial-gradient(ellipse at 72% 22%, #0a1329 0%, #060c1c 42%, #020409 100%)',
+        color: '#F8FAFC',
         overflowX: 'hidden',
         overflowY: 'auto',
       }}
@@ -47,13 +48,13 @@ export const LandingPage: React.FC = () => {
         {/* Isolated 3D Cinematic Space Scene with Earth and CubeSat */}
         <LandingSpacecraft3D />
 
-        {/* Dark Scrim Mask: keeps LEFT side deep dark space for 100% crisp typography */}
+        {/* Tactical Dark Scrim Mask with subtle radial depth */}
         <div
           style={{
             position: 'absolute',
             inset: 0,
             background:
-              'radial-gradient(circle at 18% 46%, rgba(2, 8, 20, 0.94) 0%, rgba(2, 8, 20, 0.78) 42%, rgba(2, 8, 20, 0.10) 75%, transparent 100%)',
+              'radial-gradient(circle at 18% 46%, rgba(2, 6, 16, 0.96) 0%, rgba(2, 6, 16, 0.82) 42%, rgba(2, 6, 16, 0.15) 75%, transparent 100%)',
             pointerEvents: 'none',
             zIndex: 2,
           }}
@@ -78,43 +79,45 @@ export const LandingPage: React.FC = () => {
             pointerEvents: 'none',
           }}
         >
-          <div style={{ maxWidth: '580px', pointerEvents: 'auto' }}>
-            {/* Eyebrow */}
+          <div style={{ maxWidth: '600px', pointerEvents: 'auto' }}>
+            {/* Eyebrow / Mission Spec Badge */}
             <div
               style={{
                 fontSize: '11px',
                 fontFamily: 'var(--font-mono)',
-                color: '#27C7FF',
-                letterSpacing: '2.8px',
+                color: 'var(--accent-gold)',
+                letterSpacing: '2.5px',
                 fontWeight: 600,
                 textTransform: 'uppercase',
                 marginBottom: '16px',
-                display: 'flex',
+                display: 'inline-flex',
                 alignItems: 'center',
-                gap: '10px',
+                gap: '8px',
+                padding: '4px 10px',
+                borderRadius: '4px',
+                background: 'rgba(212, 175, 55, 0.08)',
+                border: '1px solid rgba(212, 175, 55, 0.25)',
               }}
             >
-              <span>SPACE</span>
+              <span className="live-beacon" style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--accent-gold)' }} />
+              <span>MISSION ORBIT-X1</span>
               <span style={{ opacity: 0.35 }}>|</span>
-              <span>SIMULATION</span>
-              <span style={{ opacity: 0.35 }}>|</span>
-              <span>ANALYSIS</span>
-              <span style={{ opacity: 0.35 }}>|</span>
-              <span>RECOVERY</span>
+              <span>DIGITAL TWIN OPERATIONS</span>
             </div>
 
-            {/* Main Heading: ORBITAL TWIN (WHITE + BRIGHT CYAN) */}
+            {/* Main Heading: ORBITAL TWIN */}
             <h1
               style={{
-                fontSize: 'clamp(38px, 4.2vw, 56px)',
+                fontSize: 'clamp(40px, 4.4vw, 60px)',
                 fontWeight: 800,
-                letterSpacing: '-0.5px',
-                lineHeight: 1.1,
+                letterSpacing: '-0.8px',
+                lineHeight: 1.08,
                 color: '#FFFFFF',
                 marginBottom: '14px',
+                textShadow: '0 4px 24px rgba(0, 0, 0, 0.6)',
               }}
             >
-              ORBITAL <span style={{ color: '#27C7FF' }}>TWIN</span>
+              ORBITAL <span style={{ color: 'var(--accent-gold)', textShadow: '0 0 35px rgba(212, 175, 55, 0.45)' }}>TWIN</span>
             </h1>
 
             {/* Subtitle */}
@@ -122,10 +125,10 @@ export const LandingPage: React.FC = () => {
               style={{
                 fontSize: 'clamp(17px, 1.8vw, 22px)',
                 fontWeight: 600,
-                color: '#F5F8FC',
+                color: '#E2E8F0',
                 letterSpacing: '0.2px',
                 marginBottom: '16px',
-                lineHeight: 1.28,
+                lineHeight: 1.3,
               }}
             >
               Digital Twin for Mission ORBIT-X1
@@ -135,18 +138,18 @@ export const LandingPage: React.FC = () => {
             <p
               style={{
                 fontSize: '15px',
-                lineHeight: 1.62,
-                color: '#AAB7C8',
-                maxWidth: '510px',
-                marginBottom: '26px',
+                lineHeight: 1.64,
+                color: '#94A3B8',
+                maxWidth: '520px',
+                marginBottom: '28px',
               }}
             >
-              A live digital replica of ORBIT-X1 that connects spacecraft telemetry, system
-              behavior, fault propagation, simulation, and recovery planning in one mission
-              environment.
+              A high-fidelity digital replica of ORBIT-X1 uniting spacecraft telemetry,
+              system physics, cross-subsystem fault propagation, and operational recovery
+              planning in a unified mission-control environment.
             </p>
 
-            {/* Single Primary Mission Launch CTA Button -> Opens digital-twin */}
+            {/* Single Primary Mission Launch CTA Button with Animated Gold->Ruby Gradient */}
             <div>
               <button
                 onClick={handleLaunch}
@@ -155,24 +158,19 @@ export const LandingPage: React.FC = () => {
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '12px',
-                  padding: '15px 34px',
-                  background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
-                  border: '1px solid rgba(39, 199, 255, 0.45)',
+                  padding: '15px 36px',
                   borderRadius: '8px',
                   color: '#ffffff',
                   fontSize: '13.5px',
                   fontWeight: 700,
-                  letterSpacing: '0.8px',
+                  letterSpacing: '0.9px',
                   cursor: 'pointer',
-                  boxShadow:
-                    '0 0 24px rgba(24, 191, 255, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.25)',
-                  transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
                   textTransform: 'uppercase',
                 }}
               >
-                <Rocket size={17} />
-                <span>LAUNCH ORBITAL TWIN</span>
-                <ArrowRight size={17} className="cta-arrow" />
+                <Rocket size={17} color="var(--accent-gold)" />
+                <span style={{ letterSpacing: '1px' }}>LAUNCH ORBITAL TWIN</span>
+                <ArrowRight size={17} className="cta-arrow" color="var(--accent-gold)" />
               </button>
             </div>
 

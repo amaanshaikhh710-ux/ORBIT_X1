@@ -23,12 +23,12 @@ export const LandingNavbar: React.FC = () => {
           gridTemplateColumns: 'auto 1fr auto',
           alignItems: 'center',
           padding: '8px 24px',
-          background: 'rgba(5, 11, 20, 0.84)',
+          background: 'rgba(8, 14, 26, 0.88)',
           backdropFilter: 'blur(16px)',
           WebkitBackdropFilter: 'blur(16px)',
-          border: '1px solid rgba(39, 199, 255, 0.18)',
+          border: '1px solid rgba(157, 0, 255, 0.22)',
           borderRadius: '40px',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
+          boxShadow: '0 8px 32px rgba(2, 6, 15, 0.65), 0 0 16px rgba(157, 0, 255, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
         }}
       >
         {/* LEFT: Cube/Space Icon + Brand Name */}
@@ -48,24 +48,25 @@ export const LandingNavbar: React.FC = () => {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              width: '30px',
-              height: '30px',
-              borderRadius: '7px',
-              background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
-              boxShadow: '0 0 12px rgba(39, 199, 255, 0.45)',
+              width: '32px',
+              height: '32px',
+              borderRadius: '8px',
+              background: 'linear-gradient(135deg, #1e1b2e 0%, #0d121f 100%)',
+              border: '1px solid rgba(212, 175, 55, 0.5)',
+              boxShadow: '0 0 14px rgba(212, 175, 55, 0.25)',
             }}
           >
-            <Box size={16} color="#fff" />
+            <Box size={16} color="var(--accent-gold)" />
           </div>
           <span
             style={{
-              fontWeight: 700,
+              fontWeight: 800,
               fontSize: '14.5px',
               letterSpacing: '0.8px',
               color: '#FFFFFF',
             }}
           >
-            ORBITAL <span style={{ color: '#27C7FF' }}>TWIN</span>
+            ORBITAL <span style={{ color: 'var(--accent-gold)' }}>TWIN</span>
           </span>
         </div>
 
@@ -91,7 +92,7 @@ export const LandingNavbar: React.FC = () => {
               transition: 'color 0.2s ease',
               padding: '4px 6px',
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = '#27C7FF')}
+            onMouseEnter={(e) => (e.currentTarget.style.color = '#B026FF')}
             onMouseLeave={(e) => (e.currentTarget.style.color = '#CBD5E1')}
             title="Mission Overview & Telemetry"
           >
@@ -110,7 +111,7 @@ export const LandingNavbar: React.FC = () => {
               transition: 'color 0.2s ease',
               padding: '4px 6px',
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = '#27C7FF')}
+            onMouseEnter={(e) => (e.currentTarget.style.color = '#B026FF')}
             onMouseLeave={(e) => (e.currentTarget.style.color = '#CBD5E1')}
             title="Interactive 3D Spacecraft Digital Twin"
           >
@@ -129,7 +130,7 @@ export const LandingNavbar: React.FC = () => {
               transition: 'color 0.2s ease',
               padding: '4px 6px',
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = '#27C7FF')}
+            onMouseEnter={(e) => (e.currentTarget.style.color = '#B026FF')}
             onMouseLeave={(e) => (e.currentTarget.style.color = '#CBD5E1')}
             title="Engineering Baseline & Documentation"
           >
@@ -167,18 +168,19 @@ export const LandingNavbar: React.FC = () => {
             }}
           >
             <span
+              className="live-beacon"
               style={{
                 width: '6px',
                 height: '6px',
                 borderRadius: '50%',
-                background: '#27D17F',
-                boxShadow: '0 0 8px #27D17F',
+                background: '#10b981',
+                boxShadow: '0 0 8px #10b981',
                 display: 'inline-block',
               }}
             />
             <span style={{ color: '#E2E8F0' }}>ORBIT-X1</span>
             <span style={{ opacity: 0.35 }}>•</span>
-            <span style={{ color: '#27D17F' }}>OPERATIONAL</span>
+            <span style={{ color: '#10b981' }}>OPERATIONAL</span>
           </div>
 
           <button
@@ -188,24 +190,26 @@ export const LandingNavbar: React.FC = () => {
               alignItems: 'center',
               gap: '6px',
               padding: '6px 14px',
-              background: 'rgba(39, 199, 255, 0.12)',
-              border: '1px solid rgba(39, 199, 255, 0.35)',
+              background: 'rgba(212, 175, 55, 0.1)',
+              border: '1px solid rgba(212, 175, 55, 0.38)',
               borderRadius: '20px',
-              color: '#27C7FF',
+              color: 'var(--accent-gold)',
               fontSize: '11.5px',
               fontFamily: 'var(--font-mono)',
               fontWeight: 700,
               cursor: 'pointer',
               letterSpacing: '0.4px',
-              transition: 'all 0.2s ease',
+              transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'rgba(39, 199, 255, 0.25)';
-              e.currentTarget.style.borderColor = '#27C7FF';
+              e.currentTarget.style.background = 'rgba(212, 175, 55, 0.2)';
+              e.currentTarget.style.borderColor = 'var(--accent-gold)';
+              e.currentTarget.style.transform = 'translateY(-1px)';
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'rgba(39, 199, 255, 0.12)';
-              e.currentTarget.style.borderColor = 'rgba(39, 199, 255, 0.35)';
+              e.currentTarget.style.background = 'rgba(212, 175, 55, 0.1)';
+              e.currentTarget.style.borderColor = 'rgba(212, 175, 55, 0.38)';
+              e.currentTarget.style.transform = 'none';
             }}
           >
             <span>{isAuthenticated ? 'MISSION CONTROL →' : 'OPERATOR LOGIN'}</span>

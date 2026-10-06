@@ -15,25 +15,25 @@ export const LandingFeatureStrip: React.FC = () => {
   const features: FeatureItem[] = [
     {
       id: 'telemetry',
-      icon: <Radio size={17} color="#27C7FF" />,
+      icon: <Radio size={17} color="var(--accent-gold)" />,
       title: 'REAL-TIME TELEMETRY',
       description: 'Live spacecraft data',
     },
     {
       id: 'digital-twin',
-      icon: <Box size={17} color="#27C7FF" />,
+      icon: <Box size={17} color="#B026FF" />,
       title: 'DIGITAL TWIN',
       description: 'Simulate and analyse dynamics',
     },
     {
       id: 'fault-analysis',
-      icon: <TrendingUp size={17} color="#27C7FF" />,
+      icon: <TrendingUp size={17} color="var(--accent-ruby)" />,
       title: 'FAULT PROPAGATION',
       description: 'Understand impact across systems',
     },
     {
       id: 'recovery-planner',
-      icon: <ShieldCheck size={17} color="#27C7FF" />,
+      icon: <ShieldCheck size={17} color="var(--accent-gold)" />,
       title: 'RECOVERY PLANNING',
       description: 'Evaluate and execute recovery strategies',
     },
@@ -56,49 +56,63 @@ export const LandingFeatureStrip: React.FC = () => {
           display: 'grid',
           gridTemplateColumns: 'repeat(4, 1fr)',
           alignItems: 'center',
-          padding: '12px 20px',
-          background: 'rgba(5, 11, 20, 0.88)',
+          padding: '14px 20px',
+          background: 'linear-gradient(180deg, rgba(10, 18, 34, 0.92) 0%, rgba(6, 12, 24, 0.96) 100%)',
           backdropFilter: 'blur(16px)',
           WebkitBackdropFilter: 'blur(16px)',
-          border: '1px solid rgba(39, 199, 255, 0.2)',
-          borderRadius: '14px',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.06)',
+          border: '1px solid rgba(157, 0, 255, 0.22)',
+          borderRadius: '12px',
+          boxShadow: '0 12px 36px rgba(2, 6, 15, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
         }}
       >
-        {features.map((feat, idx) => (
-          <div
-            key={feat.id}
-            onClick={() => setActiveModule(feat.id)}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '14px',
-              padding: '8px 16px',
-              cursor: 'pointer',
-              transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-              borderRight: idx < features.length - 1 ? '1px solid rgba(255, 255, 255, 0.08)' : 'none',
-              borderRadius: '8px',
-            }}
-            className="feature-item-hover"
-            title={`Launch ${feat.title} in Mission Control`}
-          >
-            {/* Minimal Line Icon in Subtle Cyan Circle */}
+        {features.map((feat, idx) => {
+          const accentColor =
+            feat.id === 'digital-twin'
+              ? 'rgba(157, 0, 255, 0.35)'
+              : feat.id === 'fault-analysis'
+              ? 'rgba(224, 17, 95, 0.35)'
+              : 'rgba(212, 175, 55, 0.35)';
+          const bgDim =
+            feat.id === 'digital-twin'
+              ? 'rgba(157, 0, 255, 0.1)'
+              : feat.id === 'fault-analysis'
+              ? 'rgba(224, 17, 95, 0.1)'
+              : 'rgba(212, 175, 55, 0.1)';
+
+          return (
             <div
+              key={feat.id}
+              onClick={() => setActiveModule(feat.id)}
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center',
-                width: '38px',
-                height: '38px',
-                borderRadius: '50%',
-                background: 'rgba(39, 199, 255, 0.08)',
-                border: '1px solid rgba(39, 199, 255, 0.28)',
-                boxShadow: '0 0 12px rgba(39, 199, 255, 0.12)',
-                flexShrink: 0,
+                gap: '14px',
+                padding: '8px 16px',
+                cursor: 'pointer',
+                transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                borderRight: idx < features.length - 1 ? '1px solid rgba(255, 255, 255, 0.08)' : 'none',
+                borderRadius: '8px',
               }}
+              className="feature-item-hover"
+              title={`Launch ${feat.title} in Mission Control`}
             >
-              {feat.icon}
-            </div>
+              {/* Minimal Line Icon in Coordinated Accent Circle */}
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '40px',
+                  height: '40px',
+                  borderRadius: '50%',
+                  background: bgDim,
+                  border: `1px solid ${accentColor}`,
+                  boxShadow: `0 0 14px ${bgDim}`,
+                  flexShrink: 0,
+                }}
+              >
+                {feat.icon}
+              </div>
 
             {/* Title & Description */}
             <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -107,7 +121,7 @@ export const LandingFeatureStrip: React.FC = () => {
                   fontSize: '11.5px',
                   fontWeight: 700,
                   letterSpacing: '0.8px',
-                  color: '#F5F8FC',
+                  color: '#F8FAFC',
                   fontFamily: 'var(--font-sans)',
                   textTransform: 'uppercase',
                 }}
@@ -117,7 +131,7 @@ export const LandingFeatureStrip: React.FC = () => {
               <span
                 style={{
                   fontSize: '12px',
-                  color: '#AAB7C8',
+                  color: '#94A3B8',
                   marginTop: '2px',
                   lineHeight: 1.35,
                 }}
@@ -126,7 +140,8 @@ export const LandingFeatureStrip: React.FC = () => {
               </span>
             </div>
           </div>
-        ))}
+        );
+      })}
       </div>
     </div>
   );

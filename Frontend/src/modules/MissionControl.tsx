@@ -80,14 +80,14 @@ export const MissionControl: React.FC = () => {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           {/* Power & Energy Card */}
           <div className="aerospace-card">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Battery size={16} color="var(--accent-cyan)" />
-                <span style={{ fontWeight: 600 }}>Electrical Power System (EPS)</span>
+                <Battery size={16} color="var(--accent-gold)" />
+                <span style={{ fontWeight: 700, fontSize: '13px', letterSpacing: '0.3px', color: '#FFFFFF' }}>Electrical Power System (EPS)</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 {state.recovery_mode && state.recovery_mode !== 'NOMINAL' && (
-                  <span className="badge badge-info" style={{ borderColor: 'var(--status-normal)', color: 'var(--status-normal)', fontSize: '10px' }}>
+                  <span className="badge badge-gold" style={{ fontSize: '10px' }}>
                     MODE: {state.recovery_mode}
                   </span>
                 )}
@@ -98,38 +98,39 @@ export const MissionControl: React.FC = () => {
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', fontSize: '12px' }}>
-              <div>
-                <div style={{ color: 'var(--text-muted)' }}>BATTERY SOC</div>
-                <div style={{ fontSize: '16px', fontWeight: 700, fontFamily: 'var(--font-mono)', color: state.battery_soc_pct > 25 ? 'var(--status-normal)' : 'var(--status-critical)' }}>
+              <div style={{ padding: '8px 10px', background: 'rgba(255, 255, 255, 0.02)', borderRadius: '6px', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                <div style={{ color: '#8493A8', fontSize: '10.5px', fontFamily: 'var(--font-mono)', letterSpacing: '0.4px', marginBottom: '2px' }}>BATTERY SOC</div>
+                <div style={{ fontSize: '17px', fontWeight: 800, fontFamily: 'var(--font-mono)', color: state.battery_soc_pct > 25 ? '#34d399' : 'var(--status-critical)' }}>
                   {state.battery_soc_pct.toFixed(2)} %
                 </div>
-                <div className="source-tag">SIMULATED</div>
+                <div className="source-tag" style={{ marginTop: '4px' }}>SIMULATED</div>
               </div>
 
-              <div>
-                <div style={{ color: 'var(--text-muted)' }}>SOLAR GEN</div>
-                <div style={{ fontSize: '16px', fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--accent-cyan)' }}>
+              <div style={{ padding: '8px 10px', background: 'rgba(255, 255, 255, 0.02)', borderRadius: '6px', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                <div style={{ color: '#8493A8', fontSize: '10.5px', fontFamily: 'var(--font-mono)', letterSpacing: '0.4px', marginBottom: '2px' }}>SOLAR GEN</div>
+                <div style={{ fontSize: '17px', fontWeight: 800, fontFamily: 'var(--font-mono)', color: 'var(--accent-gold)' }}>
                   {state.solar_generation_w.toFixed(2)} W
                 </div>
-                <div className="source-tag">SIMULATED</div>
+                <div className="source-tag" style={{ marginTop: '4px' }}>SIMULATED</div>
               </div>
 
-              <div>
-                <div style={{ color: 'var(--text-muted)' }}>STORED ENERGY</div>
-                <div style={{ fontSize: '16px', fontWeight: 700, fontFamily: 'var(--font-mono)' }}>
+              <div style={{ padding: '8px 10px', background: 'rgba(255, 255, 255, 0.02)', borderRadius: '6px', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                <div style={{ color: '#8493A8', fontSize: '10.5px', fontFamily: 'var(--font-mono)', letterSpacing: '0.4px', marginBottom: '2px' }}>STORED ENERGY</div>
+                <div style={{ fontSize: '17px', fontWeight: 800, fontFamily: 'var(--font-mono)', color: 'var(--accent-gold)' }}>
                   {state.battery_stored_wh.toFixed(1)} Wh
                 </div>
-                <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>/ {(state.battery_capacity_wh || 72.0).toFixed(1)} Wh</div>
+                <div style={{ fontSize: '10px', color: '#8493A8', marginTop: '4px' }}>/ {(state.battery_capacity_wh || 72.0).toFixed(1)} Wh</div>
               </div>
             </div>
 
             {/* SOC Progress Bar */}
-            <div style={{ marginTop: '10px', height: '6px', background: 'rgba(255,255,255,0.06)', borderRadius: '3px', overflow: 'hidden' }}>
+            <div style={{ marginTop: '12px', height: '6px', background: 'rgba(255,255,255,0.06)', borderRadius: '3px', overflow: 'hidden' }}>
               <div
                 style={{
                   height: '100%',
                   width: `${Math.min(100, Math.max(0, state.battery_soc_pct))}%`,
                   background: state.battery_soc_pct > 40 ? 'var(--status-normal)' : state.battery_soc_pct > 20 ? 'var(--status-warning)' : 'var(--status-critical)',
+                  boxShadow: state.battery_soc_pct > 25 ? '0 0 8px rgba(16, 185, 129, 0.5)' : '0 0 8px rgba(239, 68, 68, 0.5)',
                   transition: 'width 0.3s ease',
                 }}
               />

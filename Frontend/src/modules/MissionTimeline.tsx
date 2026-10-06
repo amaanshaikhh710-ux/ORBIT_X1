@@ -69,7 +69,7 @@ export const MissionTimeline: React.FC = () => {
       <div className="aerospace-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Clock size={18} color="var(--accent-cyan)" />
+            <Clock size={18} color="var(--accent-gold)" />
             <span style={{ fontWeight: 600, fontSize: '15px' }}>Mission Event Timeline</span>
             <span className="source-tag">CHRONOLOGICAL SIMULATION EVENT LOG</span>
           </div>
@@ -87,6 +87,7 @@ export const MissionTimeline: React.FC = () => {
               value={selectedRunId}
               onChange={(e) => setSelectedRunId(e.target.value)}
               style={{
+<<<<<<< HEAD
                 padding: '4px 8px',
                 borderRadius: '4px',
                 border: '1px solid var(--border-color)',
@@ -95,7 +96,19 @@ export const MissionTimeline: React.FC = () => {
                 fontSize: '11.5px',
                 fontFamily: 'var(--font-mono)',
                 fontWeight: 600,
+=======
+                padding: '4px 12px',
+                borderRadius: '4px',
+                border: filterSeverity === sev ? '1px solid rgba(157, 0, 255, 0.65)' : '1px solid var(--border-color)',
+                background: filterSeverity === sev ? 'rgba(157, 0, 255, 0.22)' : 'rgba(255, 255, 255, 0.02)',
+                color: filterSeverity === sev ? '#ffffff' : 'var(--text-secondary)',
+                fontSize: '11px',
+                fontFamily: 'var(--font-mono)',
+                fontWeight: filterSeverity === sev ? 700 : 500,
+>>>>>>> 7c178db (fix: make frontend build)
                 cursor: 'pointer',
+                transition: 'all 0.18s ease',
+                boxShadow: filterSeverity === sev ? '0 0 10px rgba(157, 0, 255, 0.3)' : 'none',
               }}
               title="Select active or historical mission run to view its isolated chronological timeline"
             >

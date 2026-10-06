@@ -12,7 +12,7 @@ export const LandingFooter: React.FC = () => {
         maxWidth: '1360px',
         margin: '0 auto',
         padding: '40px 36px 36px',
-        borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+        borderTop: '1px solid rgba(56, 189, 248, 0.15)',
         position: 'relative',
         zIndex: 10,
         display: 'flex',
@@ -29,19 +29,21 @@ export const LandingFooter: React.FC = () => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            width: '28px',
-            height: '28px',
-            borderRadius: '6px',
-            background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
+            width: '30px',
+            height: '30px',
+            borderRadius: '7px',
+            background: 'linear-gradient(135deg, #1e1b2e 0%, #0d121f 100%)',
+            border: '1px solid rgba(212, 175, 55, 0.4)',
+            boxShadow: '0 0 12px rgba(212, 175, 55, 0.2)',
           }}
         >
-          <Box size={15} color="#fff" />
+          <Box size={15} color="var(--accent-gold)" />
         </div>
         <div>
-          <div style={{ fontWeight: 700, fontSize: '13.5px', letterSpacing: '0.6px', color: '#FFFFFF' }}>
-            ORBITAL <span style={{ color: '#27C7FF' }}>TWIN</span>
+          <div style={{ fontWeight: 800, fontSize: '13.5px', letterSpacing: '0.6px', color: '#FFFFFF' }}>
+            ORBITAL <span style={{ color: 'var(--accent-gold)' }}>TWIN</span>
           </div>
-          <div style={{ fontSize: '11px', color: '#64748B', fontFamily: 'var(--font-mono)' }}>
+          <div style={{ fontSize: '11px', color: '#8493A8', fontFamily: 'var(--font-mono)' }}>
             Mission ORBIT-X1 Aerospace Digital Twin Platform
           </div>
         </div>
@@ -60,7 +62,7 @@ export const LandingFooter: React.FC = () => {
             padding: '2px 4px',
             transition: 'color 0.2s ease',
           }}
-          onMouseEnter={(e) => (e.currentTarget.style.color = '#27C7FF')}
+          onMouseEnter={(e) => (e.currentTarget.style.color = '#B026FF')}
           onMouseLeave={(e) => (e.currentTarget.style.color = '#94A3B8')}
         >
           Mission
@@ -76,7 +78,7 @@ export const LandingFooter: React.FC = () => {
             padding: '2px 4px',
             transition: 'color 0.2s ease',
           }}
-          onMouseEnter={(e) => (e.currentTarget.style.color = '#27C7FF')}
+          onMouseEnter={(e) => (e.currentTarget.style.color = '#B026FF')}
           onMouseLeave={(e) => (e.currentTarget.style.color = '#94A3B8')}
         >
           Digital Twin
@@ -92,7 +94,7 @@ export const LandingFooter: React.FC = () => {
             padding: '2px 4px',
             transition: 'color 0.2s ease',
           }}
-          onMouseEnter={(e) => (e.currentTarget.style.color = '#27C7FF')}
+          onMouseEnter={(e) => (e.currentTarget.style.color = '#B026FF')}
           onMouseLeave={(e) => (e.currentTarget.style.color = '#94A3B8')}
         >
           Docs & Register
@@ -107,19 +109,21 @@ export const LandingFooter: React.FC = () => {
           gap: '8px',
           fontFamily: 'var(--font-mono)',
           fontSize: '11px',
-          color: '#64748B',
+          color: '#8493A8',
         }}
       >
-        <Globe size={13} color="#27C7FF" />
-        <span>LEO 550 KM</span>
+        <Globe size={13} color="var(--accent-cyan)" />
+        <span style={{ color: '#CBD5E1' }}>LEO 550 KM</span>
         <span style={{ opacity: 0.35 }}>•</span>
-        <span style={{ color: '#27D17F', display: 'flex', alignItems: 'center', gap: '5px' }}>
+        <span style={{ color: '#10b981', display: 'flex', alignItems: 'center', gap: '5px', fontWeight: 600 }}>
           <span
+            className="live-beacon"
             style={{
               width: '5px',
               height: '5px',
               borderRadius: '50%',
-              background: '#27D17F',
+              background: '#10b981',
+              boxShadow: '0 0 6px #10b981',
               display: 'inline-block',
             }}
           />

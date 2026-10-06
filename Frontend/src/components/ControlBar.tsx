@@ -63,8 +63,10 @@ export const ControlBar: React.FC = () => {
         flexWrap: 'wrap',
         gap: '12px',
         padding: '8px 20px',
-        background: 'var(--bg-secondary)',
-        borderBottom: '1px solid var(--border-color)',
+        background: 'rgba(7, 12, 23, 0.96)',
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
+        borderBottom: '1px solid rgba(56, 189, 248, 0.12)',
       }}
     >
       {/* Simulation Stepping & Execution Controls */}
@@ -72,8 +74,13 @@ export const ControlBar: React.FC = () => {
         {isRunning ? (
           <button
             onClick={pause}
-            className="btn btn-secondary"
-            style={{ borderColor: 'var(--status-warning)', color: 'var(--status-warning)' }}
+            className="btn"
+            style={{
+              background: 'rgba(245, 158, 11, 0.16)',
+              borderColor: 'rgba(245, 158, 11, 0.5)',
+              color: '#fbbf24',
+              boxShadow: '0 2px 8px rgba(245, 158, 11, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+            }}
             title="Pause continuous simulation"
           >
             <Pause size={15} /> Pause
@@ -81,9 +88,20 @@ export const ControlBar: React.FC = () => {
         ) : (
           <button
             onClick={start}
+<<<<<<< HEAD
             className="btn btn-primary"
             style={{ background: '#10b981', borderColor: '#059669' }}
             title="Start mission simulation"
+=======
+            className="btn"
+            style={{
+              background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+              borderColor: 'rgba(52, 211, 153, 0.5)',
+              color: '#ffffff',
+              boxShadow: '0 2px 10px rgba(16, 185, 129, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.25)',
+            }}
+            title="Start continuous real-time simulation"
+>>>>>>> 7c178db (fix: make frontend build)
           >
             <Play size={15} /> Start Mission
           </button>
@@ -127,12 +145,13 @@ export const ControlBar: React.FC = () => {
           disabled={!canInjectFault}
           className="btn btn-secondary"
           style={{
-            borderColor: canInjectFault ? '#f59e0b' : 'rgba(255, 255, 255, 0.1)',
-            color: canInjectFault ? '#f59e0b' : '#64748b',
-            background: state?.demo_mode === 'V-003_DEMO' ? 'rgba(245, 158, 11, 0.2)' : 'transparent',
+            borderColor: canInjectFault ? 'rgba(212, 175, 55, 0.55)' : 'rgba(255, 255, 255, 0.08)',
+            color: canInjectFault ? 'var(--accent-gold)' : '#64748b',
+            background: state?.demo_mode === 'V-003_DEMO' ? 'rgba(212, 175, 55, 0.22)' : 'rgba(14, 23, 40, 0.75)',
             fontSize: '12px',
             opacity: canInjectFault ? 1 : 0.45,
             cursor: canInjectFault ? 'pointer' : 'not-allowed',
+            boxShadow: state?.demo_mode === 'V-003_DEMO' ? '0 0 10px rgba(212, 175, 55, 0.3)' : 'none',
           }}
           title={
             canInjectFault
@@ -140,7 +159,7 @@ export const ControlBar: React.FC = () => {
               : "Simulation Engineer or Administrator role required to activate fault presets"
           }
         >
-          <Zap size={14} color={canInjectFault ? "#f59e0b" : "#64748b"} />
+          <Zap size={14} color={canInjectFault ? "var(--accent-gold)" : "#64748b"} />
           <span>{state?.demo_mode === 'V-003_DEMO' ? 'V-003 Active' : 'V-003 Demo'}</span>
           {!canInjectFault && ' (Locked)'}
         </button>
@@ -149,8 +168,8 @@ export const ControlBar: React.FC = () => {
           onClick={resetV003Demo}
           className="btn btn-secondary"
           style={{
-            borderColor: '#38bdf8',
-            color: '#38bdf8',
+            borderColor: 'rgba(212, 175, 55, 0.35)',
+            color: 'var(--accent-gold)',
             fontSize: '12px',
             cursor: 'pointer',
           }}
@@ -241,7 +260,7 @@ export const ControlBar: React.FC = () => {
 
         {/* Timestep Pacing Selection */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
+          <span style={{ fontSize: '11px', color: '#8493A8', fontFamily: 'var(--font-mono)', fontWeight: 600 }}>
             TIMING:
           </span>
           <div style={{ display: 'flex', gap: '3px' }}>
@@ -252,13 +271,15 @@ export const ControlBar: React.FC = () => {
                 style={{
                   padding: '3px 8px',
                   borderRadius: '4px',
-                  border: timestep === item.s ? '1px solid var(--accent-orange)' : '1px solid var(--border-color)',
-                  background: timestep === item.s ? 'rgba(249, 115, 22, 0.2)' : 'rgba(255, 255, 255, 0.03)',
-                  color: timestep === item.s ? '#fff' : 'var(--text-secondary)',
+                  border: timestep === item.s ? '1px solid rgba(157, 0, 255, 0.6)' : '1px solid rgba(255, 255, 255, 0.1)',
+                  background: timestep === item.s ? 'rgba(157, 0, 255, 0.22)' : 'rgba(255, 255, 255, 0.03)',
+                  color: timestep === item.s ? '#ffffff' : '#CBD5E1',
                   fontSize: '11px',
                   fontFamily: 'var(--font-mono)',
                   fontWeight: 600,
                   cursor: 'pointer',
+                  transition: 'all 0.18s ease',
+                  boxShadow: timestep === item.s ? '0 0 8px rgba(157, 0, 255, 0.25)' : 'none',
                 }}
                 title={`Configure simulation timestep to ${item.s}s`}
               >
@@ -270,7 +291,7 @@ export const ControlBar: React.FC = () => {
 
         {/* Speed Multiplier */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
+          <span style={{ fontSize: '11px', color: '#8493A8', fontFamily: 'var(--font-mono)', fontWeight: 600 }}>
             SPEED:
           </span>
           <div style={{ display: 'flex', gap: '3px' }}>
@@ -281,13 +302,15 @@ export const ControlBar: React.FC = () => {
                 style={{
                   padding: '3px 8px',
                   borderRadius: '4px',
-                  border: speed === s ? '1px solid var(--accent-orange)' : '1px solid var(--border-color)',
-                  background: speed === s ? 'rgba(249, 115, 22, 0.2)' : 'rgba(255, 255, 255, 0.03)',
-                  color: speed === s ? '#fff' : 'var(--text-secondary)',
+                  border: speed === s ? '1px solid rgba(157, 0, 255, 0.6)' : '1px solid rgba(255, 255, 255, 0.1)',
+                  background: speed === s ? 'rgba(157, 0, 255, 0.22)' : 'rgba(255, 255, 255, 0.03)',
+                  color: speed === s ? '#ffffff' : '#CBD5E1',
                   fontSize: '11px',
                   fontFamily: 'var(--font-mono)',
                   fontWeight: 600,
                   cursor: 'pointer',
+                  transition: 'all 0.18s ease',
+                  boxShadow: speed === s ? '0 0 8px rgba(157, 0, 255, 0.25)' : 'none',
                 }}
               >
                 {s}x
@@ -299,6 +322,7 @@ export const ControlBar: React.FC = () => {
 
       {/* Telemetry Metrics Summary */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+<<<<<<< HEAD
         <div style={{ textAlign: 'right' }}>
           <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>MISSION RUN</div>
           <div style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', fontWeight: 700, color: '#38bdf8' }}>
@@ -321,14 +345,27 @@ export const ControlBar: React.FC = () => {
           </div>
           <div style={{ fontSize: '10px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
             {(state?.simulation_time_s ?? 0).toFixed(0)}s
+=======
+        <div style={{ textAlign: 'right', padding: '3px 8px', background: 'rgba(255, 255, 255, 0.02)', borderRadius: '4px', border: '1px solid rgba(255, 255, 255, 0.06)' }}>
+          <div style={{ fontSize: '10px', color: '#8493A8', fontFamily: 'var(--font-mono)', letterSpacing: '0.4px' }}>STEP COUNT</div>
+          <div style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, color: '#F8FAFC', fontSize: '12.5px' }}>
+            #{state?.step_count || 0}
           </div>
         </div>
-        <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>ACTIVE FAULTS</div>
+        <div style={{ textAlign: 'right', padding: '3px 8px', background: 'rgba(255, 255, 255, 0.02)', borderRadius: '4px', border: '1px solid rgba(255, 255, 255, 0.06)' }}>
+          <div style={{ fontSize: '10px', color: '#8493A8', fontFamily: 'var(--font-mono)', letterSpacing: '0.4px' }}>SIM TIME</div>
+          <div style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, color: 'var(--accent-gold)', fontSize: '12.5px' }}>
+            {(state?.simulation_time_s ?? 0).toFixed(0)} s
+>>>>>>> 7c178db (fix: make frontend build)
+          </div>
+        </div>
+        <div style={{ textAlign: 'right', padding: '3px 8px', background: 'rgba(255, 255, 255, 0.02)', borderRadius: '4px', border: '1px solid rgba(255, 255, 255, 0.06)' }}>
+          <div style={{ fontSize: '10px', color: '#8493A8', fontFamily: 'var(--font-mono)', letterSpacing: '0.4px' }}>ACTIVE FAULTS</div>
           <div
             style={{
               fontFamily: 'var(--font-mono)',
               fontWeight: 700,
+              fontSize: '12.5px',
               color: (state?.active_faults_count || 0) > 0 ? 'var(--status-critical)' : 'var(--status-normal)',
             }}
           >

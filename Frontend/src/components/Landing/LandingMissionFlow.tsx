@@ -14,25 +14,25 @@ export const LandingMissionFlow: React.FC = () => {
       step: '01',
       title: 'OBSERVE',
       description: 'Real-time telemetry and spacecraft state',
-      icon: <Radio size={20} color="#27C7FF" />,
+      icon: <Radio size={20} color="var(--accent-gold)" />,
     },
     {
       step: '02',
       title: 'SIMULATE',
       description: 'Run mission scenarios and what-if conditions',
-      icon: <Sliders size={20} color="#27C7FF" />,
+      icon: <Sliders size={20} color="#B026FF" />,
     },
     {
       step: '03',
       title: 'DIAGNOSE',
       description: 'Trace faults and their propagation',
-      icon: <GitBranch size={20} color="#27C7FF" />,
+      icon: <GitBranch size={20} color="var(--accent-ruby)" />,
     },
     {
       step: '04',
       title: 'RECOVER',
       description: 'Evaluate and apply recovery strategies',
-      icon: <ShieldCheck size={20} color="#27C7FF" />,
+      icon: <ShieldCheck size={20} color="var(--accent-gold)" />,
     },
   ];
 
@@ -53,7 +53,7 @@ export const LandingMissionFlow: React.FC = () => {
           style={{
             fontSize: '11px',
             fontFamily: 'var(--font-mono)',
-            color: '#27C7FF',
+            color: 'var(--accent-gold)',
             letterSpacing: '2.5px',
             fontWeight: 600,
             textTransform: 'uppercase',
@@ -96,82 +96,103 @@ export const LandingMissionFlow: React.FC = () => {
           gap: '20px',
         }}
       >
-        {steps.map((item) => (
-          <div
-            key={item.step}
-            className="mission-flow-card"
-            style={{
-              padding: '24px 22px',
-              background: 'rgba(5, 12, 24, 0.75)',
-              backdropFilter: 'blur(14px)',
-              WebkitBackdropFilter: 'blur(14px)',
-              border: '1px solid rgba(39, 199, 255, 0.16)',
-              borderRadius: '12px',
-              boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
-              display: 'flex',
-              flexDirection: 'column',
-              transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
-            }}
-          >
-            {/* Step Top Bar: Icon + Step Badge */}
+        {steps.map((item) => {
+          const accentColor =
+            item.step === '02'
+              ? '#B026FF'
+              : item.step === '03'
+              ? 'var(--accent-ruby)'
+              : 'var(--accent-gold)';
+          const bgDim =
+            item.step === '02'
+              ? 'rgba(157, 0, 255, 0.1)'
+              : item.step === '03'
+              ? 'rgba(224, 17, 95, 0.1)'
+              : 'rgba(212, 175, 55, 0.1)';
+          const borderDim =
+            item.step === '02'
+              ? 'rgba(157, 0, 255, 0.35)'
+              : item.step === '03'
+              ? 'rgba(224, 17, 95, 0.35)'
+              : 'rgba(212, 175, 55, 0.35)';
+
+          return (
             <div
+              key={item.step}
+              className="mission-flow-card"
               style={{
+                padding: '26px 24px',
+                background: 'linear-gradient(180deg, rgba(12, 20, 36, 0.82) 0%, rgba(7, 13, 24, 0.94) 100%)',
+                backdropFilter: 'blur(16px)',
+                WebkitBackdropFilter: 'blur(16px)',
+                border: '1px solid rgba(255, 255, 255, 0.09)',
+                borderRadius: '12px',
+                boxShadow: '0 8px 28px rgba(2, 6, 15, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
                 display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                marginBottom: '18px',
+                flexDirection: 'column',
+                transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
               }}
             >
+              {/* Step Top Bar: Icon + Step Badge */}
               <div
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center',
-                  width: '40px',
-                  height: '40px',
-                  borderRadius: '8px',
-                  background: 'rgba(39, 199, 255, 0.08)',
-                  border: '1px solid rgba(39, 199, 255, 0.25)',
+                  justifyContent: 'space-between',
+                  marginBottom: '18px',
                 }}
               >
-                {item.icon}
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '42px',
+                    height: '42px',
+                    borderRadius: '10px',
+                    background: bgDim,
+                    border: `1px solid ${borderDim}`,
+                    boxShadow: `0 0 12px ${bgDim}`,
+                  }}
+                >
+                  {item.icon}
+                </div>
+                <span
+                  style={{
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    letterSpacing: '1px',
+                    color: accentColor,
+                    padding: '3px 8px',
+                    background: bgDim,
+                    borderRadius: '4px',
+                    border: `1px solid ${borderDim}`,
+                  }}
+                >
+                  // PHASE {item.step}
+                </span>
               </div>
-              <span
-                style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: '11.5px',
-                  fontWeight: 700,
-                  letterSpacing: '1px',
-                  color: '#27C7FF',
-                  padding: '3px 8px',
-                  background: 'rgba(39, 199, 255, 0.08)',
-                  borderRadius: '4px',
-                  border: '1px solid rgba(39, 199, 255, 0.2)',
-                }}
-              >
-                {item.step}
-              </span>
-            </div>
 
             {/* Title */}
             <h3
               style={{
                 fontSize: '16px',
                 fontWeight: 700,
-                color: '#F5F8FC',
+                color: '#F8FAFC',
                 letterSpacing: '0.6px',
                 marginBottom: '8px',
                 fontFamily: 'var(--font-sans)',
               }}
             >
-              {item.step} — {item.title}
+              {item.title}
             </h3>
 
             {/* Description */}
             <p
               style={{
                 fontSize: '13.5px',
-                lineHeight: 1.55,
+                lineHeight: 1.6,
                 color: '#94A3B8',
                 margin: 0,
               }}
@@ -179,7 +200,8 @@ export const LandingMissionFlow: React.FC = () => {
               {item.description}
             </p>
           </div>
-        ))}
+        );
+      })}
       </div>
     </section>
   );
