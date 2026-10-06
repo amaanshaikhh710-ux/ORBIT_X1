@@ -269,6 +269,15 @@ export const RecoveryPlanner: React.FC = () => {
         </div>
 
 <<<<<<< HEAD
+        <button
+          onClick={handleSimulate}
+          disabled={loading || selectedPolicies.length === 0}
+          className="btn btn-primary"
+          style={{
+            background: 'var(--grad-primary)',
+            borderColor: 'rgba(212, 175, 55, 0.5)',
+            boxShadow: '0 2px 12px rgba(212, 175, 55, 0.25)',
+=======
         {/* Plain Language Situation Assessment & Mission Impact */}
         <div
           style={{
@@ -278,16 +287,7 @@ export const RecoveryPlanner: React.FC = () => {
             border: `1px solid ${hasFaults || isBatteryLow ? 'rgba(239, 68, 68, 0.2)' : 'rgba(56, 189, 248, 0.2)'}`,
             fontSize: '12.5px',
             lineHeight: 1.6,
-=======
-        <button
-          onClick={handleSimulate}
-          disabled={loading || selectedPolicies.length === 0}
-          className="btn btn-primary"
-          style={{
-            background: 'var(--grad-primary)',
-            borderColor: 'rgba(212, 175, 55, 0.5)',
-            boxShadow: '0 2px 12px rgba(212, 175, 55, 0.25)',
->>>>>>> 7c178db (fix: make frontend build)
+>>>>>>> b1108d54c51c7dd8d4b0f661d5ff4dfe67f1bbf6
           }}
         >
           <div style={{ fontWeight: 600, color: hasFaults || isBatteryLow ? '#f87171' : '#38bdf8', marginBottom: '4px' }}>
@@ -372,6 +372,29 @@ export const RecoveryPlanner: React.FC = () => {
                 onClick={() => handleSelectOption(pid)}
                 style={{
 <<<<<<< HEAD
+                  padding: '14px 16px',
+                  borderRadius: '8px',
+                  border: isSelected ? '1px solid rgba(212, 175, 55, 0.6)' : '1px solid rgba(255, 255, 255, 0.08)',
+                  background: isSelected ? 'rgba(212, 175, 55, 0.1)' : 'rgba(255, 255, 255, 0.02)',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: '12px',
+                  transition: 'all 0.18s cubic-bezier(0.4, 0, 0.2, 1)',
+                  boxShadow: isSelected ? '0 0 12px rgba(212, 175, 55, 0.22)' : 'none',
+                }}
+              >
+                <div style={{ marginTop: '2px', color: isSelected ? 'var(--accent-gold)' : '#64748b' }}>
+                  {isSelected ? <CheckSquare size={16} /> : <Square size={16} />}
+                </div>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span className={`badge ${isSelected ? 'badge-gold' : 'badge-inactive'}`}>{pid}</span>
+                    <span style={{ fontWeight: 700, fontSize: '13px', color: '#F8FAFC' }}>{meta.name}</span>
+                  </div>
+                  <div style={{ fontSize: '12px', color: '#94A3B8', marginTop: '4px', lineHeight: 1.45 }}>
+                    {meta.desc}
+=======
                   padding: '12px 14px',
                   borderRadius: '6px',
                   border: isSingleSelected
@@ -406,30 +429,7 @@ export const RecoveryPlanner: React.FC = () => {
                     style={{ color: isSelectedForSim ? 'var(--accent-orange)' : 'var(--text-muted)' }}
                   >
                     {isSelectedForSim ? <CheckSquare size={16} /> : <Square size={16} />}
-=======
-                  padding: '14px 16px',
-                  borderRadius: '8px',
-                  border: isSelected ? '1px solid rgba(212, 175, 55, 0.6)' : '1px solid rgba(255, 255, 255, 0.08)',
-                  background: isSelected ? 'rgba(212, 175, 55, 0.1)' : 'rgba(255, 255, 255, 0.02)',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  gap: '12px',
-                  transition: 'all 0.18s cubic-bezier(0.4, 0, 0.2, 1)',
-                  boxShadow: isSelected ? '0 0 12px rgba(212, 175, 55, 0.22)' : 'none',
-                }}
-              >
-                <div style={{ marginTop: '2px', color: isSelected ? 'var(--accent-gold)' : '#64748b' }}>
-                  {isSelected ? <CheckSquare size={16} /> : <Square size={16} />}
-                </div>
-                <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <span className={`badge ${isSelected ? 'badge-gold' : 'badge-inactive'}`}>{pid}</span>
-                    <span style={{ fontWeight: 700, fontSize: '13px', color: '#F8FAFC' }}>{meta.name}</span>
-                  </div>
-                  <div style={{ fontSize: '12px', color: '#94A3B8', marginTop: '4px', lineHeight: 1.45 }}>
-                    {meta.desc}
->>>>>>> 7c178db (fix: make frontend build)
+>>>>>>> b1108d54c51c7dd8d4b0f661d5ff4dfe67f1bbf6
                   </div>
                 </div>
 

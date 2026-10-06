@@ -6,6 +6,14 @@ export const TelemetryWorkbench: React.FC = () => {
   const { history, telemetry, state, exportTelemetryCsv } = useSimulation();
 
 <<<<<<< HEAD
+  const metricConfigs = {
+    battery_soc_pct: { label: 'Battery State of Charge', unit: '%', color: 'var(--accent-gold)', min: 0, max: 100, source: 'SIMULATED' },
+    solar_generation_w: { label: 'Solar Array Generation', unit: 'W', color: '#E5C158', min: 0, max: 25, source: 'SIMULATED' },
+    internal_temp_c: { label: 'Internal Spacecraft Temp', unit: '°C', color: '#B026FF', min: 0, max: 60, source: 'SIMULATED' },
+    storage_used_mb: { label: 'Flash Science Storage Used', unit: 'MB', color: '#818cf8', min: 0, max: 8000, source: 'SIMULATED' },
+    downlink_mbps: { label: 'X-Band Downlink Rate', unit: 'Mbps', color: '#06b6d4', min: 0, max: 3, source: 'SIMULATED' },
+    adcs_error_deg: { label: 'ADCS Pointing Error', unit: 'deg', color: 'var(--accent-ruby)', min: 0, max: 5, source: 'SIMULATED' },
+=======
   type MetricKey =
     | 'battery_soc_pct'
     | 'solar_generation_w'
@@ -113,15 +121,7 @@ export const TelemetryWorkbench: React.FC = () => {
       thresholdCondition: 'above',
       thresholdLabel: '0.5° Pointing Warning',
     },
-=======
-  const metricConfigs = {
-    battery_soc_pct: { label: 'Battery State of Charge', unit: '%', color: 'var(--accent-gold)', min: 0, max: 100, source: 'SIMULATED' },
-    solar_generation_w: { label: 'Solar Array Generation', unit: 'W', color: '#E5C158', min: 0, max: 25, source: 'SIMULATED' },
-    internal_temp_c: { label: 'Internal Spacecraft Temp', unit: '°C', color: '#B026FF', min: 0, max: 60, source: 'SIMULATED' },
-    storage_used_mb: { label: 'Flash Science Storage Used', unit: 'MB', color: '#818cf8', min: 0, max: 8000, source: 'SIMULATED' },
-    downlink_mbps: { label: 'X-Band Downlink Rate', unit: 'Mbps', color: '#06b6d4', min: 0, max: 3, source: 'SIMULATED' },
-    adcs_error_deg: { label: 'ADCS Pointing Error', unit: 'deg', color: 'var(--accent-ruby)', min: 0, max: 5, source: 'SIMULATED' },
->>>>>>> 7c178db (fix: make frontend build)
+>>>>>>> b1108d54c51c7dd8d4b0f661d5ff4dfe67f1bbf6
   };
 
   const config = metricConfigs[selectedMetric];
@@ -192,6 +192,19 @@ export const TelemetryWorkbench: React.FC = () => {
     }).join(' ');
 
 <<<<<<< HEAD
+    const areaPoints = `${padding.left},${padding.top + plotH} ${points} ${width - padding.right},${padding.top + plotH}`;
+
+    return (
+      <svg viewBox={`0 0 ${width} ${height}`} style={{ width: '100%', height: '260px' }}>
+        <defs>
+          <linearGradient id="telemetryAreaGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={config.color} stopOpacity="0.22" />
+            <stop offset="100%" stopColor={config.color} stopOpacity="0.01" />
+          </linearGradient>
+        </defs>
+
+        {/* Horizontal gridlines */}
+=======
     // Threshold Y position
     let thresholdY: number | null = null;
     if (config.warningThreshold !== undefined) {
@@ -208,20 +221,7 @@ export const TelemetryWorkbench: React.FC = () => {
     return (
       <svg viewBox={`0 0 ${width} ${height}`} style={{ width: '100%', height: '270px' }}>
         {/* Horizontal gridlines and Y axis labels */}
-=======
-    const areaPoints = `${padding.left},${padding.top + plotH} ${points} ${width - padding.right},${padding.top + plotH}`;
-
-    return (
-      <svg viewBox={`0 0 ${width} ${height}`} style={{ width: '100%', height: '260px' }}>
-        <defs>
-          <linearGradient id="telemetryAreaGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={config.color} stopOpacity="0.22" />
-            <stop offset="100%" stopColor={config.color} stopOpacity="0.01" />
-          </linearGradient>
-        </defs>
-
-        {/* Horizontal gridlines */}
->>>>>>> 7c178db (fix: make frontend build)
+>>>>>>> b1108d54c51c7dd8d4b0f661d5ff4dfe67f1bbf6
         {[0, 0.25, 0.5, 0.75, 1].map((ratio, i) => {
           const y = padding.top + plotH * (1 - ratio);
           const val = minVal + ratio * valRange;
@@ -233,22 +233,22 @@ export const TelemetryWorkbench: React.FC = () => {
                 x2={width - padding.right}
                 y2={y}
 <<<<<<< HEAD
-                stroke="rgba(255,255,255,0.07)"
-=======
                 stroke="rgba(56, 189, 248, 0.12)"
->>>>>>> 7c178db (fix: make frontend build)
+=======
+                stroke="rgba(255,255,255,0.07)"
+>>>>>>> b1108d54c51c7dd8d4b0f661d5ff4dfe67f1bbf6
                 strokeDasharray="4 4"
               />
               <text
                 x={padding.left - 10}
                 y={y + 4}
 <<<<<<< HEAD
-                fill="var(--text-muted)"
-                fontSize="11"
-=======
                 fill="#8493A8"
                 fontSize="10"
->>>>>>> 7c178db (fix: make frontend build)
+=======
+                fill="var(--text-muted)"
+                fontSize="11"
+>>>>>>> b1108d54c51c7dd8d4b0f661d5ff4dfe67f1bbf6
                 fontFamily="var(--font-mono)"
                 textAnchor="end"
               >
@@ -259,6 +259,14 @@ export const TelemetryWorkbench: React.FC = () => {
         })}
 
 <<<<<<< HEAD
+        {/* Area fill under curve */}
+        <polygon
+          points={areaPoints}
+          fill="url(#telemetryAreaGrad)"
+        />
+
+        {/* Telemetry line */}
+=======
         {/* Warning Threshold Line if applicable */}
         {thresholdY !== null && thresholdY >= padding.top && thresholdY <= padding.top + plotH && (
           <g>
@@ -287,15 +295,7 @@ export const TelemetryWorkbench: React.FC = () => {
         )}
 
         {/* Telemetry Polyline */}
-=======
-        {/* Area fill under curve */}
-        <polygon
-          points={areaPoints}
-          fill="url(#telemetryAreaGrad)"
-        />
-
-        {/* Telemetry line */}
->>>>>>> 7c178db (fix: make frontend build)
+>>>>>>> b1108d54c51c7dd8d4b0f661d5ff4dfe67f1bbf6
         <polyline
           fill="none"
           stroke={config.color}
@@ -316,16 +316,16 @@ export const TelemetryWorkbench: React.FC = () => {
               cx={x}
               cy={y}
 <<<<<<< HEAD
-              r={isLatest ? 4.5 : 2.5}
-              fill={isLatest ? '#FFFFFF' : config.color}
-              stroke={config.color}
-              strokeWidth={isLatest ? 2 : 1}
-=======
               r="3"
               fill={config.color}
               stroke="#060b17"
               strokeWidth="1.5"
->>>>>>> 7c178db (fix: make frontend build)
+=======
+              r={isLatest ? 4.5 : 2.5}
+              fill={isLatest ? '#FFFFFF' : config.color}
+              stroke={config.color}
+              strokeWidth={isLatest ? 2 : 1}
+>>>>>>> b1108d54c51c7dd8d4b0f661d5ff4dfe67f1bbf6
             />
           );
         })}
@@ -356,21 +356,19 @@ export const TelemetryWorkbench: React.FC = () => {
         {/* Axis Titles */}
         <text
 <<<<<<< HEAD
-          x={width / 2}
-          y={height - 5}
-          fill="var(--text-muted)"
-=======
           x={padding.left}
           y={height - 8}
           fill="#8493A8"
->>>>>>> 7c178db (fix: make frontend build)
+=======
+          x={width / 2}
+          y={height - 5}
+          fill="var(--text-muted)"
+>>>>>>> b1108d54c51c7dd8d4b0f661d5ff4dfe67f1bbf6
           fontSize="10"
           fontFamily="var(--font-mono)"
           textAnchor="middle"
         >
 <<<<<<< HEAD
-          SIMULATION TIME (INTERNAL CLOCK)
-=======
           T+{timeMin}s
         </text>
         <text
@@ -382,7 +380,9 @@ export const TelemetryWorkbench: React.FC = () => {
           textAnchor="end"
         >
           T+{timeMax}s
->>>>>>> 7c178db (fix: make frontend build)
+=======
+          SIMULATION TIME (INTERNAL CLOCK)
+>>>>>>> b1108d54c51c7dd8d4b0f661d5ff4dfe67f1bbf6
         </text>
       </svg>
     );
@@ -395,20 +395,20 @@ export const TelemetryWorkbench: React.FC = () => {
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
 <<<<<<< HEAD
-            <Activity size={18} color="var(--accent-cyan)" />
-            <span style={{ fontWeight: 700, fontSize: '15px' }}>Telemetry Workbench</span>
-            <span className="source-tag">AUTHORITATIVE SIMULATION TELEMETRY</span>
-          </div>
-          <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>
-            Live engineering telemetry streamed directly from the spacecraft physics engine.
-=======
             <Activity size={18} color="var(--accent-gold)" />
             <span style={{ fontWeight: 700, fontSize: '15px', color: '#FFFFFF' }}>Telemetry Workbench</span>
             <span className="source-tag">100% SIMULATED TRUTH</span>
           </div>
           <div style={{ fontSize: '12px', color: '#8493A8', marginTop: '2px' }}>
             Every parameter originates strictly from the 10-second discrete simulation engine state.
->>>>>>> 7c178db (fix: make frontend build)
+=======
+            <Activity size={18} color="var(--accent-cyan)" />
+            <span style={{ fontWeight: 700, fontSize: '15px' }}>Telemetry Workbench</span>
+            <span className="source-tag">AUTHORITATIVE SIMULATION TELEMETRY</span>
+          </div>
+          <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>
+            Live engineering telemetry streamed directly from the spacecraft physics engine.
+>>>>>>> b1108d54c51c7dd8d4b0f661d5ff4dfe67f1bbf6
           </div>
         </div>
 
@@ -474,18 +474,6 @@ export const TelemetryWorkbench: React.FC = () => {
                 <span
                   style={{
 <<<<<<< HEAD
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: '11.5px',
-                    color: isSelected ? 'var(--accent-orange)' : '#38bdf8',
-                    fontWeight: 700,
-                  }}
-                >
-                  {val.toFixed(1)} {item.unit}
-                </span>
-              </button>
-            );
-          })}
-=======
                     padding: '6px 12px',
                     borderRadius: '4px',
                     border: isSelected ? '1px solid rgba(157, 0, 255, 0.65)' : '1px solid var(--border-color)',
@@ -519,7 +507,19 @@ export const TelemetryWorkbench: React.FC = () => {
             <Download size={14} />
             Export Telemetry (CSV)
           </button>
->>>>>>> 7c178db (fix: make frontend build)
+=======
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: '11.5px',
+                    color: isSelected ? 'var(--accent-orange)' : '#38bdf8',
+                    fontWeight: 700,
+                  }}
+                >
+                  {val.toFixed(1)} {item.unit}
+                </span>
+              </button>
+            );
+          })}
+>>>>>>> b1108d54c51c7dd8d4b0f661d5ff4dfe67f1bbf6
         </div>
       </div>
 

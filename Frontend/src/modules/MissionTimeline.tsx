@@ -88,15 +88,6 @@ export const MissionTimeline: React.FC = () => {
               onChange={(e) => setSelectedRunId(e.target.value)}
               style={{
 <<<<<<< HEAD
-                padding: '4px 8px',
-                borderRadius: '4px',
-                border: '1px solid var(--border-color)',
-                background: 'rgba(15, 23, 42, 0.9)',
-                color: '#38bdf8',
-                fontSize: '11.5px',
-                fontFamily: 'var(--font-mono)',
-                fontWeight: 600,
-=======
                 padding: '4px 12px',
                 borderRadius: '4px',
                 border: filterSeverity === sev ? '1px solid rgba(157, 0, 255, 0.65)' : '1px solid var(--border-color)',
@@ -105,7 +96,16 @@ export const MissionTimeline: React.FC = () => {
                 fontSize: '11px',
                 fontFamily: 'var(--font-mono)',
                 fontWeight: filterSeverity === sev ? 700 : 500,
->>>>>>> 7c178db (fix: make frontend build)
+=======
+                padding: '4px 8px',
+                borderRadius: '4px',
+                border: '1px solid var(--border-color)',
+                background: 'rgba(15, 23, 42, 0.9)',
+                color: '#38bdf8',
+                fontSize: '11.5px',
+                fontFamily: 'var(--font-mono)',
+                fontWeight: 600,
+>>>>>>> b1108d54c51c7dd8d4b0f661d5ff4dfe67f1bbf6
                 cursor: 'pointer',
                 transition: 'all 0.18s ease',
                 boxShadow: filterSeverity === sev ? '0 0 10px rgba(157, 0, 255, 0.3)' : 'none',

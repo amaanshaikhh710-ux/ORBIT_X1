@@ -106,6 +106,11 @@ export const Reports: React.FC = () => {
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', fontSize: '12px' }}>
 <<<<<<< HEAD
+              <div style={{ padding: '12px 14px', background: 'rgba(255,255,255,0.02)', borderRadius: '6px', border: '1px solid rgba(56, 189, 248, 0.12)' }}>
+                <div style={{ color: '#8493A8', fontSize: '10.5px', fontFamily: 'var(--font-mono)', letterSpacing: '0.4px', marginBottom: '2px' }}>DURATION</div>
+                <div style={{ fontSize: '18px', fontWeight: 800, fontFamily: 'var(--font-mono)', color: '#F8FAFC' }}>
+                  {report.simulation_duration_s} s
+=======
               <div style={{ padding: '10px', background: 'rgba(255,255,255,0.02)', borderRadius: '4px' }}>
                 <div style={{ color: 'var(--text-muted)' }}>SIMULATION DURATION</div>
                 <div style={{ fontSize: '15px', fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--accent-cyan)' }}>
@@ -119,12 +124,7 @@ export const Reports: React.FC = () => {
                 </div>
                 <div style={{ fontSize: '10px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
                   ({Number(report.simulation_duration_s || 0).toFixed(0)}s internal clock)
-=======
-              <div style={{ padding: '12px 14px', background: 'rgba(255,255,255,0.02)', borderRadius: '6px', border: '1px solid rgba(56, 189, 248, 0.12)' }}>
-                <div style={{ color: '#8493A8', fontSize: '10.5px', fontFamily: 'var(--font-mono)', letterSpacing: '0.4px', marginBottom: '2px' }}>DURATION</div>
-                <div style={{ fontSize: '18px', fontWeight: 800, fontFamily: 'var(--font-mono)', color: '#F8FAFC' }}>
-                  {report.simulation_duration_s} s
->>>>>>> 7c178db (fix: make frontend build)
+>>>>>>> b1108d54c51c7dd8d4b0f661d5ff4dfe67f1bbf6
                 </div>
               </div>
               <div style={{ padding: '12px 14px', background: 'rgba(255,255,255,0.02)', borderRadius: '6px', border: '1px solid rgba(56, 189, 248, 0.12)' }}>
