@@ -66,12 +66,12 @@ export const LandingExploreTwin: React.FC = () => {
       <div
         style={{
           padding: '48px 40px',
-          background: 'rgba(5, 12, 24, 0.82)',
+          background: 'linear-gradient(180deg, rgba(12, 20, 36, 0.88) 0%, rgba(7, 13, 24, 0.96) 100%)',
           backdropFilter: 'blur(16px)',
           WebkitBackdropFilter: 'blur(16px)',
-          border: '1px solid rgba(39, 199, 255, 0.22)',
+          border: '1px solid rgba(56, 189, 248, 0.22)',
           borderRadius: '16px',
-          boxShadow: '0 12px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
+          boxShadow: '0 16px 48px rgba(2, 6, 15, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
         }}
       >
         {/* Header */}
@@ -80,7 +80,7 @@ export const LandingExploreTwin: React.FC = () => {
             style={{
               fontSize: '11px',
               fontFamily: 'var(--font-mono)',
-              color: '#27C7FF',
+              color: 'var(--accent-gold)',
               letterSpacing: '2.5px',
               fontWeight: 600,
               textTransform: 'uppercase',
@@ -105,7 +105,7 @@ export const LandingExploreTwin: React.FC = () => {
             style={{
               fontSize: '15px',
               lineHeight: 1.6,
-              color: '#AAB7C8',
+              color: '#94A3B8',
               maxWidth: '620px',
               margin: '0 auto',
             }}
@@ -128,9 +128,9 @@ export const LandingExploreTwin: React.FC = () => {
             <div
               key={sub.tag}
               style={{
-                padding: '18px 20px',
-                background: 'rgba(2, 6, 14, 0.65)',
-                border: '1px solid rgba(39, 199, 255, 0.14)',
+                padding: '20px 22px',
+                background: 'rgba(4, 9, 20, 0.75)',
+                border: '1px solid rgba(255, 255, 255, 0.08)',
                 borderRadius: '10px',
                 display: 'flex',
                 gap: '14px',
@@ -144,11 +144,11 @@ export const LandingExploreTwin: React.FC = () => {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  width: '36px',
-                  height: '36px',
-                  borderRadius: '7px',
-                  background: 'rgba(39, 199, 255, 0.08)',
-                  border: '1px solid rgba(39, 199, 255, 0.22)',
+                  width: '38px',
+                  height: '38px',
+                  borderRadius: '8px',
+                  background: 'rgba(212, 175, 55, 0.08)',
+                  border: '1px solid rgba(212, 175, 55, 0.25)',
                   flexShrink: 0,
                 }}
               >
@@ -161,7 +161,7 @@ export const LandingExploreTwin: React.FC = () => {
                       fontFamily: 'var(--font-mono)',
                       fontSize: '11px',
                       fontWeight: 700,
-                      color: '#27C7FF',
+                      color: 'var(--accent-gold)',
                       letterSpacing: '0.6px',
                     }}
                   >
@@ -171,7 +171,7 @@ export const LandingExploreTwin: React.FC = () => {
                     style={{
                       fontSize: '12.5px',
                       fontWeight: 700,
-                      color: '#F5F8FC',
+                      color: '#F8FAFC',
                       letterSpacing: '0.4px',
                     }}
                   >
@@ -181,7 +181,7 @@ export const LandingExploreTwin: React.FC = () => {
                 <p
                   style={{
                     fontSize: '12px',
-                    lineHeight: 1.45,
+                    lineHeight: 1.5,
                     color: '#94A3B8',
                     margin: 0,
                   }}
@@ -203,22 +203,19 @@ export const LandingExploreTwin: React.FC = () => {
               alignItems: 'center',
               gap: '12px',
               padding: '16px 36px',
-              background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
-              border: '1px solid rgba(39, 199, 255, 0.45)',
               borderRadius: '8px',
               color: '#ffffff',
-              fontSize: '14px',
+              fontSize: '13.5px',
               fontWeight: 700,
-              letterSpacing: '0.8px',
+              letterSpacing: '0.9px',
               cursor: 'pointer',
-              boxShadow: '0 0 28px rgba(24, 191, 255, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.25)',
               transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
               textTransform: 'uppercase',
             }}
           >
-            <Box size={18} />
+            <Box size={18} color="var(--accent-gold)" />
             <span>EXPLORE DIGITAL TWIN</span>
-            <ArrowRight size={18} className="cta-arrow" />
+            <ArrowRight size={18} className="cta-arrow" color="var(--accent-gold)" />
           </button>
         </div>
       </div>

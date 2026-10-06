@@ -35,8 +35,9 @@ export const LoginPage: React.FC = () => {
         position: 'relative',
         minHeight: '100vh',
         width: '100%',
-        background: 'radial-gradient(ellipse at 50% 30%, #0b1528 0%, #080c14 50%, #05070d 100%)',
-        color: '#F5F8FC',
+        background:
+          'radial-gradient(circle at 50% 15%, rgba(157, 0, 255, 0.12) 0%, transparent 50%), radial-gradient(ellipse at 50% 28%, #0d1222 0%, #060a16 45%, #020409 100%)',
+        color: '#F8FAFC',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -51,7 +52,7 @@ export const LoginPage: React.FC = () => {
           position: 'absolute',
           inset: 0,
           backgroundImage:
-            'radial-gradient(rgba(39, 199, 255, 0.12) 1px, transparent 1px), radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px)',
+            'radial-gradient(rgba(157, 0, 255, 0.15) 1px, transparent 1px), radial-gradient(rgba(212, 175, 55, 0.06) 1px, transparent 1px)',
           backgroundSize: '40px 40px, 80px 80px',
           backgroundPosition: '0 0, 20px 20px',
           pointerEvents: 'none',
@@ -73,22 +74,25 @@ export const LoginPage: React.FC = () => {
             display: 'flex',
             alignItems: 'center',
             gap: '8px',
-            background: 'rgba(5, 11, 20, 0.7)',
-            border: '1px solid rgba(39, 199, 255, 0.25)',
+            background: 'rgba(8, 14, 26, 0.8)',
+            border: '1px solid rgba(212, 175, 55, 0.25)',
             color: '#CBD5E1',
             borderRadius: '20px',
             padding: '8px 16px',
             fontSize: '13px',
             cursor: 'pointer',
             transition: 'all 0.2s ease',
+            backdropFilter: 'blur(12px)',
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.color = '#27C7FF';
-            e.currentTarget.style.borderColor = '#27C7FF';
+            e.currentTarget.style.color = 'var(--accent-gold)';
+            e.currentTarget.style.borderColor = 'var(--accent-gold)';
+            e.currentTarget.style.transform = 'translateX(-2px)';
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.color = '#CBD5E1';
-            e.currentTarget.style.borderColor = 'rgba(39, 199, 255, 0.25)';
+            e.currentTarget.style.borderColor = 'rgba(212, 175, 55, 0.25)';
+            e.currentTarget.style.transform = 'none';
           }}
         >
           <ArrowLeft size={16} />
@@ -103,13 +107,13 @@ export const LoginPage: React.FC = () => {
           zIndex: 5,
           width: '100%',
           maxWidth: '440px',
-          background: 'rgba(5, 12, 24, 0.88)',
+          background: 'linear-gradient(180deg, rgba(12, 20, 36, 0.92) 0%, rgba(7, 13, 24, 0.98) 100%)',
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
-          border: '1px solid rgba(39, 199, 255, 0.25)',
+          border: '1px solid rgba(157, 0, 255, 0.28)',
           borderRadius: '16px',
           padding: '40px 32px',
-          boxShadow: '0 20px 50px rgba(0, 0, 0, 0.7), 0 0 30px rgba(39, 199, 255, 0.12)',
+          boxShadow: '0 24px 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(157, 0, 255, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
         }}
       >
         {/* Header Badge */}
@@ -119,22 +123,23 @@ export const LoginPage: React.FC = () => {
               display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
-              width: '54px',
-              height: '54px',
+              width: '56px',
+              height: '56px',
               borderRadius: '14px',
-              background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
-              boxShadow: '0 0 20px rgba(39, 199, 255, 0.45)',
+              background: 'linear-gradient(135deg, #1e1b2e 0%, #0d121f 100%)',
+              border: '1px solid rgba(212, 175, 55, 0.5)',
+              boxShadow: '0 0 24px rgba(212, 175, 55, 0.3)',
               marginBottom: '14px',
             }}
           >
-            <Satellite size={26} color="#FFFFFF" />
+            <Satellite size={26} color="var(--accent-gold)" />
           </div>
 
           <div
             style={{
               fontSize: '11px',
               fontFamily: 'var(--font-mono)',
-              color: '#27C7FF',
+              color: 'var(--accent-gold)',
               letterSpacing: '2.5px',
               fontWeight: 600,
               textTransform: 'uppercase',
@@ -153,7 +158,7 @@ export const LoginPage: React.FC = () => {
               margin: '0 0 6px 0',
             }}
           >
-            ORBITAL <span style={{ color: '#27C7FF' }}>TWIN</span>
+            ORBITAL <span style={{ color: 'var(--accent-gold)' }}>TWIN</span>
           </h2>
 
           <div
@@ -173,11 +178,11 @@ export const LoginPage: React.FC = () => {
               alignItems: 'center',
               gap: '6px',
               padding: '4px 12px',
-              background: 'rgba(234, 179, 8, 0.12)',
-              border: '1px solid rgba(234, 179, 8, 0.35)',
+              background: 'rgba(212, 175, 55, 0.12)',
+              border: '1px solid rgba(212, 175, 55, 0.35)',
               borderRadius: '20px',
               fontSize: '11.5px',
-              color: '#FACC15',
+              color: 'var(--accent-gold)',
               fontFamily: 'var(--font-mono)',
               fontWeight: 500,
             }}
@@ -331,7 +336,7 @@ export const LoginPage: React.FC = () => {
                 style={{
                   background: 'transparent',
                   border: 'none',
-                  color: '#38BDF8',
+                  color: 'var(--accent-gold)',
                   fontSize: '11px',
                   fontFamily: 'var(--font-mono)',
                   cursor: 'pointer',
@@ -354,17 +359,17 @@ export const LoginPage: React.FC = () => {
               justifyContent: 'center',
               gap: '10px',
               padding: '14px',
-              background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
-              border: '1px solid rgba(39, 199, 255, 0.45)',
+              background: 'var(--grad-primary)',
+              border: '1px solid rgba(212, 175, 55, 0.55)',
               borderRadius: '8px',
               color: '#FFFFFF',
               fontSize: '13.5px',
               fontWeight: 700,
               letterSpacing: '0.8px',
               cursor: loading ? 'not-allowed' : 'pointer',
-              boxShadow: '0 0 20px rgba(39, 199, 255, 0.35)',
+              boxShadow: '0 4px 20px rgba(212, 175, 55, 0.28)',
               opacity: loading ? 0.7 : 1,
-              transition: 'all 0.2s ease',
+              transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
               textTransform: 'uppercase',
             }}
           >

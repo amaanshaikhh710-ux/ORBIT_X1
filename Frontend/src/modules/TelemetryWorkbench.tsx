@@ -9,12 +9,12 @@ export const TelemetryWorkbench: React.FC = () => {
   >('battery_soc_pct');
 
   const metricConfigs = {
-    battery_soc_pct: { label: 'Battery State of Charge', unit: '%', color: '#22c55e', min: 0, max: 100, source: 'SIMULATED' },
-    solar_generation_w: { label: 'Solar Array Generation', unit: 'W', color: '#38bdf8', min: 0, max: 25, source: 'SIMULATED' },
-    internal_temp_c: { label: 'Internal Spacecraft Temp', unit: '°C', color: '#f59e0b', min: 0, max: 60, source: 'SIMULATED' },
+    battery_soc_pct: { label: 'Battery State of Charge', unit: '%', color: 'var(--accent-gold)', min: 0, max: 100, source: 'SIMULATED' },
+    solar_generation_w: { label: 'Solar Array Generation', unit: 'W', color: '#E5C158', min: 0, max: 25, source: 'SIMULATED' },
+    internal_temp_c: { label: 'Internal Spacecraft Temp', unit: '°C', color: '#B026FF', min: 0, max: 60, source: 'SIMULATED' },
     storage_used_mb: { label: 'Flash Science Storage Used', unit: 'MB', color: '#818cf8', min: 0, max: 8000, source: 'SIMULATED' },
     downlink_mbps: { label: 'X-Band Downlink Rate', unit: 'Mbps', color: '#06b6d4', min: 0, max: 3, source: 'SIMULATED' },
-    adcs_error_deg: { label: 'ADCS Pointing Error', unit: 'deg', color: '#ec4899', min: 0, max: 5, source: 'SIMULATED' },
+    adcs_error_deg: { label: 'ADCS Pointing Error', unit: 'deg', color: 'var(--accent-ruby)', min: 0, max: 5, source: 'SIMULATED' },
   };
 
   const config = metricConfigs[selectedMetric];
@@ -51,8 +51,17 @@ export const TelemetryWorkbench: React.FC = () => {
       return `${x},${y}`;
     }).join(' ');
 
+    const areaPoints = `${padding.left},${padding.top + plotH} ${points} ${width - padding.right},${padding.top + plotH}`;
+
     return (
       <svg viewBox={`0 0 ${width} ${height}`} style={{ width: '100%', height: '260px' }}>
+        <defs>
+          <linearGradient id="telemetryAreaGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={config.color} stopOpacity="0.22" />
+            <stop offset="100%" stopColor={config.color} stopOpacity="0.01" />
+          </linearGradient>
+        </defs>
+
         {/* Horizontal gridlines */}
         {[0, 0.25, 0.5, 0.75, 1].map((ratio, i) => {
           const y = padding.top + plotH * (1 - ratio);
@@ -64,13 +73,13 @@ export const TelemetryWorkbench: React.FC = () => {
                 y1={y}
                 x2={width - padding.right}
                 y2={y}
-                stroke="rgba(255,255,255,0.08)"
+                stroke="rgba(56, 189, 248, 0.12)"
                 strokeDasharray="4 4"
               />
               <text
                 x={padding.left - 8}
                 y={y + 4}
-                fill="var(--text-muted)"
+                fill="#8493A8"
                 fontSize="10"
                 fontFamily="var(--font-mono)"
                 textAnchor="end"
@@ -80,6 +89,12 @@ export const TelemetryWorkbench: React.FC = () => {
             </g>
           );
         })}
+
+        {/* Area fill under curve */}
+        <polygon
+          points={areaPoints}
+          fill="url(#telemetryAreaGrad)"
+        />
 
         {/* Telemetry line */}
         <polyline
@@ -102,7 +117,7 @@ export const TelemetryWorkbench: React.FC = () => {
               cy={y}
               r="3"
               fill={config.color}
-              stroke="#0a0e17"
+              stroke="#060b17"
               strokeWidth="1.5"
             />
           );
@@ -112,7 +127,7 @@ export const TelemetryWorkbench: React.FC = () => {
         <text
           x={padding.left}
           y={height - 8}
-          fill="var(--text-muted)"
+          fill="#8493A8"
           fontSize="10"
           fontFamily="var(--font-mono)"
         >
@@ -121,7 +136,7 @@ export const TelemetryWorkbench: React.FC = () => {
         <text
           x={width - padding.right}
           y={height - 8}
-          fill="var(--text-muted)"
+          fill="#8493A8"
           fontSize="10"
           fontFamily="var(--font-mono)"
           textAnchor="end"
@@ -138,11 +153,11 @@ export const TelemetryWorkbench: React.FC = () => {
       <div className="aerospace-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Activity size={18} color="var(--accent-cyan)" />
-            <span style={{ fontWeight: 600, fontSize: '15px' }}>Telemetry Workbench</span>
+            <Activity size={18} color="var(--accent-gold)" />
+            <span style={{ fontWeight: 700, fontSize: '15px', color: '#FFFFFF' }}>Telemetry Workbench</span>
             <span className="source-tag">100% SIMULATED TRUTH</span>
           </div>
-          <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>
+          <div style={{ fontSize: '12px', color: '#8493A8', marginTop: '2px' }}>
             Every parameter originates strictly from the 10-second discrete simulation engine state.
           </div>
         </div>
@@ -159,13 +174,15 @@ export const TelemetryWorkbench: React.FC = () => {
                   style={{
                     padding: '6px 12px',
                     borderRadius: '4px',
-                    border: isSelected ? '1px solid var(--accent-orange)' : '1px solid var(--border-color)',
-                    background: isSelected ? 'rgba(249, 115, 22, 0.16)' : 'rgba(255, 255, 255, 0.02)',
-                    color: isSelected ? '#fff' : 'var(--text-secondary)',
+                    border: isSelected ? '1px solid rgba(157, 0, 255, 0.65)' : '1px solid var(--border-color)',
+                    background: isSelected ? 'rgba(157, 0, 255, 0.22)' : 'rgba(255, 255, 255, 0.02)',
+                    color: isSelected ? '#ffffff' : '#CBD5E1',
                     fontSize: '12px',
                     fontFamily: 'var(--font-mono)',
                     cursor: 'pointer',
-                    fontWeight: isSelected ? 600 : 400,
+                    fontWeight: isSelected ? 700 : 500,
+                    boxShadow: isSelected ? '0 0 10px rgba(157, 0, 255, 0.3)' : 'none',
+                    transition: 'all 0.18s ease',
                   }}
                 >
                   {metricConfigs[key].label} ({metricConfigs[key].unit})
@@ -176,19 +193,11 @@ export const TelemetryWorkbench: React.FC = () => {
 
           <button
             onClick={exportTelemetryCsv}
+            className="btn btn-primary"
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
               padding: '6px 14px',
-              borderRadius: '4px',
-              border: '1px solid var(--accent-cyan)',
-              background: 'rgba(56, 189, 248, 0.15)',
-              color: '#38bdf8',
               fontSize: '12px',
               fontFamily: 'var(--font-mono)',
-              fontWeight: 600,
-              cursor: 'pointer',
               whiteSpace: 'nowrap',
             }}
             title="Download authoritative simulation run telemetry CSV with all 23 flight parameters"

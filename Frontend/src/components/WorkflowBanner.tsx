@@ -33,8 +33,8 @@ export const WorkflowBanner: React.FC = () => {
   return (
     <div
       style={{
-        background: 'var(--bg-secondary)',
-        borderBottom: '1px solid var(--border-color)',
+        background: 'rgba(7, 12, 23, 0.96)',
+        borderBottom: '1px solid rgba(56, 189, 248, 0.1)',
         padding: '8px 16px',
         overflowX: 'auto',
       }}
@@ -45,9 +45,10 @@ export const WorkflowBanner: React.FC = () => {
             fontSize: '11px',
             fontFamily: 'var(--font-mono)',
             fontWeight: 700,
-            color: 'var(--accent-cyan)',
+            color: 'var(--accent-gold)',
             marginRight: '8px',
             whiteSpace: 'nowrap',
+            letterSpacing: '0.6px',
           }}
         >
           MISSION WORKFLOW:
@@ -69,32 +70,46 @@ export const WorkflowBanner: React.FC = () => {
                   padding: '4px 10px',
                   borderRadius: '4px',
                   border: isActive
-                    ? '1px solid var(--accent-orange)'
+                    ? '1px solid rgba(212, 175, 55, 0.75)'
                     : isPassed
-                    ? '1px solid rgba(34, 197, 94, 0.35)'
-                    : '1px solid var(--border-color)',
+                    ? '1px solid rgba(16, 185, 129, 0.4)'
+                    : '1px solid rgba(255, 255, 255, 0.08)',
                   background: isActive
-                    ? 'rgba(249, 115, 22, 0.16)'
+                    ? 'rgba(212, 175, 55, 0.18)'
                     : isPassed
-                    ? 'rgba(34, 197, 94, 0.10)'
+                    ? 'rgba(16, 185, 129, 0.08)'
                     : 'rgba(255, 255, 255, 0.02)',
                   color: isActive
                     ? '#ffffff'
                     : isPassed
-                    ? 'var(--status-normal)'
+                    ? '#34d399'
                     : 'var(--text-muted)',
                   fontSize: '12px',
-                  fontWeight: isActive ? 600 : 400,
+                  fontFamily: 'var(--font-sans)',
+                  fontWeight: isActive ? 700 : isPassed ? 600 : 400,
                   cursor: 'pointer',
                   whiteSpace: 'nowrap',
-                  transition: 'all 0.15s ease',
+                  transition: 'all 0.18s ease',
+                  boxShadow: isActive ? '0 0 12px rgba(212, 175, 55, 0.28)' : 'none',
                 }}
               >
+                {isActive && (
+                  <span
+                    className="live-beacon"
+                    style={{
+                      width: '5px',
+                      height: '5px',
+                      borderRadius: '50%',
+                      background: 'var(--accent-gold)',
+                      display: 'inline-block',
+                    }}
+                  />
+                )}
                 <span>{step.label}</span>
               </button>
 
               {idx < STEPS.length - 1 && (
-                <ChevronRight size={14} color="var(--border-color)" style={{ flexShrink: 0 }} />
+                <ChevronRight size={13} color="rgba(212, 175, 55, 0.3)" style={{ flexShrink: 0 }} />
               )}
             </React.Fragment>
           );

@@ -44,7 +44,7 @@ export const Reports: React.FC = () => {
       <div className="aerospace-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <FileText size={18} color="var(--accent-cyan)" />
+            <FileText size={18} color="var(--accent-gold)" />
             <span style={{ fontWeight: 600, fontSize: '15px' }}>Mission Verification & Post-Run Reports</span>
             <span className="source-tag">AUTHORITATIVE AUDIT TRAIL</span>
           </div>
@@ -58,7 +58,11 @@ export const Reports: React.FC = () => {
             onClick={handleGenerate}
             disabled={loading}
             className="btn btn-primary"
-            style={{ background: 'var(--accent-orange)' }}
+            style={{
+              background: 'var(--grad-primary)',
+              borderColor: 'rgba(212, 175, 55, 0.5)',
+              boxShadow: '0 2px 10px rgba(212, 175, 55, 0.25)',
+            }}
           >
             <RefreshCw size={14} /> {loading ? 'Compiling Report...' : 'Generate New Report'}
           </button>
@@ -85,7 +89,7 @@ export const Reports: React.FC = () => {
           <div className="aerospace-card">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
               <div>
-                <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--accent-cyan)' }}>
+                <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--accent-gold)' }}>
                   Report ID: {report.id}
                 </span>
                 <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>
@@ -96,27 +100,27 @@ export const Reports: React.FC = () => {
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', fontSize: '12px' }}>
-              <div style={{ padding: '10px', background: 'rgba(255,255,255,0.02)', borderRadius: '4px' }}>
-                <div style={{ color: 'var(--text-muted)' }}>DURATION</div>
-                <div style={{ fontSize: '16px', fontWeight: 700, fontFamily: 'var(--font-mono)' }}>
+              <div style={{ padding: '12px 14px', background: 'rgba(255,255,255,0.02)', borderRadius: '6px', border: '1px solid rgba(56, 189, 248, 0.12)' }}>
+                <div style={{ color: '#8493A8', fontSize: '10.5px', fontFamily: 'var(--font-mono)', letterSpacing: '0.4px', marginBottom: '2px' }}>DURATION</div>
+                <div style={{ fontSize: '18px', fontWeight: 800, fontFamily: 'var(--font-mono)', color: '#F8FAFC' }}>
                   {report.simulation_duration_s} s
                 </div>
               </div>
-              <div style={{ padding: '10px', background: 'rgba(255,255,255,0.02)', borderRadius: '4px' }}>
-                <div style={{ color: 'var(--text-muted)' }}>FINAL BATTERY SOC</div>
-                <div style={{ fontSize: '16px', fontWeight: 700, fontFamily: 'var(--font-mono)', color: report.summary.final_battery_soc > 25 ? 'var(--status-normal)' : 'var(--status-critical)' }}>
+              <div style={{ padding: '12px 14px', background: 'rgba(255,255,255,0.02)', borderRadius: '6px', border: '1px solid rgba(56, 189, 248, 0.12)' }}>
+                <div style={{ color: '#8493A8', fontSize: '10.5px', fontFamily: 'var(--font-mono)', letterSpacing: '0.4px', marginBottom: '2px' }}>FINAL BATTERY SOC</div>
+                <div style={{ fontSize: '18px', fontWeight: 800, fontFamily: 'var(--font-mono)', color: report.summary.final_battery_soc > 25 ? '#34d399' : '#f87171' }}>
                   {report.summary.final_battery_soc} %
                 </div>
               </div>
-              <div style={{ padding: '10px', background: 'rgba(255,255,255,0.02)', borderRadius: '4px' }}>
-                <div style={{ color: 'var(--text-muted)' }}>FINAL TEMP</div>
-                <div style={{ fontSize: '16px', fontWeight: 700, fontFamily: 'var(--font-mono)' }}>
+              <div style={{ padding: '12px 14px', background: 'rgba(255,255,255,0.02)', borderRadius: '6px', border: '1px solid rgba(56, 189, 248, 0.12)' }}>
+                <div style={{ color: '#8493A8', fontSize: '10.5px', fontFamily: 'var(--font-mono)', letterSpacing: '0.4px', marginBottom: '2px' }}>FINAL TEMP</div>
+                <div style={{ fontSize: '18px', fontWeight: 800, fontFamily: 'var(--font-mono)', color: '#F8FAFC' }}>
                   {report.summary.final_internal_temp_c} °C
                 </div>
               </div>
-              <div style={{ padding: '10px', background: 'rgba(255,255,255,0.02)', borderRadius: '4px' }}>
-                <div style={{ color: 'var(--text-muted)' }}>DOWNLINK TOTAL</div>
-                <div style={{ fontSize: '16px', fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--accent-cyan)' }}>
+              <div style={{ padding: '12px 14px', background: 'rgba(255,255,255,0.02)', borderRadius: '6px', border: '1px solid rgba(56, 189, 248, 0.12)' }}>
+                <div style={{ color: '#8493A8', fontSize: '10.5px', fontFamily: 'var(--font-mono)', letterSpacing: '0.4px', marginBottom: '2px' }}>DOWNLINK TOTAL</div>
+                <div style={{ fontSize: '18px', fontWeight: 800, fontFamily: 'var(--font-mono)', color: 'var(--accent-cyan)' }}>
                   {report.summary.total_downlinked_mb} MB
                 </div>
               </div>

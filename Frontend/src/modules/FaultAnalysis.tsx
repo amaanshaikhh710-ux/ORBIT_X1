@@ -26,7 +26,11 @@ export const FaultAnalysis: React.FC = () => {
             setActiveModule('recovery-planner');
           }}
           className="btn btn-primary"
-          style={{ background: 'var(--accent-orange)' }}
+          style={{
+            background: 'var(--grad-primary)',
+            borderColor: 'rgba(212, 175, 55, 0.5)',
+            boxShadow: '0 2px 12px rgba(212, 175, 55, 0.25)',
+          }}
         >
           Formulate Recovery Strategy →
         </button>
@@ -56,7 +60,7 @@ export const FaultAnalysis: React.FC = () => {
       <div className="aerospace-card">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Zap size={16} color="var(--accent-cyan)" />
+            <Zap size={16} color="var(--accent-gold)" />
             <span style={{ fontWeight: 600, fontSize: '13px' }}>Subsystem Causal Transition Flow</span>
           </div>
           <span className="source-tag">DETERMINISTIC CAUSAL CHAIN</span>
@@ -81,16 +85,16 @@ export const FaultAnalysis: React.FC = () => {
                         flexDirection: 'column',
                         alignItems: 'center',
                         gap: '2px',
-                        padding: '4px 12px',
-                        background: 'rgba(239, 68, 68, 0.06)',
-                        border: '1px dashed rgba(239, 68, 68, 0.3)',
-                        borderRadius: '4px',
-                        maxWidth: '450px',
+                        padding: '6px 14px',
+                        background: 'rgba(224, 17, 95, 0.08)',
+                        border: '1px dashed rgba(224, 17, 95, 0.45)',
+                        borderRadius: '6px',
+                        maxWidth: '480px',
                         textAlign: 'center',
                       }}
                     >
                       <ArrowDown size={14} color="var(--status-critical)" />
-                      <span style={{ fontSize: '11px', color: 'var(--status-critical)', fontFamily: 'var(--font-mono)' }}>
+                      <span style={{ fontSize: '11px', color: '#ff85ab', fontFamily: 'var(--font-mono)', fontWeight: 600 }}>
                         {edge.description} (T+{(edge.timestamp_s ?? 0).toFixed(0)}s)
                       </span>
                     </div>
@@ -100,12 +104,12 @@ export const FaultAnalysis: React.FC = () => {
                   <div
                     style={{
                       width: '100%',
-                      maxWidth: '520px',
-                      background: 'var(--bg-card)',
-                      border: idx === 0 ? '1px solid var(--status-critical)' : '1px solid var(--border-active)',
+                      maxWidth: '540px',
+                      background: 'linear-gradient(180deg, rgba(14, 22, 38, 0.88) 0%, rgba(8, 14, 25, 0.95) 100%)',
+                      border: idx === 0 ? '1px solid rgba(224, 17, 95, 0.7)' : '1px solid rgba(245, 158, 11, 0.45)',
                       borderRadius: '8px',
-                      padding: '14px 18px',
-                      boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
+                      padding: '16px 20px',
+                      boxShadow: idx === 0 ? '0 0 24px rgba(224, 17, 95, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.08)' : '0 4px 18px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
                       display: 'flex',
                       justifyContent: 'space-between',
                       alignItems: 'center',
@@ -116,11 +120,11 @@ export const FaultAnalysis: React.FC = () => {
                         <span className={`badge ${idx === 0 ? 'badge-critical' : 'badge-warning'}`}>
                           {idx === 0 ? 'ROOT CAUSE' : 'CONSEQUENCE'}
                         </span>
-                        <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
+                        <span style={{ fontSize: '11px', color: '#8493A8', fontFamily: 'var(--font-mono)', letterSpacing: '0.4px' }}>
                           SUBSYSTEM: {node.subsystem.toUpperCase()}
                         </span>
                       </div>
-                      <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)' }}>
+                      <div style={{ fontSize: '13.5px', fontWeight: 700, color: '#F8FAFC' }}>
                         {node.label}
                       </div>
                     </div>

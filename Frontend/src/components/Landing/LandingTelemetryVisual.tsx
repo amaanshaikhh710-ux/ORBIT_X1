@@ -8,6 +8,7 @@ interface TelemetryChannel {
   subValue: string;
   status: string;
   statusColor: string;
+  strokeColor: string;
   icon: React.ReactNode;
   unit: string;
   points: number[];
@@ -44,8 +45,9 @@ export const LandingTelemetryVisual: React.FC = () => {
       unit: 'W',
       subValue: 'SOLAR PEAK 24 W NOMINAL',
       status: 'SUNLIT NOMINAL',
-      statusColor: '#27D17F',
-      icon: <Zap size={16} color="#27C7FF" />,
+      statusColor: '#10B981',
+      strokeColor: '#D4AF37',
+      icon: <Zap size={16} color="var(--accent-gold)" />,
       points: [22.8, 23.5, 23.9, 24.1, 24.0, 24.2, 23.8, 24.0, 24.1],
     },
     {
@@ -55,8 +57,9 @@ export const LandingTelemetryVisual: React.FC = () => {
       unit: '%',
       subValue: '72 Wh BATTERY CAPACITY',
       status: 'INITIAL SOC 85%',
-      statusColor: '#27D17F',
-      icon: <Battery size={16} color="#27C7FF" />,
+      statusColor: '#10B981',
+      strokeColor: '#D4AF37',
+      icon: <Battery size={16} color="var(--accent-gold)" />,
       points: [84.2, 84.6, 84.9, 85.0, 85.1, 85.0, 84.8, 85.0, 85.1],
     },
     {
@@ -66,8 +69,9 @@ export const LandingTelemetryVisual: React.FC = () => {
       unit: '°C',
       subValue: 'NOMINAL 20°C BUS',
       status: 'EQUILIBRIUM',
-      statusColor: '#27C7FF',
-      icon: <Thermometer size={16} color="#27C7FF" />,
+      statusColor: '#B026FF',
+      strokeColor: '#9D00FF',
+      icon: <Thermometer size={16} color="#B026FF" />,
       points: [19.8, 19.9, 20.0, 20.1, 20.0, 20.2, 20.0, 19.9, 20.0],
     },
     {
@@ -77,8 +81,9 @@ export const LandingTelemetryVisual: React.FC = () => {
       unit: 'Mbps',
       subValue: 'NOMINAL 2 Mbps DOWNLINK',
       status: 'LINK NOMINAL',
-      statusColor: '#27D17F',
-      icon: <Radio size={16} color="#27C7FF" />,
+      statusColor: '#10B981',
+      strokeColor: '#9D00FF',
+      icon: <Radio size={16} color="#B026FF" />,
       points: [1.96, 1.98, 2.01, 2.00, 2.02, 1.99, 2.01, 2.00, 2.02],
     },
   ];
@@ -100,7 +105,7 @@ export const LandingTelemetryVisual: React.FC = () => {
           style={{
             fontSize: '11px',
             fontFamily: 'var(--font-mono)',
-            color: '#27C7FF',
+            color: 'var(--accent-gold)',
             letterSpacing: '2.5px',
             fontWeight: 600,
             textTransform: 'uppercase',
@@ -147,16 +152,17 @@ export const LandingTelemetryVisual: React.FC = () => {
           <div
             key={chan.id}
             style={{
-              padding: '20px 22px',
-              background: 'rgba(5, 12, 24, 0.78)',
-              backdropFilter: 'blur(14px)',
-              WebkitBackdropFilter: 'blur(14px)',
-              border: '1px solid rgba(39, 199, 255, 0.16)',
+              padding: '22px 24px',
+              background: 'linear-gradient(180deg, rgba(12, 20, 36, 0.85) 0%, rgba(7, 13, 24, 0.95) 100%)',
+              backdropFilter: 'blur(16px)',
+              WebkitBackdropFilter: 'blur(16px)',
+              border: '1px solid rgba(56, 189, 248, 0.2)',
               borderRadius: '12px',
-              boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
+              boxShadow: '0 10px 30px rgba(2, 6, 15, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'space-between',
+              transition: 'border-color 0.2s ease, transform 0.2s ease',
             }}
           >
             {/* Card Header */}
@@ -175,11 +181,11 @@ export const LandingTelemetryVisual: React.FC = () => {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      width: '30px',
-                      height: '30px',
-                      borderRadius: '6px',
-                      background: 'rgba(39, 199, 255, 0.08)',
-                      border: '1px solid rgba(39, 199, 255, 0.22)',
+                      width: '32px',
+                      height: '32px',
+                      borderRadius: '8px',
+                      background: 'rgba(56, 189, 248, 0.1)',
+                      border: '1px solid rgba(56, 189, 248, 0.28)',
                     }}
                   >
                     {chan.icon}
@@ -188,7 +194,7 @@ export const LandingTelemetryVisual: React.FC = () => {
                     style={{
                       fontFamily: 'var(--font-mono)',
                       fontSize: '11px',
-                      fontWeight: 600,
+                      fontWeight: 700,
                       letterSpacing: '0.8px',
                       color: '#94A3B8',
                     }}
@@ -203,9 +209,9 @@ export const LandingTelemetryVisual: React.FC = () => {
                     fontWeight: 700,
                     letterSpacing: '0.5px',
                     color: chan.statusColor,
-                    padding: '2px 6px',
-                    background: `${chan.statusColor}15`,
-                    border: `1px solid ${chan.statusColor}33`,
+                    padding: '2px 7px',
+                    background: `${chan.statusColor}18`,
+                    border: `1px solid ${chan.statusColor}40`,
                     borderRadius: '4px',
                   }}
                 >
@@ -221,7 +227,7 @@ export const LandingTelemetryVisual: React.FC = () => {
                     fontSize: '28px',
                     fontWeight: 800,
                     letterSpacing: '-0.5px',
-                    color: '#F5F8FC',
+                    color: chan.strokeColor === '#D4AF37' ? 'var(--accent-gold)' : '#F8FAFC',
                   }}
                 >
                   {chan.value}
@@ -231,7 +237,7 @@ export const LandingTelemetryVisual: React.FC = () => {
                     fontFamily: 'var(--font-mono)',
                     fontSize: '14px',
                     fontWeight: 600,
-                    color: '#27C7FF',
+                    color: chan.strokeColor,
                   }}
                 >
                   {chan.unit}
@@ -256,10 +262,10 @@ export const LandingTelemetryVisual: React.FC = () => {
               style={{
                 position: 'relative',
                 width: '100%',
-                height: '60px',
-                background: 'rgba(2, 6, 14, 0.65)',
-                border: '1px solid rgba(39, 199, 255, 0.12)',
-                borderRadius: '6px',
+                height: '64px',
+                background: 'rgba(3, 8, 18, 0.85)',
+                border: '1px solid rgba(255, 255, 255, 0.08)',
+                borderRadius: '8px',
                 overflow: 'hidden',
                 padding: '4px 6px',
               }}
@@ -271,13 +277,13 @@ export const LandingTelemetryVisual: React.FC = () => {
                     <path
                       d="M 28 0 L 0 0 0 15"
                       fill="none"
-                      stroke="rgba(39, 199, 255, 0.06)"
+                      stroke="rgba(255, 255, 255, 0.04)"
                       strokeWidth="1"
                     />
                   </pattern>
                   <linearGradient id={`grad-${chan.id}`} x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#27C7FF" stopOpacity="0.35" />
-                    <stop offset="100%" stopColor="#27C7FF" stopOpacity="0.0" />
+                    <stop offset="0%" stopColor={chan.strokeColor} stopOpacity="0.35" />
+                    <stop offset="100%" stopColor={chan.strokeColor} stopOpacity="0.0" />
                   </linearGradient>
                 </defs>
                 <rect width="100%" height="100%" fill={`url(#grid-${chan.id})`} />
@@ -285,7 +291,7 @@ export const LandingTelemetryVisual: React.FC = () => {
                 {/* Animated Waveform Polyline */}
                 <polyline
                   fill="none"
-                  stroke="#27C7FF"
+                  stroke={chan.strokeColor}
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"

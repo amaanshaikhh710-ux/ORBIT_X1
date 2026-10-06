@@ -17,7 +17,7 @@ export const MissionTimeline: React.FC = () => {
       <div className="aerospace-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Clock size={18} color="var(--accent-cyan)" />
+            <Clock size={18} color="var(--accent-gold)" />
             <span style={{ fontWeight: 600, fontSize: '15px' }}>Mission Event Timeline</span>
             <span className="source-tag">CHRONOLOGICAL EVENT LOG</span>
           </div>
@@ -35,14 +35,17 @@ export const MissionTimeline: React.FC = () => {
               key={sev}
               onClick={() => setFilterSeverity(sev)}
               style={{
-                padding: '4px 10px',
+                padding: '4px 12px',
                 borderRadius: '4px',
-                border: filterSeverity === sev ? '1px solid var(--accent-orange)' : '1px solid var(--border-color)',
-                background: filterSeverity === sev ? 'rgba(249, 115, 22, 0.2)' : 'rgba(255, 255, 255, 0.02)',
-                color: filterSeverity === sev ? '#fff' : 'var(--text-secondary)',
+                border: filterSeverity === sev ? '1px solid rgba(157, 0, 255, 0.65)' : '1px solid var(--border-color)',
+                background: filterSeverity === sev ? 'rgba(157, 0, 255, 0.22)' : 'rgba(255, 255, 255, 0.02)',
+                color: filterSeverity === sev ? '#ffffff' : 'var(--text-secondary)',
                 fontSize: '11px',
                 fontFamily: 'var(--font-mono)',
+                fontWeight: filterSeverity === sev ? 700 : 500,
                 cursor: 'pointer',
+                transition: 'all 0.18s ease',
+                boxShadow: filterSeverity === sev ? '0 0 10px rgba(157, 0, 255, 0.3)' : 'none',
               }}
             >
               {sev}

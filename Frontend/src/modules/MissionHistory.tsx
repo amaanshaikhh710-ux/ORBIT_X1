@@ -65,11 +65,11 @@ export const MissionHistory: React.FC = () => {
       case 'NOMINAL':
         return { label: 'NOMINAL', bg: 'rgba(16, 185, 129, 0.15)', border: 'rgba(16, 185, 129, 0.4)', color: '#34d399' };
       case 'RUNNING':
-        return { label: 'LIVE / RUNNING', bg: 'rgba(39, 199, 255, 0.15)', border: 'rgba(39, 199, 255, 0.4)', color: '#38bdf8' };
+        return { label: 'LIVE / RUNNING', bg: 'rgba(157, 0, 255, 0.15)', border: 'rgba(157, 0, 255, 0.4)', color: '#c060ff' };
       case 'ANOMALY':
-        return { label: 'ANOMALY ACTIVE', bg: 'rgba(239, 68, 68, 0.15)', border: 'rgba(239, 68, 68, 0.4)', color: '#f87171' };
+        return { label: 'ANOMALY ACTIVE', bg: 'rgba(224, 17, 95, 0.15)', border: 'rgba(224, 17, 95, 0.45)', color: '#ff85ab' };
       case 'RECOVERED':
-        return { label: 'RECOVERED', bg: 'rgba(245, 158, 11, 0.15)', border: 'rgba(245, 158, 11, 0.4)', color: '#fbbf24' };
+        return { label: 'RECOVERED', bg: 'rgba(212, 175, 55, 0.15)', border: 'rgba(212, 175, 55, 0.45)', color: 'var(--accent-gold)' };
       default:
         return { label: status, bg: 'rgba(148, 163, 184, 0.15)', border: 'rgba(148, 163, 184, 0.3)', color: '#94a3b8' };
     }
@@ -103,7 +103,7 @@ export const MissionHistory: React.FC = () => {
             style={{
               fontSize: '11px',
               fontFamily: 'var(--font-mono)',
-              color: '#27C7FF',
+              color: 'var(--accent-gold)',
               letterSpacing: '2px',
               fontWeight: 600,
               textTransform: 'uppercase',
@@ -140,15 +140,17 @@ export const MissionHistory: React.FC = () => {
                 key={f}
                 onClick={() => setFilter(f)}
                 style={{
-                  padding: '6px 12px',
+                  padding: '6px 14px',
                   borderRadius: '6px',
-                  border: 'none',
+                  border: filter === f ? '1px solid var(--accent-cyan)' : '1px solid transparent',
                   fontSize: '11.5px',
-                  fontWeight: 600,
+                  fontFamily: 'var(--font-mono)',
+                  fontWeight: filter === f ? 700 : 500,
                   cursor: 'pointer',
-                  background: filter === f ? 'rgba(39, 199, 255, 0.2)' : 'transparent',
-                  color: filter === f ? '#27C7FF' : '#94A3B8',
+                  background: filter === f ? 'rgba(56, 189, 248, 0.2)' : 'transparent',
+                  color: filter === f ? '#FFFFFF' : '#94A3B8',
                   transition: 'all 0.15s ease',
+                  boxShadow: filter === f ? '0 0 10px rgba(56, 189, 248, 0.25)' : 'none',
                 }}
               >
                 {f}
@@ -160,21 +162,14 @@ export const MissionHistory: React.FC = () => {
           <button
             onClick={fetchRuns}
             disabled={loading}
+            className="btn btn-secondary"
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '8px 14px',
-              background: 'rgba(39, 199, 255, 0.12)',
-              border: '1px solid rgba(39, 199, 255, 0.3)',
-              borderRadius: '8px',
-              color: '#27C7FF',
-              fontSize: '12.5px',
-              fontWeight: 600,
-              cursor: loading ? 'not-allowed' : 'pointer',
+              padding: '6px 14px',
+              fontSize: '12px',
+              fontFamily: 'var(--font-mono)',
             }}
           >
-            <RefreshCw size={14} className={loading ? 'spin' : ''} />
+            <RefreshCw size={13} className={loading ? 'spin' : ''} />
             <span>Refresh Vault</span>
           </button>
         </div>
