@@ -258,6 +258,7 @@ export interface HistoricalRunDetails extends HistoricalSimulationRun {
   reports: any[];
   snapshots_count?: number;
   final_state?: any;
+  timeline_events?: any[];
 }
 
 export interface AdminUser {

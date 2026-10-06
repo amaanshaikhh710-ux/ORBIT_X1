@@ -95,6 +95,7 @@ class SimulationRunRecord(Base):
     recovery_actions = relationship("RecoveryActionRecord", back_populates="run", cascade="all, delete-orphan")
     reports = relationship("ReportRecord", back_populates="run", cascade="all, delete-orphan")
     telemetry_snapshots = relationship("TelemetrySnapshotRecord", back_populates="run", cascade="all, delete-orphan")
+    timeline_events = relationship("MissionEventRecord", back_populates="run", cascade="all, delete-orphan", order_by="MissionEventRecord.simulation_time_s")
 
     def to_dict(self):
         return {
@@ -232,5 +233,35 @@ class ReportRecord(Base):
             "report_type": self.report_type,
             "title": self.title,
             "simulation_duration_s": self.simulation_duration_s,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+        }
+
+
+class MissionEventRecord(Base):
+    __tablename__ = "mission_events"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    run_id = Column(String(64), ForeignKey("simulation_runs.id"), nullable=False, index=True)
+    simulation_time_s = Column(Float, nullable=False)
+    step = Column(Integer, default=0)
+    event_type = Column(String(64), nullable=False)
+    subsystem = Column(String(64), nullable=False)
+    severity = Column(String(32), nullable=False)
+    message = Column(Text, nullable=False)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+    run = relationship("SimulationRunRecord", back_populates="timeline_events")
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "run_id": self.run_id,
+            "simulation_time_s": self.simulation_time_s,
+            "timestamp_s": self.simulation_time_s,
+            "step": self.step,
+            "event_type": self.event_type,
+            "subsystem": self.subsystem,
+            "severity": self.severity,
+            "message": self.message,
             "created_at": self.created_at.isoformat() if self.created_at else None,
         }

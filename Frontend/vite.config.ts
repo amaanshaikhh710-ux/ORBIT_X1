@@ -25,6 +25,20 @@ export default defineConfig({
     },
   },
 
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('three')) {
+            return 'three';
+          }
+          if (id.includes('react') || id.includes('lucide-react')) {
+            return 'vendor';
+          }
+        },
+      },
+    },
+  },
   preview: {
     host: true,
     allowedHosts: ['orbit-x1-2.onrender.com'],

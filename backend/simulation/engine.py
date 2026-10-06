@@ -134,6 +134,7 @@ class SimulationEngine:
             "end_time_s": start_time_s + duration_s,
         }
         self.active_faults.append(fault)
+        self.state.active_faults = list(self.active_faults)
 
     def _apply_fault_modifiers(self) -> dict[str, float]:
         """
@@ -499,11 +500,42 @@ class SimulationEngine:
         """Applies an operational recovery policy to the active running simulation."""
         self.recovery_policy = policy
         self.state.recovery_mode = policy.policy_id
+
+        # Immediately adjust payload load if policy shuts down or safing payload
+        if policy.disable_non_critical_payload or policy.force_low_power_mode:
+            if self.payload_model.state in (PayloadState.IMAGING, PayloadState.PROCESSING):
+                self.payload_model.images_deferred += 1
+                self.payload_model.state = PayloadState.IDLE
+                self.payload_model.active_task_id = None
+                self.payload_model.task_progress_s = 0.0
+                self.payload_model.raw_buffer_mb = 0.0
+            self.state.payload_load_w = 0.0
+            self.state.payload_state = PayloadState.IDLE
+
+        # Recalculate immediate power consumption and power margin
+        total_pwr = (
+            self.state.housekeeping_load_w
+            + self.state.payload_load_w
+            + self.state.processing_load_w
+            + self.state.comm_load_w
+            + self.state.adcs_load_w
+            + self.state.thermal_load_w
+            + self.state.fault_overhead_load_w
+        )
+        self.state.total_power_consumption_w = total_pwr
+        self.state.power_margin_w = self.state.solar_generation_w - total_pwr
+
         self._record_event(
             event_type="RECOVERY_POLICY_APPLIED",
             subsystem="RECOVERY",
             severity=AlertSeverity.INFO,
             message=f"Applied recovery policy {policy.policy_id}: {policy.name} ({policy.actions})",
+        )
+        self._record_event(
+            event_type="RECOVERY_SUCCEEDED",
+            subsystem="RECOVERY",
+            severity=AlertSeverity.INFO,
+            message=f"Recovery policy {policy.policy_id} active. Subsystem load reduced to {total_pwr:.1f}W.",
         )
         self.causal_engine.record_transition(
             timestamp_s=self.state.simulation_time_s,

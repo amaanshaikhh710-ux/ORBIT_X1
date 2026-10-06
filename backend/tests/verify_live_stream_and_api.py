@@ -12,14 +12,21 @@ import urllib.request
 API_BASE = "http://127.0.0.1:8000"
 WS_URL = "ws://127.0.0.1:8000/ws/simulation/run-default"
 
+from backend.api.auth import create_access_token, UserRole
+TOKEN = create_access_token({"sub": "flight_director", "role": UserRole.FLIGHT_DIRECTOR.value})
+
 def http_get(path):
-    req = urllib.request.Request(f"{API_BASE}{path}")
+    req = urllib.request.Request(f"{API_BASE}{path}", headers={"Authorization": f"Bearer {TOKEN}"})
     with urllib.request.urlopen(req) as response:
         return json.loads(response.read().decode())
 
 def http_post(path, data=None):
     payload = json.dumps(data).encode() if data else b""
-    req = urllib.request.Request(f"{API_BASE}{path}", data=payload, headers={"Content-Type": "application/json"})
+    req = urllib.request.Request(
+        f"{API_BASE}{path}",
+        data=payload,
+        headers={"Content-Type": "application/json", "Authorization": f"Bearer {TOKEN}"},
+    )
     with urllib.request.urlopen(req) as response:
         return json.loads(response.read().decode())
 

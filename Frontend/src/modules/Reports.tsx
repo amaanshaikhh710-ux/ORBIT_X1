@@ -89,17 +89,31 @@ export const Reports: React.FC = () => {
                   Report ID: {report.id}
                 </span>
                 <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>
-                  Generated: {report.created_at} | Mission: {report.mission}
+                  Generated: {report.created_at} | Mission: <strong style={{ color: '#38bdf8' }}>{report.mission}</strong>
                 </div>
+                {report.real_started_at && (
+                  <div style={{ fontSize: '11px', color: '#94A3B8', marginTop: '3px' }}>
+                    Real Started: {new Date(report.real_started_at).toLocaleString()} {report.real_completed_at ? `| Real Ended: ${new Date(report.real_completed_at).toLocaleString()}` : ''}
+                  </div>
+                )}
               </div>
               <span className="badge badge-normal">VERIFIED STATE</span>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', fontSize: '12px' }}>
               <div style={{ padding: '10px', background: 'rgba(255,255,255,0.02)', borderRadius: '4px' }}>
-                <div style={{ color: 'var(--text-muted)' }}>DURATION</div>
-                <div style={{ fontSize: '16px', fontWeight: 700, fontFamily: 'var(--font-mono)' }}>
-                  {report.simulation_duration_s} s
+                <div style={{ color: 'var(--text-muted)' }}>SIMULATION DURATION</div>
+                <div style={{ fontSize: '15px', fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--accent-cyan)' }}>
+                  {(() => {
+                    const total = Math.max(0, Math.round(Number(report.simulation_duration_s) || 0));
+                    const h = Math.floor(total / 3600);
+                    const m = Math.floor((total % 3600) / 60);
+                    const s = Math.floor(total % 60);
+                    return `T+${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+                  })()}
+                </div>
+                <div style={{ fontSize: '10px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
+                  ({Number(report.simulation_duration_s || 0).toFixed(0)}s internal clock)
                 </div>
               </div>
               <div style={{ padding: '10px', background: 'rgba(255,255,255,0.02)', borderRadius: '4px' }}>
