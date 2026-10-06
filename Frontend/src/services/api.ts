@@ -31,7 +31,29 @@ function getAuthHeaders(extra: Record<string, string> = {}): Record<string, stri
 }
 
 export const api = {
-  // Simulation Controls
+  // Simulation Controls & Lifecycle
+  async getActiveRun() {
+    const res = await fetch(`${API_BASE}/simulation/active-run`, {
+      headers: getAuthHeaders(),
+    });
+    return res.json();
+  },
+
+  async createSimulationRun(runId?: string) {
+    const res = await fetch(`${API_BASE}/simulation/runs${runId ? `?run_id=${encodeURIComponent(runId)}` : ''}`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+    });
+    return res.json();
+  },
+
+  async getSimulationRun(runId = 'run-default') {
+    const res = await fetch(`${API_BASE}/simulation/runs/${runId}`, {
+      headers: getAuthHeaders(),
+    });
+    return res.json();
+  },
+
   async startSimulation(runId = 'run-default') {
     const res = await fetch(`${API_BASE}/simulation/runs/${runId}/start`, {
       method: 'POST',
@@ -44,6 +66,23 @@ export const api = {
     const res = await fetch(`${API_BASE}/simulation/runs/${runId}/pause`, {
       method: 'POST',
       headers: getAuthHeaders(),
+    });
+    return res.json();
+  },
+
+  async endSimulation(runId = 'run-default', status = 'COMPLETED') {
+    const res = await fetch(`${API_BASE}/simulation/runs/${runId}/end?status=${encodeURIComponent(status)}`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+    });
+    return res.json();
+  },
+
+  async advanceSimulation(runId = 'run-default', payload: { seconds?: number; amount?: number; unit?: string }) {
+    const res = await fetch(`${API_BASE}/simulation/runs/${runId}/advance`, {
+      method: 'POST',
+      headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify(payload),
     });
     return res.json();
   },
@@ -250,6 +289,18 @@ export const api = {
     return res.json();
   },
 
+  async recordTimelineEvent(
+    runId = 'run-default',
+    event: { event_type: string; message: string; subsystem?: string; severity?: string; metadata?: Record<string, any> }
+  ) {
+    const res = await fetch(`${API_BASE}/simulation/runs/${runId}/events`, {
+      method: 'POST',
+      headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify(event),
+    });
+    return res.json();
+  },
+
   // Reports
   async generateReport(runId = 'run-default') {
     const res = await fetch(`${API_BASE}/simulation/runs/${runId}/reports`, {
@@ -365,6 +416,18 @@ export class SimulationWebSocket {
 
   constructor(runId = 'run-default') {
     this.runId = runId;
+  }
+
+  updateRunId(newRunId: string) {
+    if (this.runId === newRunId) return;
+    this.runId = newRunId;
+    if (this.ws) {
+      try {
+        this.ws.close();
+      } catch {}
+      this.ws = null;
+      this.connect();
+    }
   }
 
   connect() {

@@ -13,6 +13,7 @@ from backend.db.models import (
     FaultEventRecord,
     RecoveryActionRecord,
     ReportRecord,
+    MissionEventRecord,
 )
 
 logger = logging.getLogger("orbital_twin.history")
@@ -20,7 +21,14 @@ logger = logging.getLogger("orbital_twin.history")
 
 class HistoryService:
     @staticmethod
-    def ensure_run_record(run_id: str, initial_soc: float = 100.0, spacecraft_id: str = "sat-3u-01", mission_id: str = "eo-mission-01"):
+    def ensure_run_record(
+        run_id: str,
+        initial_soc: float = 100.0,
+        spacecraft_id: str = "sat-3u-01",
+        mission_id: str = "eo-mission-01",
+        status: str = "CREATED",
+        started_at: datetime | None = None,
+    ):
         """Ensures a simulation run record exists in the database."""
         db = SessionLocal()
         try:
@@ -32,13 +40,13 @@ class HistoryService:
                     spacecraft_id=spacecraft_id,
                     mission_id=mission_id,
                     engine_version="1.0.0",
-                    status="RUNNING",
+                    status=status,
                     duration_s=0.0,
                     initial_battery_soc=initial_soc,
                     final_battery_soc=initial_soc,
                     min_battery_soc=initial_soc,
                     power_state="NOMINAL",
-                    started_at=datetime.now(timezone.utc),
+                    started_at=started_at or datetime.now(timezone.utc),
                 )
                 db.add(run)
                 db.commit()
@@ -46,6 +54,33 @@ class HistoryService:
         except Exception as e:
             db.rollback()
             logger.error("Error creating run record %s: %s", run_id, e)
+        finally:
+            db.close()
+
+    @staticmethod
+    def start_run(run_id: str, state, started_at: datetime | None = None):
+        """Marks run as RUNNING and records real wall-clock started_at timestamp."""
+        db = SessionLocal()
+        try:
+            run = db.query(SimulationRunRecord).filter_by(id=run_id).first()
+            now = started_at or datetime.now(timezone.utc)
+            if not run:
+                HistoryService.ensure_run_record(
+                    run_id=run_id,
+                    initial_soc=getattr(state, "battery_soc_pct", 100.0),
+                    status="RUNNING",
+                    started_at=now,
+                )
+            else:
+                run.status = "RUNNING"
+                # If run was not yet started, set real start timestamp
+                if not run.started_at or run.status in ("CREATED", "NOMINAL"):
+                    run.started_at = now
+                run.completed_at = None
+                db.commit()
+        except Exception as e:
+            db.rollback()
+            logger.error("Error starting run %s: %s", run_id, e)
         finally:
             db.close()
 
@@ -60,6 +95,10 @@ class HistoryService:
                 run = db.query(SimulationRunRecord).filter_by(id=run_id).first()
 
             if run:
+                # Do not overwrite completed or aborted historical runs
+                if run.status in ("COMPLETED", "ABORTED") and status not in ("COMPLETED", "ABORTED"):
+                    return
+
                 soc = getattr(state, "battery_soc_pct", run.final_battery_soc)
                 run.duration_s = getattr(state, "simulation_time_s", run.duration_s)
                 run.final_battery_soc = soc
@@ -83,16 +122,26 @@ class HistoryService:
             db.close()
 
     @staticmethod
-    def complete_run(run_id: str, state, status: str = "COMPLETED"):
-        """Marks run as completed and stores final state JSON."""
+    def complete_run(run_id: str, state, status: str = "COMPLETED", completed_at: datetime | None = None):
+        """Marks run as completed/ended and records real wall-clock completed_at, final state JSON and stats."""
         db = SessionLocal()
         try:
             run = db.query(SimulationRunRecord).filter_by(id=run_id).first()
+            if not run:
+                HistoryService.ensure_run_record(run_id, getattr(state, "battery_soc_pct", 100.0))
+                run = db.query(SimulationRunRecord).filter_by(id=run_id).first()
             if run:
                 run.status = status
-                run.completed_at = datetime.now(timezone.utc)
-                run.final_battery_soc = getattr(state, "battery_soc_pct", run.final_battery_soc)
+                run.completed_at = completed_at or datetime.now(timezone.utc)
+                soc = getattr(state, "battery_soc_pct", run.final_battery_soc)
+                run.final_battery_soc = soc
+                run.min_battery_soc = min(run.min_battery_soc, soc)
                 run.duration_s = getattr(state, "simulation_time_s", run.duration_s)
+                run.images_completed = getattr(state, "images_completed", run.images_completed)
+                run.images_deferred = getattr(state, "images_deferred", run.images_deferred)
+                run.total_downlinked_mb = getattr(state, "total_downlinked_data_mb", run.total_downlinked_mb)
+                run.power_state = getattr(state.power_state, "value", str(state.power_state)) if hasattr(state, "power_state") else run.power_state
+                run.active_faults_count = len(getattr(state, "active_faults", []))
                 if hasattr(state, "to_dict"):
                     run.final_state_json = json.dumps(state.to_dict())
                 db.commit()
@@ -238,6 +287,48 @@ class HistoryService:
             db.close()
 
     @staticmethod
+    def record_events(run_id: str, events: list[dict]):
+        """Persists simulation timeline events for a run."""
+        if not events:
+            return
+        db = SessionLocal()
+        try:
+            HistoryService.ensure_run_record(run_id)
+            for ev in events:
+                rec = MissionEventRecord(
+                    run_id=run_id,
+                    simulation_time_s=float(ev.get("simulation_time_s", ev.get("timestamp_s", 0.0))),
+                    step=int(ev.get("step", 0)),
+                    event_type=str(ev.get("event_type", "EVENT")),
+                    subsystem=str(ev.get("subsystem", "MISSION")),
+                    severity=str(ev.get("severity", "INFO")),
+                    message=str(ev.get("message", "")),
+                    created_at=datetime.now(timezone.utc),
+                )
+                db.add(rec)
+            db.commit()
+        except Exception as e:
+            db.rollback()
+            logger.error("Error recording events for run %s: %s", run_id, e)
+        finally:
+            db.close()
+
+    @staticmethod
+    def get_run_events(run_id: str) -> list[dict]:
+        """Returns all persisted events for a specific run in chronological simulation time."""
+        db = SessionLocal()
+        try:
+            events = (
+                db.query(MissionEventRecord)
+                .filter_by(run_id=run_id)
+                .order_by(MissionEventRecord.simulation_time_s.asc())
+                .all()
+            )
+            return [e.to_dict() for e in events]
+        finally:
+            db.close()
+
+    @staticmethod
     def get_run_details(run_id: str):
         """Returns deep details of a specific simulation run."""
         db = SessionLocal()
@@ -249,6 +340,7 @@ class HistoryService:
             res["fault_events"] = [f.to_dict() for f in run.fault_events]
             res["recovery_actions"] = [r.to_dict() for r in run.recovery_actions]
             res["reports"] = [rep.to_dict() for rep in run.reports]
+            res["timeline_events"] = [e.to_dict() for e in run.timeline_events]
             res["snapshots_count"] = len(run.telemetry_snapshots)
             if run.final_state_json:
                 try:

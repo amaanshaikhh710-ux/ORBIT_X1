@@ -54,14 +54,19 @@ export const MissionHistory: React.FC = () => {
   });
 
   const formatDuration = (secs: number) => {
-    const h = Math.floor(secs / 3600);
-    const m = Math.floor((secs % 3600) / 60);
-    const s = Math.floor(secs % 60);
-    return `T+ ${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    const total = Math.max(0, Math.round(secs));
+    const h = Math.floor(total / 3600);
+    const m = Math.floor((total % 3600) / 60);
+    const s = Math.floor(total % 60);
+    return `T+${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
   };
 
   const getStatusBadge = (status: string) => {
     switch (status.toUpperCase()) {
+      case 'COMPLETED':
+        return { label: 'COMPLETED', bg: 'rgba(16, 185, 129, 0.15)', border: 'rgba(16, 185, 129, 0.4)', color: '#34d399' };
+      case 'ABORTED':
+        return { label: 'ABORTED', bg: 'rgba(239, 68, 68, 0.15)', border: 'rgba(239, 68, 68, 0.4)', color: '#f87171' };
       case 'NOMINAL':
         return { label: 'NOMINAL', bg: 'rgba(16, 185, 129, 0.15)', border: 'rgba(16, 185, 129, 0.4)', color: '#34d399' };
       case 'RUNNING':
@@ -233,7 +238,7 @@ export const MissionHistory: React.FC = () => {
                   e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.07)';
                 }}
               >
-                {/* 1. Run ID & Date */}
+                {/* 1. Run ID & Real Date/Time */}
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
                     <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, fontSize: '14px', color: '#FFFFFF' }}>
@@ -257,10 +262,16 @@ export const MissionHistory: React.FC = () => {
                   <div style={{ fontSize: '11px', color: '#94A3B8' }}>
                     Started: {r.started_at ? new Date(r.started_at).toLocaleString() : 'N/A'}
                   </div>
+                  <div style={{ fontSize: '11px', color: '#94A3B8' }}>
+                    Ended: {r.completed_at ? new Date(r.completed_at).toLocaleString() : 'In-Progress / Running'}
+                  </div>
                 </div>
 
-                {/* 2. Duration & Power State */}
+                {/* 2. Simulation Duration & Power State */}
                 <div>
+                  <div style={{ fontSize: '10px', color: '#64748B', fontFamily: 'var(--font-mono)' }}>
+                    SIM DURATION
+                  </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '13px', color: '#E2E8F0', fontFamily: 'var(--font-mono)' }}>
                     <Clock size={13} color="#38bdf8" />
                     <span>{formatDuration(r.duration_s)}</span>
@@ -447,6 +458,39 @@ export const MissionHistory: React.FC = () => {
 
             {/* Modal Body */}
             <div style={{ padding: '24px', overflowY: 'auto', flex: 1 }}>
+              {/* Real Wall-Clock Run Timestamps & Outcome */}
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(3, 1fr)',
+                  gap: '12px',
+                  marginBottom: '16px',
+                  background: 'rgba(255, 255, 255, 0.02)',
+                  padding: '12px 14px',
+                  borderRadius: '8px',
+                  border: '1px solid rgba(255, 255, 255, 0.06)',
+                }}
+              >
+                <div>
+                  <div style={{ fontSize: '10px', color: '#64748B', fontFamily: 'var(--font-mono)' }}>REAL WALL-CLOCK START</div>
+                  <div style={{ fontSize: '12px', color: '#E2E8F0', marginTop: '2px', fontWeight: 600 }}>
+                    {selectedRun.started_at ? new Date(selectedRun.started_at).toLocaleString() : 'N/A'}
+                  </div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '10px', color: '#64748B', fontFamily: 'var(--font-mono)' }}>REAL WALL-CLOCK END</div>
+                  <div style={{ fontSize: '12px', color: '#E2E8F0', marginTop: '2px', fontWeight: 600 }}>
+                    {selectedRun.completed_at ? new Date(selectedRun.completed_at).toLocaleString() : 'In-Progress / Running'}
+                  </div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '10px', color: '#64748B', fontFamily: 'var(--font-mono)' }}>MISSION OUTCOME</div>
+                  <div style={{ fontSize: '12px', fontWeight: 700, color: selectedRun.status === 'COMPLETED' ? '#34d399' : selectedRun.status === 'ABORTED' ? '#f87171' : '#38bdf8', marginTop: '2px' }}>
+                    {selectedRun.status}
+                  </div>
+                </div>
+              </div>
+
               {/* Metrics Grid */}
               <div
                 style={{
@@ -554,6 +598,49 @@ export const MissionHistory: React.FC = () => {
                 ) : (
                   <div style={{ fontSize: '12px', color: '#64748B', fontStyle: 'italic' }}>
                     No recovery policies executed.
+                  </div>
+                )}
+              </div>
+
+              {/* Persisted Chronological Mission Timeline (Simulation Time) */}
+              <div style={{ marginBottom: '20px' }}>
+                <h4 style={{ fontSize: '13px', fontWeight: 700, color: '#CBD5E1', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Clock size={14} color="#38bdf8" />
+                  <span>Persisted Mission Timeline ({selectedRun.timeline_events?.length || 0} events)</span>
+                </h4>
+                {selectedRun.timeline_events && selectedRun.timeline_events.length > 0 ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '180px', overflowY: 'auto' }}>
+                    {selectedRun.timeline_events.map((ev, idx) => (
+                      <div
+                        key={idx}
+                        style={{
+                          padding: '8px 12px',
+                          background: 'rgba(255, 255, 255, 0.03)',
+                          borderLeft: `3px solid ${
+                            ev.severity === 'CRITICAL' ? '#ef4444' : ev.severity === 'WARNING' ? '#f59e0b' : '#38bdf8'
+                          }`,
+                          borderRadius: '4px',
+                          fontSize: '12px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '12px',
+                        }}
+                      >
+                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: '#38bdf8', width: '85px', flexShrink: 0 }}>
+                          {formatDuration(ev.simulation_time_s ?? 0)}
+                        </div>
+                        <div style={{ fontSize: '11px', fontWeight: 600, color: '#CBD5E1', width: '90px', flexShrink: 0 }}>
+                          [{ev.subsystem}]
+                        </div>
+                        <div style={{ flex: 1, color: '#F1F5F9' }}>
+                          {ev.message}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div style={{ fontSize: '12px', color: '#64748B', fontStyle: 'italic' }}>
+                    No recorded timeline events for this run.
                   </div>
                 )}
               </div>

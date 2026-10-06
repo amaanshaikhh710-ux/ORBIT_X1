@@ -100,6 +100,8 @@ interface TelemetryTimeSeriesPoint {
   time_s: number;
   battery_soc_pct: number;
   solar_generation_w: number;
+  total_power_consumption_w: number;
+  power_margin_w: number;
   internal_temp_c: number;
   storage_used_mb: number;
   downlink_mbps: number;
@@ -125,6 +127,10 @@ interface SimulationContextValue {
   selectedComponent: string | null;
   user: OperatorUser | null;
   isAuthenticated: boolean;
+  activeRunId: string;
+  missionStatus: string;
+  realStartedAt: string | null;
+  realCompletedAt: string | null;
 
   // Actions
   setWorkflowStep: (step: WorkflowStep) => void;
@@ -136,6 +142,8 @@ interface SimulationContextValue {
   loadHistoricalRun: (runId: string) => Promise<void>;
   start: () => void;
   pause: () => void;
+  end: (status?: string) => Promise<void>;
+  advanceTime: (amount: number, unit?: string) => Promise<void>;
   step: () => void;
   reset: () => Promise<void>;
   resetV003Demo: () => Promise<void>;
@@ -149,6 +157,13 @@ interface SimulationContextValue {
   setEnvironment: (state: string, durationS?: number) => Promise<any>;
   exportTelemetryCsv: () => Promise<void>;
   generateReport: () => Promise<any>;
+  recordTimelineEvent: (
+    eventType: string,
+    message: string,
+    subsystem?: string,
+    severity?: string,
+    metadata?: Record<string, any>
+  ) => Promise<any>;
 }
 
 const SimulationContext = createContext<SimulationContextValue | null>(null);
@@ -167,6 +182,12 @@ export const SimulationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [timestep, setTimestepState] = useState<number>(10);
   const [connected, setConnected] = useState<boolean>(false);
   const [workflowStep, setWorkflowStep] = useState<WorkflowStep>('OBSERVE');
+
+  // Mission Lifecycle & Identity State
+  const [activeRunId, setActiveRunId] = useState<string>('run-default');
+  const [missionStatus, setMissionStatus] = useState<string>('CREATED');
+  const [realStartedAt, setRealStartedAt] = useState<string | null>(null);
+  const [realCompletedAt, setRealCompletedAt] = useState<string | null>(null);
 
   // Operator Authentication State
   const [user, setUser] = useState<OperatorUser | null>(() => {
@@ -262,6 +283,8 @@ export const SimulationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         time_s: s.simulation_time_s,
         battery_soc_pct: s.battery_soc_pct,
         solar_generation_w: s.solar_generation_w,
+        total_power_consumption_w: s.total_power_consumption_w ?? 14.2,
+        power_margin_w: s.power_margin_w ?? 10.3,
         internal_temp_c: s.internal_temp_c,
         storage_used_mb: s.storage_used_mb,
         downlink_mbps: s.downlink_data_rate_mbps,
@@ -298,6 +321,18 @@ export const SimulationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     if (localStorage.getItem('orbital_twin_module') === 'mission-admin') {
       localStorage.setItem('orbital_twin_module', 'mission-control');
     }
+
+    // 0. Fetch active run info
+    api.getActiveRun().then((info) => {
+      if (info && info.run_id) {
+        setActiveRunId(info.run_id);
+        if (info.status) setMissionStatus(info.status);
+        if (info.real_started_at) setRealStartedAt(info.real_started_at);
+        if (info.real_completed_at) setRealCompletedAt(info.real_completed_at);
+        if (typeof info.is_running === 'boolean') setIsRunning(info.is_running);
+        if (info.speed) setSpeedState(info.speed);
+      }
+    }).catch(() => {});
 
     // 1. Fetch catalog
     api.getFaultCatalog().then((cat) => {
@@ -369,25 +404,120 @@ export const SimulationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     };
   }, []);
 
-  const start = () => {
+  const start = async () => {
     wsRef.current?.sendCommand('start');
-    api.startSimulation().catch(console.error);
-    setIsRunning(true);
+    try {
+      const res = await api.startSimulation(activeRunId);
+      if (res && res.run_id) {
+        setActiveRunId(res.run_id);
+        setMissionStatus('RUNNING');
+        if (res.real_started_at) setRealStartedAt(res.real_started_at);
+        wsRef.current?.updateRunId(res.run_id);
+      }
+      setIsRunning(true);
+    } catch (e) {
+      console.error('Failed to start simulation:', e);
+      setIsRunning(true);
+    }
   };
 
-  const pause = () => {
+  const pause = async () => {
     wsRef.current?.sendCommand('pause');
-    api.pauseSimulation().catch(console.error);
-    setIsRunning(false);
+    try {
+      await api.pauseSimulation(activeRunId);
+      setMissionStatus('PAUSED');
+      setIsRunning(false);
+    } catch (e) {
+      console.error('Failed to pause simulation:', e);
+      setIsRunning(false);
+    }
+  };
+
+  const end = async (status = 'COMPLETED') => {
+    wsRef.current?.sendCommand('end', { status });
+    try {
+      const res = await api.endSimulation(activeRunId, status);
+      setIsRunning(false);
+      if (res) {
+        // Backend ended and persisted activeRunId, then returned active_run_id and active_state (which is reset to T+00:00:00)
+        if (res.active_state) {
+          const norm = normalizeState(res.active_state);
+          setState(norm);
+          setHistory([
+            {
+              time_s: norm.simulation_time_s,
+              battery_soc_pct: norm.battery_soc_pct,
+              solar_generation_w: norm.solar_generation_w,
+              total_power_consumption_w: norm.total_power_consumption_w ?? 14.2,
+              power_margin_w: norm.power_margin_w ?? 10.3,
+              internal_temp_c: norm.internal_temp_c,
+              storage_used_mb: norm.storage_used_mb,
+              downlink_mbps: norm.downlink_data_rate_mbps,
+              adcs_error_deg: norm.adcs_pointing_error_deg,
+              power_state: norm.power_state,
+            },
+          ]);
+        } else {
+          setState({ ...DEFAULT_BASELINE_STATE });
+          setHistory([]);
+        }
+
+        const newRunId = res.active_run_id || 'run-default';
+        setActiveRunId(newRunId);
+        setMissionStatus('READY');
+        setRealStartedAt(null);
+        setRealCompletedAt(null);
+        setAlerts([]);
+        setActiveFaults([]);
+        setCausalGraph(null);
+        setRecoveryReport(null);
+        setWorkflowStep('OBSERVE');
+
+        if (wsRef.current) {
+          wsRef.current.updateRunId(newRunId);
+        }
+      }
+    } catch (e) {
+      console.error('Failed to end simulation:', e);
+      setIsRunning(false);
+    }
+  };
+
+  const advanceTime = async (amount: number, unit = 'seconds') => {
+    wsRef.current?.sendCommand('advance', { amount, unit });
+    try {
+      const res = await api.advanceSimulation(activeRunId, { amount, unit });
+      if (res && res.state) {
+        const norm = normalizeState(res.state);
+        setState(norm);
+        pushHistoryPoint(norm);
+      }
+      if (res && res.run_id && res.run_id !== activeRunId) {
+        setActiveRunId(res.run_id);
+        wsRef.current?.updateRunId(res.run_id);
+      }
+      if (res && res.real_started_at && !realStartedAt) {
+        setRealStartedAt(res.real_started_at);
+      }
+      if (res && res.status) {
+        setMissionStatus(res.status);
+      }
+    } catch (e) {
+      console.error('Failed to advance simulation:', e);
+    }
   };
 
   const step = () => {
     wsRef.current?.sendCommand('step');
-    api.stepSimulation().then((res) => {
+    api.stepSimulation(activeRunId).then((res) => {
       if (res.state) {
         const norm = normalizeState(res.state);
         setState(norm);
         pushHistoryPoint(norm);
+      }
+      if (res.run_id && res.run_id !== activeRunId) {
+        setActiveRunId(res.run_id);
+        wsRef.current?.updateRunId(res.run_id);
       }
     }).catch(console.error);
   };
@@ -395,7 +525,7 @@ export const SimulationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const reset = async () => {
     wsRef.current?.sendCommand('reset');
     try {
-      const res = await api.resetSimulation('run-default');
+      const res = await api.resetSimulation(activeRunId);
       if (res && res.state) {
         const norm = normalizeState(res.state);
         setState(norm);
@@ -404,6 +534,8 @@ export const SimulationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
             time_s: norm.simulation_time_s,
             battery_soc_pct: norm.battery_soc_pct,
             solar_generation_w: norm.solar_generation_w,
+            total_power_consumption_w: norm.total_power_consumption_w ?? 14.2,
+            power_margin_w: norm.power_margin_w ?? 10.3,
             internal_temp_c: norm.internal_temp_c,
             storage_used_mb: norm.storage_used_mb,
             downlink_mbps: norm.downlink_data_rate_mbps,
@@ -420,12 +552,53 @@ export const SimulationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       setRecoveryReport(null);
       setActiveFaults([]);
       setWorkflowStep('OBSERVE');
+      setIsRunning(false);
+
+      const active = await api.getActiveRun().catch(() => null);
+      if (active && active.run_id) {
+        setActiveRunId(active.run_id);
+        setMissionStatus(active.status || 'READY');
+        setRealStartedAt(active.real_started_at || null);
+        setRealCompletedAt(active.real_completed_at || null);
+        if (wsRef.current) {
+          wsRef.current.updateRunId(active.run_id);
+        }
+      }
     } catch (e) {
       console.error('Reset error:', e);
       setState({ ...DEFAULT_BASELINE_STATE });
       setHistory([]);
+      setIsRunning(false);
     }
-    setIsRunning(false);
+  };
+
+  const recordTimelineEvent = async (
+    eventType: string,
+    message: string,
+    subsystem = 'MISSION',
+    severity = 'INFO',
+    metadata?: Record<string, any>
+  ) => {
+    try {
+      const res = await api.recordTimelineEvent(activeRunId, {
+        event_type: eventType,
+        message,
+        subsystem,
+        severity,
+        metadata,
+      });
+      const newAlert: AlertItem = {
+        timestamp_s: state?.simulation_time_s || 0,
+        simulation_time_s: state?.simulation_time_s || 0,
+        severity: severity as any,
+        subsystem,
+        message,
+      };
+      setAlerts((prev) => [newAlert, ...prev]);
+      return res;
+    } catch (e) {
+      console.warn('Failed to record timeline event:', e);
+    }
   };
 
   const resetV003Demo = async () => {
@@ -435,13 +608,13 @@ export const SimulationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
   const setSpeed = (spd: number) => {
     wsRef.current?.sendCommand('set_speed', { speed: spd });
-    api.setSpeed('run-default', spd).catch(console.error);
+    api.setSpeed(activeRunId, spd).catch(console.error);
     setSpeedState(spd);
   };
 
   const setTimestep = async (ts: number) => {
     try {
-      await api.setTimestep('run-default', ts);
+      await api.setTimestep(activeRunId, ts);
       setTimestepState(ts);
     } catch (e) {
       console.error('Failed to set timestep:', e);
@@ -449,53 +622,53 @@ export const SimulationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   };
 
   const injectFault = async (fault: ActiveFault) => {
-    await api.injectFault('run-default', fault);
+    await api.injectFault(activeRunId, fault);
     setActiveFaults((prev) => [...prev.filter((f) => f.fault_id !== fault.fault_id), fault]);
     // Fetch updated causal graph
-    const g = await api.getCausalGraph('run-default');
+    const g = await api.getCausalGraph(activeRunId);
     setCausalGraph(g);
   };
 
   const clearFault = async (faultId: string) => {
-    await api.clearFault('run-default', faultId);
+    await api.clearFault(activeRunId, faultId);
     setActiveFaults((prev) => prev.filter((f) => f.fault_id !== faultId));
-    const g = await api.getCausalGraph('run-default');
+    const g = await api.getCausalGraph(activeRunId);
     setCausalGraph(g);
   };
 
   const activateV003Demo = async () => {
-    const res = await api.activateV003Demo('run-default');
+    const res = await api.activateV003Demo(activeRunId);
     if (res.state) {
       const norm = normalizeState(res.state);
       setState(norm);
       pushHistoryPoint(norm);
       setActiveFaults(norm.active_faults || []);
-      const g = await api.getCausalGraph('run-default');
+      const g = await api.getCausalGraph(activeRunId);
       setCausalGraph(g);
     }
     return res;
   };
 
   const runRecoverySim = async (policies: string[], durationS = 600) => {
-    const res = await api.simulateRecovery('run-default', durationS, policies);
+    const res = await api.simulateRecovery(activeRunId, durationS, policies);
     setRecoveryReport(res.report);
     return res.report;
   };
 
   const applyRecoveryPolicy = async (policyId: string) => {
-    const res = await api.applyRecoveryPolicy('run-default', policyId);
+    const res = await api.applyRecoveryPolicy(activeRunId, policyId);
     setState((prev) => (prev ? { ...prev, recovery_mode: policyId } : prev));
     return res;
   };
 
   const setEnvironment = async (envState: string, durationS = 600) => {
-    const res = await api.setEnvironment('run-default', envState, durationS);
+    const res = await api.setEnvironment(activeRunId, envState, durationS);
     return res;
   };
 
   const exportTelemetryCsv = async () => {
     try {
-      await api.downloadTelemetryCsv('run-default');
+      await api.downloadTelemetryCsv(activeRunId);
     } catch (e: any) {
       console.error('Telemetry CSV export error:', e);
       alert(`CSV Export Error: ${e.message || 'Unable to download telemetry data'}`);
@@ -503,7 +676,7 @@ export const SimulationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   };
 
   const generateReport = async () => {
-    const res = await api.generateReport('run-default');
+    const res = await api.generateReport(activeRunId);
     return res.report;
   };
 
@@ -581,6 +754,10 @@ export const SimulationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       selectedComponent,
       user,
       isAuthenticated,
+      activeRunId,
+      missionStatus,
+      realStartedAt,
+      realCompletedAt,
       setWorkflowStep,
       setActiveModule,
       setSelectedComponent,
@@ -590,6 +767,8 @@ export const SimulationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       loadHistoricalRun,
       start,
       pause,
+      end,
+      advanceTime,
       step,
       reset,
       resetV003Demo,
@@ -603,6 +782,7 @@ export const SimulationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       setEnvironment,
       exportTelemetryCsv,
       generateReport,
+      recordTimelineEvent,
     }),
     [
       state,
@@ -622,6 +802,10 @@ export const SimulationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       selectedComponent,
       user,
       isAuthenticated,
+      activeRunId,
+      missionStatus,
+      realStartedAt,
+      realCompletedAt,
     ]
   );
 
