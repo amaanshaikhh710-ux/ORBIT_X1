@@ -88,8 +88,7 @@ export const ControlBar: React.FC = () => {
         ) : (
           <button
             onClick={start}
-<<<<<<< HEAD
-            className="btn"
+            className="btn btn-primary"
             style={{
               background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
               borderColor: 'rgba(52, 211, 153, 0.5)',
@@ -97,11 +96,6 @@ export const ControlBar: React.FC = () => {
               boxShadow: '0 2px 10px rgba(16, 185, 129, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.25)',
             }}
             title="Start continuous real-time simulation"
-=======
-            className="btn btn-primary"
-            style={{ background: '#10b981', borderColor: '#059669' }}
-            title="Start mission simulation"
->>>>>>> b1108d54c51c7dd8d4b0f661d5ff4dfe67f1bbf6
           >
             <Play size={15} /> Start Mission
           </button>
@@ -322,7 +316,15 @@ export const ControlBar: React.FC = () => {
 
       {/* Telemetry Metrics Summary */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-<<<<<<< HEAD
+        <div style={{ textAlign: 'right', padding: '3px 8px', background: 'rgba(255, 255, 255, 0.02)', borderRadius: '4px', border: '1px solid rgba(255, 255, 255, 0.06)' }}>
+          <div style={{ fontSize: '10px', color: '#8493A8', fontFamily: 'var(--font-mono)', letterSpacing: '0.4px' }}>MISSION RUN</div>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', fontWeight: 700, color: '#38bdf8' }}>
+            {activeRunId}
+          </div>
+          <div style={{ fontSize: '9px', fontWeight: 600, color: missionStatus === 'COMPLETED' ? '#10b981' : missionStatus === 'RUNNING' ? '#38bdf8' : '#f59e0b' }}>
+            ● {missionStatus}
+          </div>
+        </div>
         <div style={{ textAlign: 'right', padding: '3px 8px', background: 'rgba(255, 255, 255, 0.02)', borderRadius: '4px', border: '1px solid rgba(255, 255, 255, 0.06)' }}>
           <div style={{ fontSize: '10px', color: '#8493A8', fontFamily: 'var(--font-mono)', letterSpacing: '0.4px' }}>STEP COUNT</div>
           <div style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, color: '#F8FAFC', fontSize: '12.5px' }}>
@@ -332,31 +334,10 @@ export const ControlBar: React.FC = () => {
         <div style={{ textAlign: 'right', padding: '3px 8px', background: 'rgba(255, 255, 255, 0.02)', borderRadius: '4px', border: '1px solid rgba(255, 255, 255, 0.06)' }}>
           <div style={{ fontSize: '10px', color: '#8493A8', fontFamily: 'var(--font-mono)', letterSpacing: '0.4px' }}>SIM TIME</div>
           <div style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, color: 'var(--accent-gold)', fontSize: '12.5px' }}>
-            {(state?.simulation_time_s ?? 0).toFixed(0)} s
-=======
-        <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>MISSION RUN</div>
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', fontWeight: 700, color: '#38bdf8' }}>
-            {activeRunId}
-          </div>
-          <div style={{ fontSize: '9px', fontWeight: 600, color: missionStatus === 'COMPLETED' ? '#10b981' : missionStatus === 'RUNNING' ? '#38bdf8' : '#f59e0b' }}>
-            ● {missionStatus}
-          </div>
-        </div>
-        <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>STEP COUNT</div>
-          <div style={{ fontFamily: 'var(--font-mono)', fontWeight: 600, color: 'var(--text-primary)' }}>
-            #{state?.step_count || 0}
-          </div>
-        </div>
-        <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>SIM TIME</div>
-          <div style={{ fontFamily: 'var(--font-mono)', fontWeight: 600, color: 'var(--accent-cyan)' }}>
             {formatSimTime(state?.simulation_time_s)}
           </div>
           <div style={{ fontSize: '10px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
             {(state?.simulation_time_s ?? 0).toFixed(0)}s
->>>>>>> b1108d54c51c7dd8d4b0f661d5ff4dfe67f1bbf6
           </div>
         </div>
         <div style={{ textAlign: 'right', padding: '3px 8px', background: 'rgba(255, 255, 255, 0.02)', borderRadius: '4px', border: '1px solid rgba(255, 255, 255, 0.06)' }}>

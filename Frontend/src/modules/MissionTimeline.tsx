@@ -87,17 +87,7 @@ export const MissionTimeline: React.FC = () => {
               value={selectedRunId}
               onChange={(e) => setSelectedRunId(e.target.value)}
               style={{
-<<<<<<< HEAD
-                padding: '4px 12px',
-                borderRadius: '4px',
-                border: filterSeverity === sev ? '1px solid rgba(157, 0, 255, 0.65)' : '1px solid var(--border-color)',
-                background: filterSeverity === sev ? 'rgba(157, 0, 255, 0.22)' : 'rgba(255, 255, 255, 0.02)',
-                color: filterSeverity === sev ? '#ffffff' : 'var(--text-secondary)',
-                fontSize: '11px',
-                fontFamily: 'var(--font-mono)',
-                fontWeight: filterSeverity === sev ? 700 : 500,
-=======
-                padding: '4px 8px',
+                padding: '4px 10px',
                 borderRadius: '4px',
                 border: '1px solid var(--border-color)',
                 background: 'rgba(15, 23, 42, 0.9)',
@@ -105,10 +95,7 @@ export const MissionTimeline: React.FC = () => {
                 fontSize: '11.5px',
                 fontFamily: 'var(--font-mono)',
                 fontWeight: 600,
->>>>>>> b1108d54c51c7dd8d4b0f661d5ff4dfe67f1bbf6
                 cursor: 'pointer',
-                transition: 'all 0.18s ease',
-                boxShadow: filterSeverity === sev ? '0 0 10px rgba(157, 0, 255, 0.3)' : 'none',
               }}
               title="Select active or historical mission run to view its isolated chronological timeline"
             >
@@ -130,14 +117,17 @@ export const MissionTimeline: React.FC = () => {
                 key={sev}
                 onClick={() => setFilterSeverity(sev)}
                 style={{
-                  padding: '4px 10px',
+                  padding: '4px 12px',
                   borderRadius: '4px',
-                  border: filterSeverity === sev ? '1px solid var(--accent-orange)' : '1px solid var(--border-color)',
-                  background: filterSeverity === sev ? 'rgba(249, 115, 22, 0.2)' : 'rgba(255, 255, 255, 0.02)',
-                  color: filterSeverity === sev ? '#fff' : 'var(--text-secondary)',
+                  border: filterSeverity === sev ? '1px solid rgba(157, 0, 255, 0.65)' : '1px solid var(--border-color)',
+                  background: filterSeverity === sev ? 'rgba(157, 0, 255, 0.22)' : 'rgba(255, 255, 255, 0.02)',
+                  color: filterSeverity === sev ? '#ffffff' : 'var(--text-secondary)',
                   fontSize: '11px',
                   fontFamily: 'var(--font-mono)',
+                  fontWeight: filterSeverity === sev ? 700 : 500,
                   cursor: 'pointer',
+                  transition: 'all 0.18s ease',
+                  boxShadow: filterSeverity === sev ? '0 0 10px rgba(157, 0, 255, 0.3)' : 'none',
                 }}
               >
                 {sev}
